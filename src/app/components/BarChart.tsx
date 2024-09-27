@@ -5,7 +5,7 @@ import { useTheme } from '../ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface UploadedData {
+interface UploadedDataChannel {
   channel_name: string;
   fecha: string;
   hora: string;
@@ -15,7 +15,7 @@ interface UploadedData {
 }
 
 interface BarChartProps {
-  data: UploadedData[];
+  data: UploadedDataChannel[];
   onRendered: () => void;
 }
 
@@ -38,7 +38,7 @@ export default function BarChart({ data }: BarChartProps) {
       acc[item.channel_name] = item;
     }
     return acc;
-  }, {} as { [key: string]: UploadedData });
+  }, {} as { [key: string]: UploadedDataChannel });
 
   // Preparar los datos para el gráfico
   const chartData = {

@@ -3,7 +3,7 @@ import { Bar } from 'react-chartjs-2';
 import './SummaryTable.css'; // Importar el archivo CSS
 import { useTheme } from '../ThemeContext';
 
-interface UploadedData {
+interface UploadedDataChannel {
   channel_name: string;
   fecha: string;
   hora: string;
@@ -14,7 +14,7 @@ interface UploadedData {
 
 interface SummaryTableProps {
 
-  data: UploadedData[];
+  data: UploadedDataChannel[];
 
   onRendered: () => void;
 
@@ -39,7 +39,7 @@ export default function SummaryTable({ data }: SummaryTableProps) {
       acc[item.channel_name] = item;
     }
     return acc;
-  }, {} as Record<string, UploadedData>);
+  }, {} as Record<string, UploadedDataChannel>);
 
   // Convertir el objeto en una matriz y ordenar por el pico más alto de espectadores
   const sortedChannels = Object.values(channelPeaks)

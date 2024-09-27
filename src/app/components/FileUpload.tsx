@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { useTheme } from '../ThemeContext'; // Importar el contexto del tema
 
 
-interface UploadedData {
+interface UploadedDataChannel {
   channel_name: string;
   created_date: string; // Cambiar a created_date para consistencia
   youtube: number;
@@ -12,7 +12,7 @@ interface UploadedData {
 }
 
 interface FileUploadProps {
-  onFileUpload: (data: UploadedData[]) => void;
+  onFileUpload: (data: UploadedDataChannel[]) => void;
 }
 
 export default function FileUpload({ onFileUpload }: FileUploadProps) {
@@ -37,7 +37,7 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData: UploadedData[] = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData: UploadedDataChannel[] = XLSX.utils.sheet_to_json(worksheet);
 
       // Separar la fecha y la hora antes de enviar los datos
       const formattedData = jsonData.map(item => {
@@ -89,7 +89,7 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData: UploadedData[] = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData: UploadedDataChannel[] = XLSX.utils.sheet_to_json(worksheet);
 
       // Separar la fecha y la hora antes de enviar los datos
       const formattedData = jsonData.map(item => {

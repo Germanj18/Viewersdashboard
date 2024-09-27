@@ -7,7 +7,7 @@ import { useTheme } from '../ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale);
 
-interface UploadedData {
+interface UploadedDataChannel {
   channel_name: string;
   fecha: string;
   hora: string;
@@ -19,7 +19,7 @@ interface UploadedData {
 
 interface ChartsProps {
 
-  data: UploadedData[];
+  data: UploadedDataChannel[];
 
   onRendered: () => void;
 
@@ -37,7 +37,7 @@ function getRandomColor() {
 
 export default function Charts({ data }: ChartsProps) {
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
-  const [combinedData, setCombinedData] = useState<UploadedData[]>([]);
+  const [combinedData, setCombinedData] = useState<UploadedDataChannel[]>([]);
   const [showCombineOptions, setShowCombineOptions] = useState<boolean>(false);
   const [isCombined, setIsCombined] = useState<boolean>(false);
   const [selectedChart, setSelectedChart] = useState<string | null>(null);
@@ -60,14 +60,14 @@ export default function Charts({ data }: ChartsProps) {
   console.log('Datos en Charts:', data); // Verificar los datos en Charts
 
   // Agrupar los datos por fecha
-  const groupedData: { [key: string]: UploadedData[] } = data.reduce((acc, item) => {
+  const groupedData: { [key: string]: UploadedDataChannel[] } = data.reduce((acc, item) => {
     const date = item.fecha.split('T')[0];
     if (!acc[date]) {
       acc[date] = [];
     }
     acc[date].push(item);
     return acc;
-  }, {} as { [key: string]: UploadedData[] });
+  }, {} as { [key: string]: UploadedDataChannel[] });
 
   const handleDateSelection = (date: string) => {
     setSelectedDates(prev =>
@@ -111,7 +111,7 @@ export default function Charts({ data }: ChartsProps) {
     setSelectedChannel(event.target.value);
   };
 
-  const renderChart = (date: string, dateData: UploadedData[], isModal: boolean = false) => {
+  const renderChart = (date: string, dateData: UploadedDataChannel[], isModal: boolean = false) => {
     const channels = Array.from(new Set(dateData.map(item => item.channel_name)));
     const filteredData = viewMode === 'channel' && selectedChannel
       ? dateData.filter(item => item.channel_name === selectedChannel)

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import * as XLSX from 'xlsx';
-import { UploadedDataProgram } from '../types';
+
 
 interface AuthenticatedFileUploadProps {
   onFileUpload: (data: UploadedDataProgram[]) => void;
 }
 
-interface UploadedData {
+interface UploadedDataProgram {
   programa: string;
   hora: string;
   real: number;
@@ -16,6 +16,7 @@ interface UploadedData {
   fecha: string;
 }
 
+// Removed duplicate UploadedDataProgram interface
 interface User {
   name?: string | null | undefined;
   email?: string | null | undefined;
@@ -23,13 +24,10 @@ interface User {
   rol?: string | null | undefined;
 }
 
-interface AuthenticatedFileUploadProps {
-  onFileUpload: (data: UploadedData[]) => void;
-}
 
 export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedFileUploadProps) {
   const { data: session } = useSession();
-  const [fileData, setFileData] = useState<UploadedData[]>([]);
+  const [fileData, setFileData] = useState<UploadedDataProgram[]>([]);
   const [fileLoaded, setFileLoaded] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [step, setStep] = useState<number>(0); // Controlar el paso actual del proceso
@@ -58,9 +56,9 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
       }
 
       const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-      const jsonData: UploadedData[] = [];
+      const jsonData: UploadedDataProgram[] = [];
       let currentProgram = '';
-      let programData: UploadedData[] = [];
+      let programData: UploadedDataProgram[] = [];
 
       rows.forEach((row, rowIndex) => {
         if (row.length === 1 && row[0]) {
