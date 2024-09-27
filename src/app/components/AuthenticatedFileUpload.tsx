@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import * as XLSX from 'xlsx';
+import { UploadedDataProgram } from '../types';
+
+interface AuthenticatedFileUploadProps {
+  onFileUpload: (data: UploadedDataProgram[]) => void;
+}
 
 interface UploadedData {
   programa: string;
