@@ -5,7 +5,7 @@ import SkeletonGraph from './SkeletonGraph'; // Importar el componente SkeletonG
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-interface UploadedData {
+interface UploadedDataProgram {
   programa: string;
   hora: string;
   real: number;
@@ -15,7 +15,7 @@ interface UploadedData {
 }
 
 interface AdminGraphQueryProps {
-  data: UploadedData[];
+  data: UploadedDataProgram[];
   theme: string; // Recibir el tema como prop
 }
 
@@ -49,7 +49,7 @@ const calculateMaxValue = (datasets: any[]) => {
 const AdminGraphQuery: React.FC<AdminGraphQueryProps> = ({ data, theme }) => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [filteredData, setFilteredData] = useState<UploadedData[]>([]);
+  const [filteredData, setFilteredData] = useState<UploadedDataProgram[]>([]);
   const [step, setStep] = useState<number>(0); // Controlar el paso actual del proceso
   const [isLoading, setIsLoading] = useState(false); // Estado para controlar la carga de datos
 
@@ -80,7 +80,7 @@ const AdminGraphQuery: React.FC<AdminGraphQueryProps> = ({ data, theme }) => {
     }
     acc[item.programa].push(item);
     return acc;
-  }, {} as Record<string, UploadedData[]>);
+  }, {} as Record<string, UploadedDataProgram[]>);
 
   // Función para ajustar la fecha manualmente
   const adjustDate = (dateString: string) => {
@@ -237,7 +237,7 @@ const AdminGraphQuery: React.FC<AdminGraphQueryProps> = ({ data, theme }) => {
                               }
                             }
                           },
-                          maxDataValuePlugin // Añadir el plugin directamente al objeto plugins
+                       
                         },
                         scales: {
                           x: {
