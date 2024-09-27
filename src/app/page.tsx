@@ -32,7 +32,6 @@ const Preloader = () => (
       <div className="line"></div>
     </div>
     <style jsx>{`
-    
       .preloader {
         display: flex;
         justify-content: center;
