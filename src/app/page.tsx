@@ -1,113 +1,224 @@
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from 'react';
+import { useSession, signIn, signOut } from 'next-auth/react';
+import { useTheme } from './ThemeContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSun, faMoon, faChartLine, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import Charts from './components/Charts';
+import BarChart from './components/BarChart';
+import SummaryTable from './components/SummaryTable';
+import Modal from './components/Modal';
+import 'animate.css';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
+import Slider from 'react-slick';
+import Image from 'next/image';
+import './page.css';
+
+const logoVerde = '/logo-expansion-verde.png';
+
+interface UploadedData {
+  channel_name: string;
+  fecha: string;
+  hora: string;
+  youtube: number;
+  likes: number;
+  title: string;
+}
+
+const Preloader = () => (
+  <div className="preloader">
+    <div className="preloader-chart">
+      <div className="line"></div>
+    </div>
+    <style jsx>{`
+    
+      .preloader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+      .preloader-chart {
+        width: 100px;
+        height: 100px;
+        position: relative;
+      }
+      .line {
+        width: 100%;
+        height: 100%;
+        border-left: 2px solid #4CAF50;
+        border-bottom: 2px solid #4CAF50;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      .line::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #4CAF50 50%, transparent 50%);
+        background-size: 200% 100%;
+        animation: zigzag 2s infinite;
+      }
+      @keyframes zigzag {
+        0% {
+          clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%);
+        }
+        25% {
+          clip-path: polygon(0% 100%, 25% 75%, 50% 100%, 75% 75%, 100% 100%);
+        }
+        50% {
+          clip-path: polygon(0% 100%, 25% 75%, 50% 50%, 75% 25%, 100% 0%);
+        }
+        75% {
+          clip-path: polygon(0% 100%, 25% 75%, 50% 50%, 75% 25%, 100% 0%);
+        }
+        100% {
+          clip-path: polygon(0% 100%, 25% 75%, 50% 50%, 75% 25%, 100% 0%);
+        }
+      }
+    `}</style>
+  </div>
+);
 
 export default function Home() {
+  const { data: session, status } = useSession();
+  const { theme, toggleTheme } = useTheme();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [data, setData] = useState<UploadedData[]>([]);
+  const [showDateInputs, setShowDateInputs] = useState(false);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // Estado para el preloader
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const handleSignInClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleConsultMetricsClick = () => {
+    setShowDateInputs(true);
+  };
+
+  const handleFetchData = async () => {
+    if (!startDate || !endDate) return;
+
+    setIsLoading(true); // Mostrar preloader
+    const response = await fetch(`/api/fetchData?startDate=${startDate}&endDate=${endDate}`);
+    const result = await response.json();
+    console.log('Datos obtenidos:', result);
+    setData(result);
+    setIsLoading(false); // Ocultar preloader
+  };
+
+  const handleChartsRendered = () => {
+    setIsLoading(false); // Ocultar preloader cuando los gráficos estén renderizados
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
+      <header className={`w-full flex justify-between items-center p-4 shadow-md ${theme === 'dark' ? 'header-dark' : 'header-light'}`}>
+        <div className="flex items-center">
+          <Image src={logoVerde} alt="Logo Verde" width={50} height={50} className="mr-4" />
+          <h1 className="text-2xl font-bold">YouTube Viewers Analysis</h1>
         </div>
-      </div>
+        <div className="flex items-center">
+          <button onClick={toggleTheme} className="btn btn-secondary mr-4 transition-transform transform hover:scale-110">
+            {theme === 'dark' ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />}
+          </button>
+          {status === 'loading' ? (
+            <p>Cargando...</p>
+          ) : !session ? (
+            <button onClick={handleSignInClick} className="btn btn-primary p-2 rounded-lg bg-green-500 text-white hover:bg-green-700 transition-transform transform hover:scale-110">
+              <FontAwesomeIcon icon={faSignInAlt} className="mr-2" />
+              Iniciar sesión
+            </button>
+          ) : (
+            <button onClick={() => signOut()} className="btn btn-secondary p-2 rounded-lg bg-red-500 text-white hover:bg-red-700 transition-transform transform hover:scale-110">
+              <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
+              Cerrar sesión
+            </button>
+          )}
+        </div>
+      </header>
 
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+      <main className="flex-grow flex">
+        <aside className={`w-64 p-4 shadow-md ${theme === 'dark' ? 'dark' : 'light'}`}>
+          <button 
+            onClick={handleConsultMetricsClick} 
+            className="btn btn-primary w-full mb-4 p-2 rounded-lg text-white hover:bg-gray-900 transition-transform transform hover:scale-110" 
+            style={{ backgroundColor: '#4CAF50' }}
+          >
+            <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+            Consultar Métricas
+          </button>
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+          {showDateInputs && (
+            <div className="flex flex-col space-y-4">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className={`p-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
+              />
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className={`p-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
+              />
+              <button 
+                onClick={handleFetchData} 
+                className="btn btn-secondary w-full p-2 rounded-lg text-white hover:bg-gray-900 transition-transform transform hover:scale-110"
+                style={{ backgroundColor: '#4CAF50' }}
+              >
+                Consultar
+              </button>
+            </div>
+          )}
+        </aside>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+        <section className="flex-grow p-8">
+          <h2 className="text-3xl font-bold mt-8 mb-4">Consulta las métricas de los canales</h2>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
+          {isLoading ? (
+            <Preloader />
+          ) : (
+            data.length > 0 && (
+              <>
+                <div>
+                  <div>
+                    <Charts data={data} onRendered={handleChartsRendered} />
+                  </div>
+                </div>
+                <div className="flex flex-col md:flex-row justify-between w-full mt-8 space-y-4 md:space-y-0 md:space-x-4 px-4 md:px-16">
+                  <div className="chart-container-small-bar w-full md:w-1/2">
+                    <BarChart data={data} onRendered={handleChartsRendered} />
+                  </div>
+                  <div className="chart-container-small-sumary w-full md:w-1/2">
+                    <SummaryTable data={data} onRendered={handleChartsRendered} />
+                  </div>
+                </div>
+              </>
+            )
+          )}
 
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <Modal isOpen={isModalOpen} onClose={handleModalClose} />
+        </section>
+      </main>
+
+      <footer className={`w-full p-4 text-center ${theme === 'dark' ? 'footer-dark' : 'footer-light'}`}>
+        <p>&copy; 2024 YouTube Viewers Analysis. Todos los derechos reservados.</p>
+      </footer>
+    </div>
   );
 }

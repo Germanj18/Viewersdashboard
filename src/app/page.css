@@ -1,0 +1,75 @@
+/* Variables de color */
+:root {
+  --card-bg-color-light: #f8f9fa;
+  --card-bg-color-dark: #1e1e1e;
+  --text-color-light: #212529;
+  --text-color-dark: #ffffff;
+}
+
+[data-theme="light"] {
+  --card-bg-color: var(--card-bg-color-light);
+  --text-color: var(--text-color-light);
+}
+
+[data-theme="dark"] {
+  --card-bg-color: var(--card-bg-color-dark);
+  --text-color: var(--text-color-dark);
+}
+
+/* Estilos para el header y el footer */
+.header, .footer {
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.header-light, .footer-light {
+  background-color: var(--card-bg-color-light);
+  color: var(--text-color-light);
+}
+
+.header-dark {
+  background-color: var(--card-bg-color-dark);
+  color: var(--text-color-dark);
+  box-shadow: 0 4px 8px rgba(98, 118, 99, 0.5); /* Sombra verde */
+}
+
+.footer-dark {
+  background-color: var(--card-bg-color-dark);
+  color: var(--text-color-dark);
+}
+
+/* Otros estilos */
+
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Asegurar que el z-index sea el mismo para todos los gráficos */
+}
+
+/* Estilos adicionales para el panel lateral */
+aside {
+  transition: background-color 0.1s, color 0.3s;
+}
+
+aside.light {
+  background-color: var(--card-bg-color-light);
+  color: var(--text-color-light);
+}
+
+aside.dark {
+  background-color: var(--card-bg-color-dark);
+  color: var(--text-color-dark);
+}
+
+aside h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+aside .btn {
+  width: 100%;
+}
+
+aside input[type="date"] {
+  width: 100%;
+}

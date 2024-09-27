@@ -1,6 +1,9 @@
+// layout.tsx (sin "use client")
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import ClientProvider from "./components/ClientProvider"; // Importar el componente del cliente
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +19,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <ClientProvider>{children}</ClientProvider> {/* Usar el provider aquí */}
+      </body>
     </html>
   );
 }

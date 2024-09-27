@@ -1,0 +1,38 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  username String @unique
+  password String
+  rol      String?
+}
+
+model Programas {
+  id       Int      @id @default(autoincrement())
+  programa String
+  hora     String
+  real     Float
+  chimi    Float
+  total    Float
+  fecha    DateTime
+}
+
+model ExcelData {
+  id           Int      @id @default(autoincrement())
+  channel_name String
+  fecha    DateTime 
+  hora     String
+  youtube      Int
+  
+  likes        Int
+  title        String
+ 
+}
