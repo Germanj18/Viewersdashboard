@@ -46,6 +46,7 @@ const handler = NextAuth({
       return token;
     },
   },
+  secret: process.env.NEXTAUTH_SECRET, // Asegúrate de tener esta variable de entorno configurada
 });
 
 export { handler as GET, handler as POST };

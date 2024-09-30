@@ -1,9 +1,4 @@
 {
-  "/admin/page": "app/admin/page.js",
   "/page": "app/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/fetchData/route": "app/api/fetchData/route.js",
-  "/api/upload/route": "app/api/upload/route.js",
-  "/api/query/route": "app/api/query/route.js"
+  "/admin/page": "app/admin/page.js"
 }
