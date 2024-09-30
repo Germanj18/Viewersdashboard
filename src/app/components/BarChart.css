@@ -6,7 +6,7 @@
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   padding: 24px; /* Ajustar padding según sea necesario */
   min-height: 300px;
-  max-height: 400px;
+  max-height: 394px;
 }
 .card-small.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
@@ -14,7 +14,7 @@
   border: 1px solid #ffffff; /* Borde blanco para modo oscuro */
   padding: 24px; /* Ajustar padding según sea necesario */
   min-height: 300px;
-  max-height: 407px;
+  max-height: 394px;
 }
 
 
