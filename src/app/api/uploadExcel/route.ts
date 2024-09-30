@@ -53,31 +53,37 @@ export async function POST(request: Request) {
       });
     }
 
-    // Insertar nuevos datos
-    const createPromises = validData.map((item: any) => {
-      const [date, time] = item.created_date.split('T');
-      const formattedDate = new Date(date); // Convertir a formato Date
-      const formattedTime = time.split('.')[0].substring(0, 5); // Obtener solo HH:MM
+    // Insertar nuevos datos en lotes
+    const batchSize = 50; // Tamaño del lote
+    for (let i = 0; i < validData.length; i += batchSize) {
+      const batch = validData.slice(i, i + batchSize);
+      const createPromises = batch.map((item: any) => {
+        const [date, time] = item.created_date.split('T');
+        const formattedDate = new Date(date); // Convertir a formato Date
+        const formattedTime = time.split('.')[0].substring(0, 5); // Obtener solo HH:MM
 
-      return prisma.excelData.create({
-        data: {
-          channel_name: item.channel_name,
-          fecha: formattedDate, // Fecha en formato Date
-          hora: formattedTime, // Hora en formato HH:MM
-          youtube: item.youtube,
-          likes: item.likes,
-          title: item.title,
-        },
+        return prisma.excelData.create({
+          data: {
+            channel_name: item.channel_name,
+            fecha: formattedDate, // Fecha en formato Date
+            hora: formattedTime, // Hora en formato HH:MM
+            youtube: item.youtube,
+            likes: item.likes,
+            title: item.title,
+          },
+        });
       });
-    });
 
-    const result = await Promise.all(createPromises);
+      await Promise.all(createPromises);
+    }
 
-    console.log('Resultado de la inserción:', result); // Agregar mensaje de registro
+    console.log('Resultado de la inserción: Datos subidos exitosamente'); // Agregar mensaje de registro
 
     return NextResponse.json({ message: 'Data uploaded successfully' });
   } catch (error) {
     console.error('Error al procesar la solicitud:', error); // Agregar mensaje de error
     return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+  } finally {
+    await prisma.$disconnect(); // Asegúrate de desconectar Prisma al final
   }
 }
