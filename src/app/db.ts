@@ -1,11 +1,6 @@
-import { Pool } from 'pg';
+const { Pool } = require('pg')
+require('dotenv').config()
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'lacasa',
-  password: 'xforce',
-  port: 5432,
-});
-
-export default pool;
+  connectionString: "postgres://default:SbPtsfC23mND@ep-muddy-rain-a4kexquv-pooler.us-east-1.aws.neon.tech:5432/verceldb?sslmode=require?sslmode=require",
+})
