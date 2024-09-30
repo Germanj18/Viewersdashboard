@@ -20,6 +20,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-zoom": "^2.0.1",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "next": "^14.2.7",
@@ -36,6 +37,7 @@
   "devDependencies": {
     "@prisma/extension-optimize": "^1.0.1",
     "@types/bcrypt": "^5.0.2",
+    "@types/dotenv": "^8.2.0",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
     "@types/pg": "^8.11.8",
