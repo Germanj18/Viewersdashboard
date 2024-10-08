@@ -1,21 +1,22 @@
 "use client";
-
+// src/app/admin/page.tsx
 import { useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 
 import AdminGraphQuery from '../components/AdminGraphQuery';
-import AuthenticatedFileUpload from '../components/AuthenticatedFileUpload'; // Import the AuthenticatedFileUpload component
-import FileUpload from '../components/FileUpload'; // Import the FileUpload component
-import { useTheme } from '../ThemeContext'; // Importar el contexto del tema
-import Preloader from '../components/Preloader'; // Importar el componente Preloader
+import AuthenticatedFileUpload from '../components/AuthenticatedFileUpload';
+import FileUpload from '../components/FileUpload';
+import { useTheme } from '../ThemeContext';
+import Preloader from '../components/Preloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons'; // Importar los iconos
+import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
+import ProgramCards from '../components/ProgramCards'; // Importar el componente ProgramCards
 
 interface User {
   name?: string | null | undefined;
   email?: string | null | undefined;
   image?: string | null | undefined;
-  rol?: string | null | undefined; // Agregar la propiedad 'rol' a la interfaz User
+  rol?: string | null | undefined;
 }
 
 interface UploadedDataProgram {
@@ -38,8 +39,8 @@ interface UploadedDataChannel {
 export default function AdminDashboard() {
   const [data, setData] = useState<UploadedDataProgram[]>([]);
   const [channelData, setChannelData] = useState<UploadedDataChannel[]>([]);
-  const { data: session, status } = useSession(); // Obtener el estado de la sesión
-  const { theme, toggleTheme } = useTheme(); // Obtener el tema y la función para cambiarlo
+  const { data: session, status } = useSession();
+  const { theme, toggleTheme } = useTheme();
   const [activeComponent, setActiveComponent] = useState<string>(''); // Estado para controlar el componente activo
 
   const handleFileUpload = (uploadedData: UploadedDataProgram[]) => {
@@ -51,7 +52,6 @@ export default function AdminDashboard() {
   };
 
   if (status === 'loading') {
-    // Mostrar el preloader mientras la sesión se está cargando
     return <Preloader />;
   }
 
@@ -63,7 +63,6 @@ export default function AdminDashboard() {
 
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
-      {/* Barra superior */}
       <header className="w-full bg-gray-800 text-white flex justify-between items-center p-4">
         <h1 className="text-2xl font-bold">Metricas LaCasa</h1>
         <div className="flex items-center space-x-4">
@@ -82,10 +81,14 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* Contenido principal */}
       <div className="flex flex-1">
-        {/* Barra de navegación lateral */}
         <aside className="w-64 bg-gray-800 text-white flex flex-col items-center py-8">
+          <button
+            onClick={() => setActiveComponent('')}
+            className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 mb-4"
+          >
+            Home
+          </button>
           {user.rol === 'admin' && (
             <>
               <button
@@ -111,6 +114,7 @@ export default function AdminDashboard() {
         </aside>
 
         <main className="flex-1 flex flex-col items-center justify-start p-8">
+          {activeComponent === '' && <ProgramCards theme={theme} />} {/* Mostrar las tarjetas por defecto */}
           {activeComponent === 'upload' && <AuthenticatedFileUpload onFileUpload={handleFileUpload} />}
           {activeComponent === 'uploadChannels' && <FileUpload onFileUpload={handleChannelFileUpload} />}
           {activeComponent === 'query' && <AdminGraphQuery data={data} theme={theme} />}

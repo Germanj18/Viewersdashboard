@@ -1,0 +1,57 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
+import { startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from 'date-fns';
+
+const prisma = new PrismaClient();
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const start = searchParams.get('start');
+  const end = searchParams.get('end');
+
+  if (!start || !end) {
+    return NextResponse.json({ error: 'Faltan parámetros de fecha' }, { status: 400 });
+  }
+
+  try {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    endDate.setHours(23, 59, 59, 999); // Establecer la hora máxima para el día de finalización
+
+    console.log('Fechas recibidas:', { startDate, endDate });
+
+    // Obtener todas las fechas del mes que no sean fines de semana
+    const dates = eachDayOfInterval({ start: startDate, end: endDate }).filter(date => !isWeekend(date));
+
+    console.log('Fechas filtradas (lunes a viernes):', dates);
+
+    const data = await prisma.programas.findMany({
+      where: {
+        fecha: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      orderBy: {
+        fecha: 'asc',
+      },
+    });
+
+    const groupedData = dates.map(date => {
+      const dayData = data.filter(item => item.fecha.toISOString().split('T')[0] === date.toISOString().split('T')[0]);
+      const maxTotal = dayData.length > 0 ? Math.max(...dayData.map(item => item.total)) : -Infinity;
+      return {
+        fecha: date,
+        max_total: maxTotal,
+        dayData: dayData,
+      };
+    });
+
+    console.log('Datos agrupados por día:', groupedData);
+
+    return NextResponse.json(groupedData, { status: 200 });
+  } catch (error) {
+    console.error('Error al consultar los datos:', error);
+    return NextResponse.json({ error: 'Error al consultar los datos' }, { status: 500 });
+  }
+}
