@@ -28,6 +28,7 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
   const [fileLoaded, setFileLoaded] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [sheetExists, setSheetExists] = useState<boolean>(true); // Estado para controlar si la hoja existe
+  const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null); // Estado para almacenar el workbook
 
   if (!session) {
     return <p>Por favor, inicia sesión para subir archivos.</p>;
@@ -45,63 +46,68 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
     reader.onload = async (e) => {
       const data = new Uint8Array(e.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = selectedDate.split('-')[2].padStart(2, '0'); // Selecciona la hoja basada en el día del calendario
-      const worksheet = workbook.Sheets[sheetName];
-      if (!worksheet) {
-        alert(`La hoja con el nombre "${sheetName}" no existe.`);
-        setSheetExists(false);
-        return;
-      }
-
-      setSheetExists(true); // La hoja existe, permitir la carga de datos
-
-      const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
-      const jsonData: UploadedDataProgram[] = [];
-      let currentProgram = '';
-      let programData: UploadedDataProgram[] = [];
-
-      rows.forEach((row, rowIndex) => {
-        if (row.length === 1 && row[0]) {
-          // Encontramos el nombre de un nuevo programa
-          if (currentProgram && programData.length > 0) {
-            // Filtrar programas que tienen todas las filas con valores en cero
-            const allZero = programData.every(row => row.real === 0 && row.chimi === 0 && row.total === 0);
-            if (!allZero) {
-              jsonData.push(...programData);
-            }
-          }
-          currentProgram = row[0];
-          programData = [];
-        } else if (row.length > 1 && currentProgram) {
-          // Procesar filas de datos
-          if (row[0] !== 'Hora' && row[1] !== 'Real' && row[2] !== 'Chimi' && row[3] !== 'Total') {
-            const dataRow = {
-              programa: currentProgram,
-              hora: row[0], // Hora
-              real: row[1], // Real
-              chimi: row[2], // Chimi
-              total: row[3], // Total
-              fecha: selectedDate ? new Date(selectedDate).toISOString() : '', // Usar la fecha seleccionada y formatearla correctamente
-            };
-            programData.push(dataRow);
-          }
-        }
-      });
-
-      // Procesar el último programa
-      if (currentProgram && programData.length > 0) {
-        const allZero = programData.every(row => row.real === 0 && row.chimi === 0 && row.total === 0);
-        if (!allZero) {
-          jsonData.push(...programData);
-        }
-      }
-
-      console.log('Datos procesados:', jsonData); // Agregar mensaje de registro
-
-      setFileData(jsonData);
-      setFileLoaded(true);
+      setWorkbook(workbook); // Almacenar el workbook en el estado
+      processFile(workbook, selectedDate);
     };
     reader.readAsArrayBuffer(file);
+  };
+
+  const processFile = (workbook: XLSX.WorkBook, date: string) => {
+    const sheetName = date.split('-')[2].padStart(2, '0'); // Selecciona la hoja basada en el día del calendario
+    const worksheet = workbook.Sheets[sheetName];
+    if (!worksheet) {
+      alert(`La hoja con el nombre "${sheetName}" no existe.`);
+      setSheetExists(false);
+      return;
+    }
+
+    setSheetExists(true); // La hoja existe, permitir la carga de datos
+
+    const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+    const jsonData: UploadedDataProgram[] = [];
+    let currentProgram = '';
+    let programData: UploadedDataProgram[] = [];
+
+    rows.forEach((row, rowIndex) => {
+      if (row.length === 1 && row[0]) {
+        // Encontramos el nombre de un nuevo programa
+        if (currentProgram && programData.length > 0) {
+          // Filtrar programas que tienen todas las filas con valores en cero
+          const allZero = programData.every(row => row.real === 0 && row.chimi === 0 && row.total === 0);
+          if (!allZero) {
+            jsonData.push(...programData);
+          }
+        }
+        currentProgram = row[0];
+        programData = [];
+      } else if (row.length > 1 && currentProgram) {
+        // Procesar filas de datos
+        if (row[0] !== 'Hora' && row[1] !== 'Real' && row[2] !== 'Chimi' && row[3] !== 'Total') {
+          const dataRow = {
+            programa: currentProgram,
+            hora: row[0], // Hora
+            real: row[1], // Real
+            chimi: row[2], // Chimi
+            total: row[3], // Total
+            fecha: date ? new Date(date).toISOString() : '', // Usar la fecha seleccionada y formatearla correctamente
+          };
+          programData.push(dataRow);
+        }
+      }
+    });
+
+    // Procesar el último programa
+    if (currentProgram && programData.length > 0) {
+      const allZero = programData.every(row => row.real === 0 && row.chimi === 0 && row.total === 0);
+      if (!allZero) {
+        jsonData.push(...programData);
+      }
+    }
+
+    console.log('Datos procesados:', jsonData); // Agregar mensaje de registro
+
+    setFileData(jsonData);
+    setFileLoaded(true);
   };
 
   const handleUpload = async () => {
@@ -112,10 +118,15 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
       },
       body: JSON.stringify(fileData),
     });
-    // Opcionalmente, podrías querer limpiar el estado de fileData o proporcionar retroalimentación al usuario
-    setFileLoaded(false);
-    setFileData([]);
     alert('Datos subidos exitosamente');
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    setSelectedDate(newDate);
+    if (workbook) {
+      processFile(workbook, newDate); // Procesar el archivo con la nueva fecha
+    }
   };
 
   return (
@@ -124,7 +135,7 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
       <input
         type="date"
         value={selectedDate}
-        onChange={(e) => setSelectedDate(e.target.value)}
+        onChange={handleDateChange}
         className="mb-4 p-2 border border-gray-300 rounded-lg"
       />
       <label className="mb-2 text-lg font-semibold">Selecciona el archivo a cargar:</label>
