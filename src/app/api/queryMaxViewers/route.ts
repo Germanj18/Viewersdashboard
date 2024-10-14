@@ -39,10 +39,11 @@ export async function GET(req: NextRequest) {
 
     const groupedData = dates.map(date => {
       const dayData = data.filter(item => item.fecha.toISOString().split('T')[0] === date.toISOString().split('T')[0]);
-      const maxTotal = dayData.length > 0 ? Math.max(...dayData.map(item => item.total)) : -Infinity;
+      const filteredDayData = dayData.filter(item => item.total > 1000); // Filtrar datos donde total > 1000
+      const avgTotal = filteredDayData.length > 0 ? filteredDayData.reduce((sum, item) => sum + item.total, 0) / filteredDayData.length : 0;
       return {
         fecha: date,
-        max_total: maxTotal,
+        avg_total: avgTotal,
         dayData: dayData,
       };
     });

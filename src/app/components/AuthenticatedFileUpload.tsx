@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import * as XLSX from 'xlsx';
 
-
 interface AuthenticatedFileUploadProps {
   onFileUpload: (data: UploadedDataProgram[]) => void;
 }
@@ -16,7 +15,6 @@ interface UploadedDataProgram {
   fecha: string;
 }
 
-// Removed duplicate UploadedDataProgram interface
 interface User {
   name?: string | null | undefined;
   email?: string | null | undefined;
@@ -24,13 +22,12 @@ interface User {
   rol?: string | null | undefined;
 }
 
-
 export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedFileUploadProps) {
   const { data: session } = useSession();
   const [fileData, setFileData] = useState<UploadedDataProgram[]>([]);
   const [fileLoaded, setFileLoaded] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [step, setStep] = useState<number>(0); // Controlar el paso actual del proceso
+  const [sheetExists, setSheetExists] = useState<boolean>(true); // Estado para controlar si la hoja existe
 
   if (!session) {
     return <p>Por favor, inicia sesión para subir archivos.</p>;
@@ -48,12 +45,15 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
     reader.onload = async (e) => {
       const data = new Uint8Array(e.target?.result as ArrayBuffer);
       const workbook = XLSX.read(data, { type: 'array' });
-      const sheetName = "02"; // Selecciona la hoja con el nombre "02"
+      const sheetName = selectedDate.split('-')[2].padStart(2, '0'); // Selecciona la hoja basada en el día del calendario
       const worksheet = workbook.Sheets[sheetName];
       if (!worksheet) {
         alert(`La hoja con el nombre "${sheetName}" no existe.`);
+        setSheetExists(false);
         return;
       }
+
+      setSheetExists(true); // La hoja existe, permitir la carga de datos
 
       const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
       const jsonData: UploadedDataProgram[] = [];
@@ -116,50 +116,24 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
     setFileLoaded(false);
     setFileData([]);
     alert('Datos subidos exitosamente');
-    setStep(0); // Reiniciar el proceso
   };
 
   return (
     <div className="flex flex-col items-center">
-      {step === 0 && (
-        <button
-          onClick={() => setStep(1)}
-          className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 mt-4"
-        >
-          Subir Datos
-        </button>
-      )}
-
-      {step === 1 && (
-        <div className="flex flex-col items-center animate-fade-in">
-          <label className="mb-2 text-lg font-semibold">Selecciona la fecha de los datos a cargar:</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="mb-4 p-2 border border-gray-300 rounded-lg"
-          />
-          <button
-            onClick={() => setStep(2)}
-            className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300"
-          >
-            Continuar
-          </button>
-        </div>
-      )}
-
-      {step === 2 && (
-        <div className="flex flex-col items-center animate-fade-in">
-          <label className="mb-2 text-lg font-semibold">Selecciona el archivo a cargar:</label>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            className="mb-4 p-2 border border-gray-300 rounded-lg"
-          />
-        </div>
-      )}
-
-      {fileLoaded && (
+      <label className="mb-2 text-lg font-semibold">Selecciona la fecha de los datos a cargar:</label>
+      <input
+        type="date"
+        value={selectedDate}
+        onChange={(e) => setSelectedDate(e.target.value)}
+        className="mb-4 p-2 border border-gray-300 rounded-lg"
+      />
+      <label className="mb-2 text-lg font-semibold">Selecciona el archivo a cargar:</label>
+      <input
+        type="file"
+        onChange={handleFileChange}
+        className="mb-4 p-2 border border-gray-300 rounded-lg"
+      />
+      {fileLoaded && sheetExists && (
         <button
           onClick={handleUpload}
           className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 mt-4"
