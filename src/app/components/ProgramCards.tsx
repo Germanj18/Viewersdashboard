@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { format, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths, addMonths, eachDayOfInterval, isSunday, getDay } from 'date-fns';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -44,7 +44,14 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   };
 
   const renderCards = () => {
-    return data.map(item => {
+    // Filtrar los días de lunes a viernes
+    const filteredData = data.filter(item => {
+      const date = new Date(item.fecha);
+      const day = getDay(date);
+      return day !== 0 && day !== 6; // Excluir domingos (0) y sábados (6)
+    });
+
+    return filteredData.map(item => {
       const date = new Date(item.fecha).toLocaleDateString();
       const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
       const chartData = {
