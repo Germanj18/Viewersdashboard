@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { format, startOfMonth, endOfMonth, subMonths, addMonths, getDay } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
+import { format, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -16,7 +15,6 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   const [data, setData] = useState<ProgramData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const timeZone = 'America/Argentina/Buenos_Aires'; // Ajusta esto a tu zona horaria
 
   const fetchData = async (start: Date, end: Date) => {
     setIsLoading(true);
@@ -46,23 +44,16 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   };
 
   const renderCards = () => {
-    // Filtrar los días de lunes a viernes
-    const filteredData = data.filter(item => {
-      const date = toZonedTime(new Date(item.fecha), timeZone);
-      const day = getDay(date);
-      return day >= 1 && day <= 5; // Incluir solo lunes (1) a viernes (5)
-    });
-
     // Agrupar las tarjetas en filas de 4 columnas
     const rows = [];
-    for (let i = 0; i < filteredData.length; i += 4) {
-      rows.push(filteredData.slice(i, i + 4));
+    for (let i = 0; i < data.length; i += 4) {
+      rows.push(data.slice(i, i + 4));
     }
 
     return rows.map((row, rowIndex) => (
       <div key={rowIndex} className="flex justify-center w-full mb-4">
         {row.map(item => {
-          const date = toZonedTime(new Date(item.fecha), timeZone).toLocaleDateString();
+          const date = new Date(item.fecha).toLocaleDateString();
           const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
           const chartData = {
             labels: sortedDayData.map(d => d.hora),
