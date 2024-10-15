@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { format, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths, addMonths, getDay } from 'date-fns';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -44,10 +44,17 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   };
 
   const renderCards = () => {
+    // Filtrar los días de lunes a viernes
+    const filteredData = data.filter(item => {
+      const date = new Date(item.fecha);
+      const day = getDay(date);
+      return day >= 1 && day <= 5; // Incluir solo lunes (1) a viernes (5)
+    });
+
     // Agrupar las tarjetas en filas de 4 columnas
     const rows = [];
-    for (let i = 0; i < data.length; i += 4) {
-      rows.push(data.slice(i, i + 4));
+    for (let i = 0; i < filteredData.length; i += 4) {
+      rows.push(filteredData.slice(i, i + 4));
     }
 
     return rows.map((row, rowIndex) => (
