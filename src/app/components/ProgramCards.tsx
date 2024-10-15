@@ -7,7 +7,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 interface ProgramData {
   fecha: string;
-  avg_total: number;
+  max_total: number;
   dayData: { hora: string; total: number }[];
 }
 
@@ -46,13 +46,12 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   const renderCards = () => {
     return data.map(item => {
       const date = new Date(item.fecha).toLocaleDateString();
-      const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
       const chartData = {
-        labels: sortedDayData.map(d => d.hora),
+        labels: item.dayData.map(d => d.hora),
         datasets: [
           {
             label: 'Total',
-            data: sortedDayData.map(d => d.total),
+            data: item.dayData.map(d => d.total),
             backgroundColor: 'rgba(54, 162, 235, 0.2)',
             borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
@@ -95,8 +94,8 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
           </div>
           <div className="flex justify-center gap-1 mb-2">
             <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
-              <p className="font-bold text-xs">Media Total del Día</p>
-              <p className="text-xs">{item.avg_total.toFixed(2)}</p>
+              <p className="font-bold text-xs">Pico Máximo Total</p>
+              <p className="text-xs">{item.max_total}</p>
             </div>
           </div>
           <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
