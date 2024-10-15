@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { startOfMonth, endOfMonth, eachDayOfInterval, isWeekend } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, getDay } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -20,8 +20,11 @@ export async function GET(req: NextRequest) {
 
     console.log('Fechas recibidas:', { startDate, endDate });
 
-    // Obtener todas las fechas del mes que no sean fines de semana
-    const dates = eachDayOfInterval({ start: startDate, end: endDate }).filter(date => !isWeekend(date));
+    // Obtener todas las fechas del mes que no sean sábados o domingos
+    const dates = eachDayOfInterval({ start: startDate, end: endDate }).filter(date => {
+      const day = getDay(date);
+      return day !== 0 && day !== 6; // Excluir domingos (0) y sábados (6)
+    });
 
     console.log('Fechas filtradas (lunes a viernes):', dates);
 
@@ -39,10 +42,11 @@ export async function GET(req: NextRequest) {
 
     const groupedData = dates.map(date => {
       const dayData = data.filter(item => item.fecha.toISOString().split('T')[0] === date.toISOString().split('T')[0]);
-      const maxTotal = dayData.length > 0 ? Math.max(...dayData.map(item => item.total)) : -Infinity;
+      const filteredDayData = dayData.filter(item => item.total > 1000); // Filtrar datos donde total > 1000
+      const avgTotal = filteredDayData.length > 0 ? filteredDayData.reduce((sum, item) => sum + item.total, 0) / filteredDayData.length : 0;
       return {
         fecha: date,
-        max_total: maxTotal,
+        avg_total: avgTotal,
         dayData: dayData,
       };
     });
