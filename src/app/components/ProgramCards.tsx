@@ -48,7 +48,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
     const filteredData = data.filter(item => {
       const date = new Date(item.fecha);
       const day = getDay(date);
-      return day !== 0 && day !== 6; // Excluir domingos (0) y sábados (6)
+      return day >= 1 && day <= 5; // Incluir solo lunes (1) a viernes (5)
     });
 
     // Agrupar las tarjetas en filas de 4 columnas
