@@ -46,68 +46,82 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   const renderCards = () => {
     const start = startOfMonth(currentMonth);
     const end = endOfMonth(currentMonth);
-    
+
     const weekdays = [];
-    for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
-      const day = getDay(date);
+    let currentDate = start;
+
+    // Generar un array de fechas de lunes a viernes
+    while (currentDate <= end) {
+      const day = getDay(currentDate);
       if (day >= 1 && day <= 5) { // Lunes (1) a Viernes (5)
-        weekdays.push(date.toISOString().split('T')[0]); // Agregar la fecha en formato 'YYYY-MM-DD'
+        weekdays.push(currentDate.toISOString().split('T')[0]); // Agregar la fecha en formato 'YYYY-MM-DD'
       }
+      currentDate.setDate(currentDate.getDate() + 1); // Avanzar un día
     }
 
-    return weekdays.map((date) => {
-      const item = data.find(d => d.fecha === date) || { avg_total: 0, dayData: [] }; // Obtener datos o usar objeto vacío
+    // Agrupar las tarjetas en filas de 4 columnas
+    const rows = [];
+    for (let i = 0; i < weekdays.length; i += 4) {
+      rows.push(weekdays.slice(i, i + 4));
+    }
 
-      const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora));
-      const chartData = {
-        labels: sortedDayData.map(d => d.hora),
-        datasets: [
-          {
-            label: 'Total',
-            data: sortedDayData.map(d => d.total),
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            pointRadius: 0,
-            fill: true,
-          },
-        ],
-      };
+    return rows.map((row, rowIndex) => (
+      <div key={rowIndex} className="flex justify-center w-full mb-4">
+        {row.map((date) => {
+          const item = data.find(d => d.fecha === date) || { avg_total: 0, dayData: [] };
 
-      const chartOptions = {
-        maintainAspectRatio: false,
-        scales: {
-          x: { display: false },
-          y: { display: false },
-        },
-        plugins: {
-          legend: { display: false },
-        },
-        layout: {
-          padding: { left: 0, right: 0, top: 0, bottom: 0 },
-        },
-      };
+          const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora));
+          const chartData = {
+            labels: sortedDayData.map(d => d.hora),
+            datasets: [
+              {
+                label: 'Total',
+                data: sortedDayData.map(d => d.total),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                pointRadius: 0,
+                fill: true,
+              },
+            ],
+          };
 
-      const formattedDate = new Date(date).toLocaleDateString();
+          const chartOptions = {
+            maintainAspectRatio: false,
+            scales: {
+              x: { display: false },
+              y: { display: false },
+            },
+            plugins: {
+              legend: { display: false },
+            },
+            layout: {
+              padding: { left: 0, right: 0, top: 0, bottom: 0 },
+            },
+          };
 
-      return (
-        <div key={formattedDate} className={`shadow-md rounded-lg p-2 w-1/4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-sm font-bold">LaCasa</h2>
-            <p className="text-xs">{formattedDate}</p>
-          </div>
-          <div className="flex justify-center gap-1 mb-2">
-            <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
-              <p className="font-bold text-xs">Media Total del Día</p>
-              <p className="text-xs">{item.avg_total.toFixed(2)}</p>
+          const formattedDate = new Date(date).toLocaleDateString();
+
+          return (
+            <div key={formattedDate} className={`shadow-md rounded-lg p-2 w-1/4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-sm font-bold">LaCasa</h2>
+                <p className="text-xs">{formattedDate}</p>
+              </div>
+              <div className="flex justify-center gap-1 mb-2">
+                <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                  <p className="font-bold text-xs">Media Total del Día</p>
+                  <p className="text-xs">{item.avg_total.toFixed(2)}</p>
+                </div>
+              </div>
+              <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
+                <Line data={chartData} options={chartOptions} />
+              </div>
             </div>
-          </div>
-          <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
-            <Line data={chartData} options={chartOptions} />
-          </div>
-        </div>
-      );
-    });
+          );
+        })}
+      </div>
+    ));
   };
 
   return (
