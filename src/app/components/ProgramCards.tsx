@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { format, startOfMonth, endOfMonth, subMonths, addMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths, addMonths, getDay } from 'date-fns';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -44,67 +44,84 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
   };
 
   const renderCards = () => {
-    return data.map(item => {
-      const date = new Date(item.fecha).toLocaleDateString();
-      const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
-      const chartData = {
-        labels: sortedDayData.map(d => d.hora),
-        datasets: [
-          {
-            label: 'Total',
-            data: sortedDayData.map(d => d.total),
-            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            pointRadius: 0, // No mostrar puntos
-            fill: true, // Rellenar el área debajo de la línea
-          },
-        ],
-      };
-
-      const chartOptions = {
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            display: false, // Ocultar eje X
-          },
-          y: {
-            display: false, // Ocultar eje Y
-          },
-        },
-        plugins: {
-          legend: {
-            display: false, // Ocultar leyenda
-          },
-        },
-        layout: {
-          padding: {
-            left: 0,
-            right: 0,
-            top: 0,
-            bottom: 0,
-          },
-        },
-      };
-
-      return (
-        <div key={date} className={`shadow-md rounded-lg p-2 w-1/5 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-sm font-bold">LaCasa</h2>
-            <p className="text-xs">{date}</p>
-          </div>
-          <div className="flex justify-center gap-1 mb-2">
-            <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
-              <p className="font-bold text-xs">Media Total del Día</p>
-              <p className="text-xs">{item.avg_total.toFixed(2)}</p>
-            </div>
-          </div>
-          <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
-            <Line data={chartData} options={chartOptions} />
-          </div>
-        </div>
-      );
+    // Filtrar los días de lunes a viernes
+    const filteredData = data.filter(item => {
+      const date = new Date(item.fecha);
+      const day = getDay(date);
+      return day >= 1 && day <= 5; // Incluir solo lunes (1) a viernes (5)
     });
+
+    // Agrupar las tarjetas en filas de 4 columnas
+    const rows = [];
+    for (let i = 0; i < filteredData.length; i += 4) {
+      rows.push(filteredData.slice(i, i + 4));
+    }
+
+    return rows.map((row, rowIndex) => (
+      <div key={rowIndex} className="flex justify-center w-full mb-4">
+        {row.map(item => {
+          const date = new Date(item.fecha).toLocaleDateString();
+          const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
+          const chartData = {
+            labels: sortedDayData.map(d => d.hora),
+            datasets: [
+              {
+                label: 'Total',
+                data: sortedDayData.map(d => d.total),
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                pointRadius: 0, // No mostrar puntos
+                fill: true, // Rellenar el área debajo de la línea
+              },
+            ],
+          };
+
+          const chartOptions = {
+            maintainAspectRatio: false,
+            scales: {
+              x: {
+                display: false, // Ocultar eje X
+              },
+              y: {
+                display: false, // Ocultar eje Y
+              },
+            },
+            plugins: {
+              legend: {
+                display: false, // Ocultar leyenda
+              },
+            },
+            layout: {
+              padding: {
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+              },
+            },
+          };
+
+          return (
+            <div key={date} className={`shadow-md rounded-lg p-2 w-1/4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-sm font-bold">LaCasa</h2>
+                <p className="text-xs">{date}</p>
+              </div>
+              <div className="flex justify-center gap-1 mb-2">
+                <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                  <p className="font-bold text-xs">Media Total del Día</p>
+                  <p className="text-xs">{item.avg_total.toFixed(2)}</p>
+                </div>
+              </div>
+              <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
+                <Line data={chartData} options={chartOptions} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    ));
   };
 
   return (
@@ -121,7 +138,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
       {isLoading ? (
         <p>Cargando...</p>
       ) : (
-        <div className="flex flex-wrap justify-center">
+        <div className="flex flex-col items-center w-full">
           {renderCards()}
         </div>
       )}
