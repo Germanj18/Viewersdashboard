@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { format, startOfMonth, endOfMonth, subMonths, addMonths, eachDayOfInterval, getDay } from 'date-fns';
+import { es } from 'date-fns/locale'; // Importar el locale español
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -81,7 +82,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
         {row.map(item => {
           const date = new Date(item.fecha);
           const formattedDate = format(date, 'dd/MM/yyyy');
-          const dayOfWeek = format(date, 'EEEE'); // Obtener el día de la semana
+          const dayOfWeek = format(date, 'EEEE', { locale: es }); // Obtener el día de la semana en español
           const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
           const chartData = {
             labels: sortedDayData.map(d => d.hora),
@@ -140,7 +141,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
         <button onClick={handlePreviousMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
           Mes Anterior
         </button>
-        <h2 className="text-xl font-bold">{format(currentMonth, 'MMMM yyyy')}</h2>
+        <h2 className="text-xl font-bold">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
         <button onClick={handleNextMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
           Mes Siguiente
         </button>
