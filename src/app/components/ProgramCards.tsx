@@ -61,7 +61,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
       <div key={rowIndex} className="flex justify-center w-full mb-4">
         {row.map(item => {
           const date = new Date(item.fecha).toLocaleDateString();
-          const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
+          const sortedDayData = item.dayData ? item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)) : []; // Ordenar los datos por hora
           const chartData = {
             labels: sortedDayData.map(d => d.hora),
             datasets: [
@@ -111,11 +111,15 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
               <div className="flex justify-center gap-1 mb-2">
                 <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
                   <p className="font-bold text-xs">Media Total del Día</p>
-                  <p className="text-xs">{item.avg_total.toFixed(2)}</p>
+                  <p className="text-xs">{item.avg_total > 0 ? item.avg_total.toFixed(2) : "Sin datos"}</p>
                 </div>
               </div>
               <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
-                <Line data={chartData} options={chartOptions} />
+                {sortedDayData.length > 0 ? (
+                  <Line data={chartData} options={chartOptions} />
+                ) : (
+                  <p className="text-xs text-center">Sin gráfico</p> // Mensaje si no hay datos para graficar
+                )}
               </div>
             </div>
           );
