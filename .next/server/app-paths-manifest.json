@@ -1,6 +1,6 @@
 {
+  "/page": "app/page.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/admin/page": "app/admin/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/queryMaxViewers/route": "app/api/queryMaxViewers/route.js"
+  "/api/queryMaxViewers/route": "app/api/queryMaxViewers/route.js",
+  "/admin/page": "app/admin/page.js"
 }

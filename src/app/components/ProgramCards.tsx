@@ -50,13 +50,13 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
       const day = getDay(date);
       return day >= 1 && day <= 5; // Incluir solo lunes (1) a viernes (5)
     });
-
+  
     // Agrupar las tarjetas en filas de 4 columnas
     const rows = [];
     for (let i = 0; i < filteredData.length; i += 4) {
       rows.push(filteredData.slice(i, i + 4));
     }
-
+  
     return rows.map((row, rowIndex) => (
       <div key={rowIndex} className="flex justify-center w-full mb-4">
         {row.map(item => {
@@ -71,25 +71,25 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
                 borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1,
-                pointRadius: 0, // No mostrar puntos
-                fill: true, // Rellenar el área debajo de la línea
+                pointRadius: 0,
+                fill: true,
               },
             ],
           };
-
+  
           const chartOptions = {
             maintainAspectRatio: false,
             scales: {
               x: {
-                display: false, // Ocultar eje X
+                display: false,
               },
               y: {
-                display: false, // Ocultar eje Y
+                display: false,
               },
             },
             plugins: {
               legend: {
-                display: false, // Ocultar leyenda
+                display: false,
               },
             },
             layout: {
@@ -101,7 +101,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
               },
             },
           };
-
+  
           return (
             <div key={date} className={`shadow-md rounded-lg p-2 w-1/4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
               <div className="flex justify-between items-center mb-2">
