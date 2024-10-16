@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
-import { format, startOfMonth, endOfMonth, subMonths, addMonths, getDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths, addMonths, eachDayOfInterval, getDay } from 'date-fns';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -21,7 +21,7 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
     const response = await fetch(`/api/queryMaxViewers?start=${format(start, 'yyyy-MM-dd')}&end=${format(end, 'yyyy-MM-dd')}`);
     if (response.ok) {
       const result = await response.json();
-      console.log('Datos recibidos:', result); // Log para verificar los datos recibidos
+      console.log('Datos recibidos:', result);
       setData(result);
     } else {
       console.error('Error al consultar los datos');
@@ -43,25 +43,44 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
     setCurrentMonth(addMonths(currentMonth, 1));
   };
 
-  const renderCards = () => {
-    // Filtrar los días de lunes a viernes
-    const filteredData = data.filter(item => {
-      const date = new Date(item.fecha);
+  // Función para obtener los días de lunes a viernes del mes actual
+  const getWeekdaysInMonth = (month: Date) => {
+    const start = startOfMonth(month);
+    const end = endOfMonth(month);
+    
+    return eachDayOfInterval({ start, end }).filter(date => {
       const day = getDay(date);
-      return day >= 1 && day <= 5; // Incluir solo lunes (1) a viernes (5)
+      return day >= 1 && day <= 5; // Lunes a viernes
     });
-  
+  };
+
+  const renderCards = () => {
+    // Obtener los días de lunes a viernes
+    const weekdays = getWeekdaysInMonth(currentMonth);
+
+    // Agrupar los datos por fecha
+    const groupedData = weekdays.map(date => {
+      const dateString = date.toISOString().split('T')[0];
+      const dayData = data.find(item => item.fecha.split('T')[0] === dateString) || { avg_total: 0, dayData: [] };
+      
+      return {
+        fecha: date,
+        avg_total: dayData.avg_total,
+        dayData: dayData.dayData || [],
+      };
+    });
+
     // Agrupar las tarjetas en filas de 4 columnas
     const rows = [];
-    for (let i = 0; i < filteredData.length; i += 4) {
-      rows.push(filteredData.slice(i, i + 4));
+    for (let i = 0; i < groupedData.length; i += 4) {
+      rows.push(groupedData.slice(i, i + 4));
     }
-  
+
     return rows.map((row, rowIndex) => (
       <div key={rowIndex} className="flex justify-center w-full mb-4">
         {row.map(item => {
           const date = new Date(item.fecha).toLocaleDateString();
-          const sortedDayData = item.dayData ? item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)) : []; // Ordenar los datos por hora
+          const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
           const chartData = {
             labels: sortedDayData.map(d => d.hora),
             datasets: [
@@ -76,32 +95,17 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
               },
             ],
           };
-  
+
           const chartOptions = {
             maintainAspectRatio: false,
             scales: {
-              x: {
-                display: false,
-              },
-              y: {
-                display: false,
-              },
+              x: { display: false },
+              y: { display: false },
             },
-            plugins: {
-              legend: {
-                display: false,
-              },
-            },
-            layout: {
-              padding: {
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-              },
-            },
+            plugins: { legend: { display: false } },
+            layout: { padding: { left: 0, right: 0, top: 0, bottom: 0 } },
           };
-  
+
           return (
             <div key={date} className={`shadow-md rounded-lg p-2 w-1/4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
               <div className="flex justify-between items-center mb-2">
