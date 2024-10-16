@@ -70,16 +70,18 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
       };
     });
 
-    // Agrupar las tarjetas en filas de 4 columnas
+    // Agrupar las tarjetas en filas de 5 columnas
     const rows = [];
-    for (let i = 0; i < groupedData.length; i += 4) {
-      rows.push(groupedData.slice(i, i + 4));
+    for (let i = 0; i < groupedData.length; i += 5) {
+      rows.push(groupedData.slice(i, i + 5));
     }
 
     return rows.map((row, rowIndex) => (
       <div key={rowIndex} className="flex justify-center w-full mb-4">
         {row.map(item => {
-          const date = new Date(item.fecha).toLocaleDateString();
+          const date = new Date(item.fecha);
+          const formattedDate = format(date, 'dd/MM/yyyy');
+          const dayOfWeek = format(date, 'EEEE'); // Obtener el día de la semana
           const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
           const chartData = {
             labels: sortedDayData.map(d => d.hora),
@@ -107,10 +109,10 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
           };
 
           return (
-            <div key={date} className={`shadow-md rounded-lg p-2 w-1/4 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
+            <div key={formattedDate} className={`shadow-md rounded-lg p-2 w-1/5 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-sm font-bold">LaCasa</h2>
-                <p className="text-xs">{date}</p>
+                <p className="text-xs">{`${dayOfWeek} - ${formattedDate}`}</p>
               </div>
               <div className="flex justify-center gap-1 mb-2">
                 <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
