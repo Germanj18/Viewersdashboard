@@ -3,6 +3,7 @@ import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { format, startOfMonth, endOfMonth, subMonths, addMonths, eachDayOfInterval, getDay } from 'date-fns';
 import { es } from 'date-fns/locale'; // Importar el locale español
+import AdminGraphQuery from './AdminGraphQuery'; // Importar el componente AdminGraphQuery
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -12,10 +13,26 @@ interface ProgramData {
   dayData: { hora: string; total: number }[];
 }
 
-const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
+interface ProgramCardsProps {
+  theme: string;
+  onDateSelect: (date: string | null) => void; // Prop para manejar la selección de fecha desde AdminDashboard
+  selectedDate: string | null; // Prop para recibir la fecha seleccionada desde AdminDashboard
+}
+
+const ProgramCards: React.FC<ProgramCardsProps> = ({ theme, onDateSelect, selectedDate }) => {
   const [data, setData] = useState<ProgramData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  interface UploadedDataProgram {
+    hora: string;
+    total: number;
+    programa: string;
+    real: number;
+    chimi: number;
+    fecha: string;
+  }
+
+  const [graphData, setGraphData] = useState<UploadedDataProgram[]>([]); // Estado para los datos del gráfico
 
   const fetchData = async (start: Date, end: Date) => {
     setIsLoading(true);
@@ -42,6 +59,19 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
 
   const handleNextMonth = () => {
     setCurrentMonth(addMonths(currentMonth, 1));
+  };
+
+  const handleCardClick = async (date: string) => {
+    onDateSelect(date); // Notificar a AdminDashboard sobre la selección de fecha
+    setIsLoading(true);
+    const response = await fetch(`/api/query?start=${date}&end=${date}`);
+    if (response.ok) {
+      const result = await response.json();
+      setGraphData(result);
+    } else {
+      console.error('Error al consultar los datos');
+    }
+    setIsLoading(false);
   };
 
   // Función para obtener los días de lunes a viernes del mes actual
@@ -109,11 +139,17 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
             layout: { padding: { left: 0, right: 0, top: 0, bottom: 0 } },
           };
 
+          const dateString = date.toISOString().split('T')[0];
           return (
-            <div key={formattedDate} className={`shadow-md rounded-lg p-2 w-1/5 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2`} style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}>
-              <div className="flex justify-between items-center mb-2">
+            <div
+              key={formattedDate}
+              className={`shadow-md rounded-lg p-2 w-1/5 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2 cursor-pointer`}
+              style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}
+              onClick={() => handleCardClick(dateString)} // Establecer la fecha seleccionada al hacer clic
+            >
+              <div className="flex flex-col justify-between items-center mb-2">
                 <h2 className="text-sm font-bold">LaCasa</h2>
-                <p className="text-xs">{`${dayOfWeek} - ${formattedDate}`}</p>
+                <p className="text-xs mt-1">{`${dayOfWeek} - ${formattedDate}`}</p>
               </div>
               <div className="flex justify-center gap-1 mb-2">
                 <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
@@ -137,21 +173,27 @@ const ProgramCards: React.FC<{ theme: string }> = ({ theme }) => {
 
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={handlePreviousMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
-          Mes Anterior
-        </button>
-        <h2 className="text-xl font-bold">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
-        <button onClick={handleNextMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
-          Mes Siguiente
-        </button>
-      </div>
-      {isLoading ? (
-        <p>Cargando...</p>
+      {selectedDate ? (
+        <AdminGraphQuery data={graphData} theme={theme} startDate={selectedDate} endDate={selectedDate} fromProgramCards={true} /> // Mostrar AdminGraphQuery con la fecha seleccionada
       ) : (
-        <div className="flex flex-col items-center w-full">
-          {renderCards()}
-        </div>
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={handlePreviousMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+              Mes Anterior
+            </button>
+            <h2 className="text-xl font-bold">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
+            <button onClick={handleNextMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+              Mes Siguiente
+            </button>
+          </div>
+          {isLoading ? (
+            <p>Cargando...</p>
+          ) : (
+            <div className="flex flex-col items-center w-full">
+              {renderCards()}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

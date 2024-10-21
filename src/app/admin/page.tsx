@@ -41,7 +41,8 @@ export default function AdminDashboard() {
   const [channelData, setChannelData] = useState<UploadedDataChannel[]>([]);
   const { data: session, status } = useSession();
   const { theme, toggleTheme } = useTheme();
-  const [activeComponent, setActiveComponent] = useState<string>(''); // Estado para controlar el componente activo
+  const [activeComponent, setActiveComponent] = useState<string>('ProgramCards'); // Estado para controlar el componente activo
+  const [selectedDate, setSelectedDate] = useState<string | null>(null); // Estado para la fecha seleccionada
 
   const handleFileUpload = (uploadedData: UploadedDataProgram[]) => {
     setData(uploadedData);
@@ -60,6 +61,11 @@ export default function AdminDashboard() {
   }
 
   const user = session.user as User;
+
+  const handleHomeClick = () => {
+    setSelectedDate(null); // Limpiar la fecha seleccionada
+    setActiveComponent('ProgramCards'); // Mostrar ProgramCards
+  };
 
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
@@ -84,7 +90,7 @@ export default function AdminDashboard() {
       <div className="flex flex-1">
         <aside className="w-64 bg-gray-800 text-white flex flex-col items-center py-8">
           <button
-            onClick={() => setActiveComponent('')}
+            onClick={handleHomeClick}
             className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 mb-4"
           >
             Home
@@ -114,10 +120,10 @@ export default function AdminDashboard() {
         </aside>
 
         <main className="flex-1 flex flex-col items-center justify-start p-8">
-          {activeComponent === '' && <ProgramCards theme={theme} />} {/* Mostrar las tarjetas por defecto */}
+          {activeComponent === 'ProgramCards' && <ProgramCards theme={theme} onDateSelect={setSelectedDate} selectedDate={selectedDate} />} {/* Mostrar las tarjetas por defecto */}
           {activeComponent === 'upload' && <AuthenticatedFileUpload onFileUpload={handleFileUpload} />}
           {activeComponent === 'uploadChannels' && <FileUpload onFileUpload={handleChannelFileUpload} />}
-          {activeComponent === 'query' && <AdminGraphQuery data={data} theme={theme} />}
+          {activeComponent === 'query' && <AdminGraphQuery data={data} theme={theme} startDate={new Date().toISOString().split('T')[0]} endDate={new Date().toISOString().split('T')[0]} />} {/* Mostrar AdminGraphQuery */}
         </main>
       </div>
     </div>
