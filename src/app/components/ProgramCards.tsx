@@ -85,6 +85,11 @@ const ProgramCards: React.FC<ProgramCardsProps> = ({ theme, onDateSelect, select
     });
   };
 
+  // Función para capitalizar la primera letra de una cadena
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   const renderCards = () => {
     // Obtener los días de lunes a viernes
     const weekdays = getWeekdaysInMonth(currentMonth);
@@ -112,7 +117,7 @@ const ProgramCards: React.FC<ProgramCardsProps> = ({ theme, onDateSelect, select
         {row.map(item => {
           const date = new Date(item.fecha);
           const formattedDate = format(date, 'dd/MM/yyyy');
-          const dayOfWeek = format(date, 'EEEE', { locale: es }); // Obtener el día de la semana en español
+          const dayOfWeek = capitalizeFirstLetter(format(date, 'EEEE', { locale: es })); // Obtener el día de la semana en español y capitalizar la primera letra
           const sortedDayData = item.dayData.sort((a, b) => a.hora.localeCompare(b.hora)); // Ordenar los datos por hora
           const chartData = {
             labels: sortedDayData.map(d => d.hora),
@@ -152,9 +157,9 @@ const ProgramCards: React.FC<ProgramCardsProps> = ({ theme, onDateSelect, select
                 <p className="text-xs mt-1">{`${dayOfWeek} - ${formattedDate}`}</p>
               </div>
               <div className="flex justify-center gap-1 mb-2">
-                <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                <div className={`p-2 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'} flex flex-col items-center justify-center`}>
                   <p className="font-bold text-xs">Media Total del Día</p>
-                  <p className="text-xs">{item.avg_total > 0 ? item.avg_total.toFixed(2) : "Sin datos"}</p>
+                  <p className="text-xs">{item.avg_total > 0 ? item.avg_total.toFixed(2) : "Sin datos"}</p> {/* Centrar el número */}
                 </div>
               </div>
               <div style={{ position: 'absolute', bottom: '0', left: '0', right: '0', top: 'auto', height: '150px' }}>
