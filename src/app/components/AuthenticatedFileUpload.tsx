@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import * as XLSX from 'xlsx';
+import { useTheme } from '../ThemeContext'; // Importar el contexto de tema
 
 interface AuthenticatedFileUploadProps {
   onFileUpload: (data: UploadedDataProgram[]) => void;
@@ -24,6 +25,7 @@ interface User {
 
 export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedFileUploadProps) {
   const { data: session } = useSession();
+  const { theme } = useTheme(); // Obtener el tema actual
   const [fileData, setFileData] = useState<UploadedDataProgram[]>([]);
   const [fileLoaded, setFileLoaded] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
@@ -136,13 +138,13 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
         type="date"
         value={selectedDate}
         onChange={handleDateChange}
-        className="mb-4 p-2 border border-gray-300 rounded-lg"
+        className={`mb-4 p-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`}
       />
       <label className="mb-2 text-lg font-semibold">Selecciona el archivo a cargar:</label>
       <input
         type="file"
         onChange={handleFileChange}
-        className="mb-4 p-2 border border-gray-300 rounded-lg"
+        className={`mb-4 p-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-600' : 'bg-white text-black border-gray-300'}`}
       />
       {fileLoaded && sheetExists && (
         <button

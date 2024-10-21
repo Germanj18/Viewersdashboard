@@ -111,13 +111,13 @@ const AdminGraphQuery: React.FC<AdminGraphQueryProps> = ({ data, theme, startDat
             type="date"
             value={start}
             onChange={(e) => setStart(e.target.value)}
-            className="border rounded-lg p-2"
+            className={`border rounded-lg p-2 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
           />
           <input
             type="date"
             value={end}
             onChange={(e) => setEnd(e.target.value)}
-            className="border rounded-lg p-2"
+            className={`border rounded-lg p-2 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}
           />
           <button onClick={handleDateChange} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
             Consultar
@@ -145,21 +145,21 @@ const AdminGraphQuery: React.FC<AdminGraphQueryProps> = ({ data, theme, startDat
                   <p className="text-lg">{start} - {end}</p>
                 </div>
                 <div className="flex justify-center gap-2 mb-4"> {/* Reducir el espacio entre las tarjetas y centrarlas */}
-                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'} flex flex-col items-center justify-center`}>
                     <p className="font-bold">Media Real</p>
-                    <p>{mediaReal}</p>
+                    <p className="text-xl">{mediaReal}</p> {/* Centrar el número */}
                   </div>
-                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'} flex flex-col items-center justify-center`}>
                     <p className="font-bold">Media Total</p>
-                    <p>{mediaTotal}</p>
+                    <p className="text-xl">{mediaTotal}</p> {/* Centrar el número */}
                   </div>
-                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'} flex flex-col items-center justify-center`}>
                     <p className="font-bold">Pico Más Alto Real</p>
-                    <p>{picoReal}</p>
+                    <p className="text-xl">{picoReal}</p> {/* Centrar el número */}
                   </div>
-                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'}`}>
+                  <div className={`p-4 rounded-lg shadow-md ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-black'} flex flex-col items-center justify-center`}>
                     <p className="font-bold">Pico Más Alto Total</p>
-                    <p>{picoTotal}</p>
+                    <p className="text-xl">{picoTotal}</p> {/* Centrar el número */}
                   </div>
                 </div>
                 <div className="relative h-96 w-full">
