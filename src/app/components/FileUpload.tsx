@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { useTheme } from '../ThemeContext'; // Importar el contexto del tema
-
+import { CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/20/solid'; // Importar los íconos de verificación y carga para Heroicons v2
 
 interface UploadedDataChannel {
   channel_name: string;
@@ -20,6 +20,7 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
   const [warning, setWarning] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Estado para mostrar la animación de carga
   const { theme } = useTheme(); // Obtener el tema
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,6 +31,8 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
 
   const handleFileUpload = async () => {
     if (!file) return;
+
+    setIsLoading(true); // Mostrar la animación de carga
 
     const reader = new FileReader();
     reader.onload = async (e) => {
@@ -62,6 +65,7 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
       });
 
       const result = await response.json();
+      setIsLoading(false); // Ocultar la animación de carga
 
       if (response.ok) {
         if (result.confirmDelete) {
@@ -143,6 +147,12 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
       >
         Upload
       </button>
+      {isLoading && (
+        <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-100'} border ${theme === 'dark' ? 'border-gray-600' : 'border-blue-400'} rounded-lg flex items-center`}>
+          <ArrowPathIcon className="h-6 w-6 text-blue-500 animate-spin mr-2" />
+          <p className={`${theme === 'dark' ? 'text-white' : 'text-black'}`}>Validando datos...</p>
+        </div>
+      )}
       {warning && (
         <div className="mt-4 p-4 bg-yellow-200 text-yellow-800 rounded-lg">
           <p>{warning}</p>
@@ -163,8 +173,9 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
         </div>
       )}
       {successMessage && (
-        <div className="mt-4 p-4 bg-green-200 text-green-800 rounded-lg">
+        <div className="mt-4 p-4 bg-green-200 text-green-800 rounded-lg flex items-center">
           <p>{successMessage}</p>
+          <CheckCircleIcon className="h-6 w-6 text-green-500 ml-2" />
         </div>
       )}
     </div>

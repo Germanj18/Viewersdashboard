@@ -4,11 +4,11 @@ import { prisma } from '../../lib/prisma'; // Asegúrate de que la ruta sea corr
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const { data, confirm } = await request.json();
     console.log('Datos recibidos:', data); // Agregar mensaje de registro
 
     if (!Array.isArray(data)) {
-      return NextResponse.json({ message: 'Invalid data format' }, { status: 400 });
+      return NextResponse.json({ message: 'Formato de datos inválido' }, { status: 400 });
     }
 
     // Filtrar datos inválidos antes de la inserción
@@ -22,6 +22,37 @@ export async function POST(request: Request) {
 
     console.log('Datos válidos:', validData); // Agregar mensaje de registro
 
+    if (validData.length === 0) {
+      return NextResponse.json({ message: 'No hay datos válidos para insertar' }, { status: 400 });
+    }
+
+    const fecha = new Date(validData[0].fecha);
+
+    // Verificar si ya existen registros con la misma fecha
+    const existingRecords = await prisma.programas.findMany({
+      where: {
+        fecha: fecha,
+      },
+    });
+
+    if (existingRecords.length > 0 && !confirm) {
+      // Si ya existen registros y no se ha confirmado, enviar una respuesta solicitando confirmación
+      return NextResponse.json({
+        message: `Se van a borrar los registros viejos de la fecha ${fecha.toISOString().split('T')[0]}. Si estás seguro, confirma la operación.`,
+        confirm: true,
+      });
+    }
+
+    if (confirm) {
+      // Borrar los registros viejos
+      await prisma.programas.deleteMany({
+        where: {
+          fecha: fecha,
+        },
+      });
+    }
+
+    // Insertar los nuevos registros
     const result = await prisma.programas.createMany({
       data: validData.map((item: any) => ({
         programa: item.programa,
@@ -35,9 +66,9 @@ export async function POST(request: Request) {
 
     console.log('Resultado de la inserción:', result); // Agregar mensaje de registro
 
-    return NextResponse.json({ message: 'Data uploaded successfully' });
+    return NextResponse.json({ message: 'Datos cargados exitosamente' });
   } catch (error) {
     console.error('Error al procesar la solicitud:', error); // Agregar mensaje de error
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ message: 'Error interno del servidor' }, { status: 500 });
   }
 }

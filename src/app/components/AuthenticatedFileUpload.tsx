@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import * as XLSX from 'xlsx';
 import { useTheme } from '../ThemeContext'; // Importar el contexto de tema
+import { CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/20/solid'; // Importar los íconos de verificación y carga para Heroicons v2
 
 interface AuthenticatedFileUploadProps {
   onFileUpload: (data: UploadedDataProgram[]) => void;
@@ -31,6 +32,9 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [sheetExists, setSheetExists] = useState<boolean>(true); // Estado para controlar si la hoja existe
   const [workbook, setWorkbook] = useState<XLSX.WorkBook | null>(null); // Estado para almacenar el workbook
+  const [message, setMessage] = useState<string>(''); // Estado para el mensaje de advertencia/confirmación/éxito
+  const [showConfirmButtons, setShowConfirmButtons] = useState<boolean>(false); // Estado para mostrar los botones de confirmación
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Estado para mostrar la animación de carga
 
   if (!session) {
     return <p>Por favor, inicia sesión para subir archivos.</p>;
@@ -112,15 +116,36 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
     setFileLoaded(true);
   };
 
-  const handleUpload = async () => {
-    await fetch('/api/upload', {
+  const handleUpload = async (confirm = false) => {
+    setIsLoading(true); // Mostrar la animación de carga
+    const response = await fetch('/api/upload', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(fileData),
+      body: JSON.stringify({ data: fileData, confirm }),
     });
-    alert('Datos subidos exitosamente');
+
+    const result = await response.json();
+    setIsLoading(false); // Ocultar la animación de carga
+
+    if (result.confirm && !confirm) {
+      setMessage(result.message);
+      setShowConfirmButtons(true);
+    } else if (confirm) {
+      const confirmResponse = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: fileData, confirm: true }),
+      });
+      const confirmResult = await confirmResponse.json();
+      setMessage(confirmResult.message);
+      setShowConfirmButtons(false);
+    } else {
+      setMessage(result.message);
+    }
   };
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,8 +156,13 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
     }
   };
 
+  const handleCancel = () => {
+    setMessage('');
+    setShowConfirmButtons(false);
+  };
+
   return (
-    <div className="flex flex-col items-center">
+    <div className={`flex flex-col items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-md w-full max-w-md`}>
       <label className="mb-2 text-lg font-semibold">Selecciona la fecha de los datos a cargar:</label>
       <input
         type="date"
@@ -148,11 +178,43 @@ export default function AuthenticatedFileUpload({ onFileUpload }: AuthenticatedF
       />
       {fileLoaded && sheetExists && (
         <button
-          onClick={handleUpload}
+          onClick={() => handleUpload()}
           className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 mt-4"
         >
           Cargar Datos
         </button>
+      )}
+      {isLoading && (
+        <div className={`mt-4 p-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-100'} border ${theme === 'dark' ? 'border-gray-600' : 'border-blue-400'} rounded-lg flex items-center`}>
+          <ArrowPathIcon className="h-6 w-6 text-blue-500 animate-spin mr-2" />
+          <p className={`${theme === 'dark' ? 'text-white' : 'text-black'}`}>Validando datos...</p>
+        </div>
+      )}
+      {message && (
+        <div className={`mt-4 p-4 ${message.includes('exitosamente') ? 'bg-green-100 border-green-400' : 'bg-yellow-100 border-yellow-400'} border rounded-lg`}>
+          <div className="flex items-center">
+            <p className={`${theme === 'dark' ? 'text-black' : 'text-black'}`}>{message}</p>
+            {message.includes('exitosamente') && (
+              <CheckCircleIcon className="h-6 w-6 text-green-500 ml-2" />
+            )}
+          </div>
+          {showConfirmButtons && (
+            <div className="flex gap-4 mt-4">
+              <button
+                onClick={() => handleUpload(true)}
+                className="bg-red-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-red-600 transition duration-300"
+              >
+                Confirmar
+              </button>
+              <button
+                onClick={handleCancel}
+                className="bg-gray-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
