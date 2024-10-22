@@ -151,7 +151,7 @@ export default function Home() {
       </header>
 
       <main className="flex-grow flex">
-        <aside className={`w-64 p-4 shadow-md ${theme === 'dark' ? 'dark' : 'light'}`}>
+        <div className={`w-64 p-4 shadow-md ${theme === 'dark' ? 'bg-[#1e1e1e] text-white' : 'bg-white text-black'}`}>
           <button 
             onClick={handleConsultMetricsClick} 
             className="btn btn-primary w-full mb-4 p-2 rounded-lg text-white hover:bg-gray-900 transition-transform transform hover:scale-110" 
@@ -184,7 +184,7 @@ export default function Home() {
               </button>
             </div>
           )}
-        </aside>
+        </div>
 
         <section className="flex-grow p-8">
           <h2 className="text-3xl font-bold mt-8 mb-4">Consulta las métricas de los canales</h2>
