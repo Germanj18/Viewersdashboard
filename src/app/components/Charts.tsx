@@ -16,15 +16,10 @@ interface UploadedDataChannel {
   title: string; 
 }
 
-
 interface ChartsProps {
-
   data: UploadedDataChannel[];
-
   onRendered: () => void;
-
 }
-
 
 function getRandomColor() {
   const letters = '0123456789ABCDEF';
@@ -33,6 +28,10 @@ function getRandomColor() {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+}
+
+function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 export default function Charts({ data }: ChartsProps) {
@@ -81,7 +80,6 @@ export default function Charts({ data }: ChartsProps) {
     setIsCombined(true);
     setShowCombineOptions(false);
   }, [selectedDates, groupedData]);
-  
 
   const handleRevert = () => {
     setCombinedData([]);
@@ -200,7 +198,7 @@ export default function Charts({ data }: ChartsProps) {
       plugins: {
         title: {
           display: true,
-          text: `Viewers - ${date}`, // Título del gráfico con la fecha
+          text: `${capitalizeFirstLetter(new Date(date + 'T00:00:00').toLocaleDateString('es-ES', { weekday: 'long' }))} - ${date}`, // Título del gráfico con el día de la semana y la fecha
           font: {
             size: 18,
             family: 'Arial, sans-serif',
@@ -247,15 +245,13 @@ export default function Charts({ data }: ChartsProps) {
             size: 14,
             color: theme === 'dark' ? '#ffffff' : '#ffffff', // Color del texto en modo claro
             borderWidth: 1,
-  // Puedes agregar sombra si lo deseas
-  boxPadding: 4,
+            boxPadding: 4,
           },
           bodyFont: {
             family: 'Arial, sans-serif',
             size: 12,
             color: theme === 'dark' ? '#ffffff' : '#ffffff', // Color del texto en modo claro
           },
-          
           callbacks: {
             title: (tooltipItems: TooltipItem<'line'>[]) => {
               const item = dateData.find(d => new Date(`${d.fecha.split('T')[0]}T${d.hora}`).getTime() === new Date(tooltipItems[0].parsed.x).getTime());
@@ -290,10 +286,12 @@ export default function Charts({ data }: ChartsProps) {
         )}
       </div>
     );
-    
   };
 
   const combinedChart = combinedData.length > 0 && renderChart('Combined', combinedData);
+
+  // Ordenar las fechas de forma ascendente
+  const sortedDates = Object.keys(groupedData).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
   return (
     <div className={`charts-container ${theme}`}>
@@ -318,7 +316,7 @@ export default function Charts({ data }: ChartsProps) {
       )}
       {showCombineOptions && (
         <div className={`selection-list ${showCombineOptions ? 'show' : ''} ${theme}`}>
-          {Object.keys(groupedData).map(date => (
+          {sortedDates.map(date => (
             <div key={date} className="selection-list-item">
               <input
                 type="checkbox"
@@ -343,7 +341,7 @@ export default function Charts({ data }: ChartsProps) {
       {!isCombined && (
         <div className="charts-grid-container">
           <div className="charts-grid">
-            {Object.keys(groupedData).map(date => renderChart(date, groupedData[date]))}
+            {sortedDates.map(date => renderChart(date, groupedData[date]))}
           </div>
         </div>
       )}

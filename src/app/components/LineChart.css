@@ -12,7 +12,7 @@
 .card-chart.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
-  border: 1px solid #ffffff; /* Borde blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
 }
 
 .chart-container {
@@ -25,10 +25,10 @@
   flex-direction: column;
   align-items: center; /* Centrar horizontalmente */
 }
+
 .chart-container.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
 }
-
 
 .chart-container canvas {
   width: 100% !important;
@@ -163,7 +163,7 @@
 
 .modal-content-chart.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
-  border: 2px solid #ffffff; /* Borde blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
 }
 
 .modal-chart {
