@@ -19,12 +19,17 @@ import './page.css';
 const logoVerde = '/logo-expansion-verde.png';
 
 interface UploadedData {
-  channel_name: string;
-  fecha: string;
-  hora: string;
-  youtube: number;
-  likes: number;
-  title: string;
+  date: string;
+  hour: string;
+  luzu: number;
+  olga: number;
+  gelatina: number;
+  blender: number;
+  lacasa: number;
+  vorterix: number;
+  bondi: number;
+  carajo: number;
+  azz: number;
 }
 
 interface UploadedDataChannel extends UploadedData {
