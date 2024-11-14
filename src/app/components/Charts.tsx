@@ -1,19 +1,24 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale, TooltipItem, LegendElement } from 'chart.js';
+import { Line, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale, TooltipItem, LegendElement } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import './LineChart.css'; // Importar estilos específicos para el gráfico de líneas
 import { useTheme } from '../ThemeContext';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, TimeScale);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, TimeScale);
 
 interface UploadedDataChannel {
-  channel_name: string;
-  fecha: string;
-  hora: string;
-  youtube: number;
-  likes: number;
-  title: string; 
+  date: string;
+  hour: string;
+  luzu: number;
+  olga: number;
+  gelatina: number;
+  blender: number;
+  lacasa: number;
+  vorterix: number;
+  bondi: number;
+  carajo: number;
+  azz: number;
 }
 
 interface ChartsProps {
@@ -43,16 +48,23 @@ export default function Charts({ data }: ChartsProps) {
   const [viewMode, setViewMode] = useState<'all' | 'channel'>('all');
   const [selectedChannel, setSelectedChannel] = useState<string | null>(null);
   const [channelColors, setChannelColors] = useState<{ [key: string]: string }>({});
+  const [startTime, setStartTime] = useState<string>('00:00');
+  const [endTime, setEndTime] = useState<string>('23:59');
   const { theme } = useTheme(); // Obtener el tema del contexto
 
   useEffect(() => {
     // Generar colores para cada canal y almacenarlos en el estado
-    const colors: { [key: string]: string } = {};
-    data.forEach(item => {
-      if (!colors[item.channel_name]) {
-        colors[item.channel_name] = getRandomColor();
-      }
-    });
+    const colors: { [key: string]: string } = {
+      luzu: getRandomColor(),
+      olga: getRandomColor(),
+      gelatina: getRandomColor(),
+      blender: getRandomColor(),
+      lacasa: getRandomColor(),
+      vorterix: getRandomColor(),
+      bondi: getRandomColor(),
+      carajo: getRandomColor(),
+      azz: getRandomColor(),
+    };
     setChannelColors(colors);
   }, [data]);
 
@@ -60,7 +72,7 @@ export default function Charts({ data }: ChartsProps) {
 
   // Agrupar los datos por fecha
   const groupedData: { [key: string]: UploadedDataChannel[] } = data.reduce((acc, item) => {
-    const date = item.fecha.split('T')[0];
+    const date = item.date.split('T')[0];
     if (!acc[date]) {
       acc[date] = [];
     }
@@ -98,9 +110,6 @@ export default function Charts({ data }: ChartsProps) {
   const handleViewModeChange = () => {
     setViewMode(prevMode => (prevMode === 'all' ? 'channel' : 'all'));
     if (viewMode === 'all') {
-      const firstChannel = data[0]?.channel_name || null;
-      setSelectedChannel(firstChannel);
-    } else {
       setSelectedChannel(null);
     }
   };
@@ -109,18 +118,29 @@ export default function Charts({ data }: ChartsProps) {
     setSelectedChannel(event.target.value);
   };
 
+  const filterDataByTimeRange = (dateData: UploadedDataChannel[]) => {
+    const start = new Date(`1970-01-01T${startTime}:00`).getTime();
+    const end = new Date(`1970-01-01T${endTime}:00`).getTime();
+
+    return dateData.filter(item => {
+      const itemTime = new Date(`1970-01-01T${item.hour}:00`).getTime();
+      return itemTime >= start && itemTime <= end;
+    });
+  };
+
   const renderChart = (date: string, dateData: UploadedDataChannel[], isModal: boolean = false) => {
-    const channels = Array.from(new Set(dateData.map(item => item.channel_name)));
+    const filteredDataByTime = filterDataByTimeRange(dateData);
+    const channels = ['luzu', 'olga', 'gelatina', 'blender', 'lacasa', 'vorterix', 'bondi', 'carajo', 'azz'];
     const filteredData = viewMode === 'channel' && selectedChannel
-      ? dateData.filter(item => item.channel_name === selectedChannel)
-      : dateData;
+      ? filteredDataByTime.filter(item => item[selectedChannel as keyof UploadedDataChannel] !== undefined)
+      : filteredDataByTime;
 
-    const datasets = channels.map(channel => {
+    const datasets = (viewMode === 'channel' && selectedChannel ? [selectedChannel] : channels).map(channel => {
       const channelData = filteredData
-        .filter(item => item.channel_name === channel)
-        .sort((a, b) => new Date(`${a.fecha.split('T')[0]}T${a.hora}`).getTime() - new Date(`${b.fecha.split('T')[0]}T${b.hora}`).getTime()); // Ordenar los datos cronológicamente
+        .filter(item => item[channel as keyof UploadedDataChannel] !== undefined)
+        .sort((a, b) => new Date(`${a.date.split('T')[0]}T${a.hour}`).getTime() - new Date(`${b.date.split('T')[0]}T${b.hour}`).getTime()); // Ordenar los datos cronológicamente
 
-      const viewers = channelData.map(item => ({ x: new Date(`${item.fecha.split('T')[0]}T${item.hora}`), y: item.youtube }));
+      const viewers = channelData.map(item => ({ x: new Date(`${item.date.split('T')[0]}T${item.hour}`), y: item[channel as keyof UploadedDataChannel] }));
       const color = channelColors[channel] || getRandomColor();
 
       return {
@@ -140,9 +160,9 @@ export default function Charts({ data }: ChartsProps) {
     };
 
     // Calcular el rango inicial del eje X basado en los datos de la columna youtube
-    const youtubeDates = dateData
-      .filter(item => item.youtube > 0)
-      .map(item => new Date(`${item.fecha.split('T')[0]}T${item.hora}`).getTime());
+    const youtubeDates = filteredDataByTime
+      .flatMap(item => channels.map(channel => Number(item[channel as keyof UploadedDataChannel]) > 0 ? new Date(`${item.date.split('T')[0]}T${item.hour}`).getTime() : null))
+      .filter(date => date !== null) as number[];
     const initialMinDate = Math.min(...youtubeDates);
     const initialMaxDate = Math.max(...youtubeDates);
 
@@ -254,14 +274,14 @@ export default function Charts({ data }: ChartsProps) {
           },
           callbacks: {
             title: (tooltipItems: TooltipItem<'line'>[]) => {
-              const item = dateData.find(d => new Date(`${d.fecha.split('T')[0]}T${d.hora}`).getTime() === new Date(tooltipItems[0].parsed.x).getTime());
-              const date = new Date(item ? `${item.fecha.split('T')[0]}T${item.hora}` : '');
+              const item = filteredDataByTime.find(d => new Date(`${d.date.split('T')[0]}T${d.hour}`).getTime() === new Date(tooltipItems[0].parsed.x).getTime());
+              const date = new Date(item ? `${item.date.split('T')[0]}T${item.hour}` : '');
               return `${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}`;
             },
             label: (tooltipItem: TooltipItem<'line'>) => {
               const dataset = datasets[tooltipItem.datasetIndex];
-              const item = dateData.find(d => d.channel_name === dataset.label && new Date(`${d.fecha.split('T')[0]}T${d.hora}`).getTime() === new Date(tooltipItem.parsed.x).getTime());
-              return item ? `${dataset.label}: ${item.youtube} Viewers` : '';
+              const item = filteredDataByTime.find(d => new Date(`${d.date.split('T')[0]}T${d.hour}`).getTime() === new Date(tooltipItem.parsed.x).getTime());
+              return item ? `${dataset.label}: ${item[dataset.label as keyof UploadedDataChannel]} Viewers` : '';
             },
             labelColor: (tooltipItem: TooltipItem<'line'>) => {
               const dataset = datasets[tooltipItem.datasetIndex];
@@ -301,13 +321,23 @@ export default function Charts({ data }: ChartsProps) {
         </button>
         {viewMode === 'channel' && (
           <select value={selectedChannel || ''} onChange={handleChannelChange} className={`channel-select ${theme}`}>
-            {Array.from(new Set(data.map(item => item.channel_name))).map(channel => (
+            {['luzu', 'olga', 'gelatina', 'blender', 'lacasa', 'vorterix', 'bondi', 'carajo', 'azz'].map(channel => (
               <option key={channel} value={channel}>
                 {channel}
               </option>
             ))}
           </select>
         )}
+      </div>
+      <div className="time-range-filters">
+        <label>
+          Hora de inicio:
+          <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+        </label>
+        <label>
+          Hora de fin:
+          <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+        </label>
       </div>
       {!isCombined && (
         <button onClick={() => setShowCombineOptions(!showCombineOptions)} className={`button-combine-toggle ${theme}`}>

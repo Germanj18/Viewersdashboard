@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
-import { eachDayOfInterval, getDay } from 'date-fns';
+import { startOfMonth, endOfMonth, eachDayOfInterval, getDay } from 'date-fns';
 
 const prisma = new PrismaClient();
 
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 
     console.log('Fechas recibidas:', { startDate, endDate });
 
-    // Obtener todas las fechas del intervalo que no sean sábados o domingos
+    // Obtener todas las fechas del mes que no sean sábados o domingos
     const dates = eachDayOfInterval({ start: startDate, end: endDate }).filter(date => {
       const day = getDay(date);
       return day !== 0 && day !== 6; // Excluir domingos (0) y sábados (6)

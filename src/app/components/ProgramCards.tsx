@@ -148,7 +148,7 @@ const ProgramCards: React.FC<ProgramCardsProps> = ({ theme, onDateSelect, select
           return (
             <div
               key={formattedDate}
-              className={`shadow-md rounded-lg p-2 w-1/5 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'} m-2 cursor-pointer`}
+              className={`shadow-md rounded-lg p-2 w-1/5 ${theme === 'dark' ? 'bg-black text-white border border-[#444]' : 'bg-white text-black border border-[#444]'} m-2 cursor-pointer`}
               style={{ minWidth: '200px', maxWidth: '200px', height: '300px', position: 'relative' }}
               onClick={() => handleCardClick(dateString)} // Establecer la fecha seleccionada al hacer clic
             >
@@ -183,11 +183,11 @@ const ProgramCards: React.FC<ProgramCardsProps> = ({ theme, onDateSelect, select
       ) : (
         <>
           <div className="flex justify-between items-center mb-4">
-            <button onClick={handlePreviousMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+            <button onClick={handlePreviousMonth} className={`py-1 px-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 ${theme === 'dark' ? 'bg-black text-white border border-[#444]' : 'bg-white text-black border border-[#444]'}`}>
               Mes Anterior
             </button>
-            <h2 className="text-xl font-bold">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
-            <button onClick={handleNextMonth} className="bg-blue-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-blue-600 transition duration-300">
+            <h2 className="text-xl font-bold mx-4">{format(currentMonth, 'MMMM yyyy', { locale: es })}</h2>
+            <button onClick={handleNextMonth} className={`py-1 px-2 rounded-lg shadow-md hover:bg-blue-600 transition duration-300 ${theme === 'dark' ? 'bg-black text-white border border-[#444]' : 'bg-white text-black border border-[#444]'}`}>
               Mes Siguiente
             </button>
           </div>

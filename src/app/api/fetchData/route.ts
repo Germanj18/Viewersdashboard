@@ -14,9 +14,9 @@ export async function GET(request: Request) {
 
   try {
     const data = await prisma.$queryRaw`
-      SELECT * FROM "ExcelData"
-      WHERE DATE(fecha) >= TO_DATE(${startDate}, 'YYYY-MM-DD') 
-      AND DATE(fecha) <= TO_DATE(${endDate}, 'YYYY-MM-DD')
+      SELECT * FROM "excelData"
+      WHERE DATE(date) >= TO_DATE(${startDate}, 'YYYY-MM-DD') 
+      AND DATE(date) <= TO_DATE(${endDate}, 'YYYY-MM-DD')
     `;
 
     return NextResponse.json(data);

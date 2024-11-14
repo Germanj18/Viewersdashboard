@@ -14,28 +14,34 @@ export async function POST(request: Request) {
     const { items, confirmDelete } = data;
 
     const validData = items.filter((item: any) => 
-      item.channel_name && 
-      item.created_date && 
-      typeof item.youtube === 'number' && 
-      typeof item.likes === 'number' && 
-      item.title
+      item.date && 
+      item.hour && 
+      typeof item.luzu === 'number' && 
+      typeof item.olga === 'number' && 
+      typeof item.gelatina === 'number' && 
+      typeof item.blender === 'number' && 
+      typeof item.lacasa === 'number' && 
+      typeof item.vorterix === 'number' && 
+      typeof item.bondi === 'number' && 
+      typeof item.carajo === 'number' && 
+      typeof item.azz === 'number'
     );
 
     console.log('Datos válidos:', validData); // Agregar mensaje de registro
 
-    const dates = validData.map((item: any) => new Date(item.created_date.split('T')[0]));
+    const dates = validData.map((item: any) => new Date(item.date.split(' ')[0]));
 
     // Verificar si existen registros con las mismas fechas
     const existingRecords = await prisma.excelData.findMany({
       where: {
-        fecha: {
+        date: {
           in: dates,
         },
       },
     });
 
     if (existingRecords.length > 0 && !confirmDelete) {
-      const existingDate = existingRecords[0].fecha.toISOString().split('T')[0];
+      const existingDate = existingRecords[0].date.toISOString().split('T')[0];
       return NextResponse.json({
         message: `Se van a borrar los registros viejos de la fecha: ${existingDate}. Si estás seguro, confirma la operación.`,
         confirmDelete: true,
@@ -46,7 +52,7 @@ export async function POST(request: Request) {
       // Eliminar registros antiguos
       await prisma.excelData.deleteMany({
         where: {
-          fecha: {
+          date: {
             in: dates,
           },
         },
@@ -58,18 +64,22 @@ export async function POST(request: Request) {
     for (let i = 0; i < validData.length; i += batchSize) {
       const batch = validData.slice(i, i + batchSize);
       const createPromises = batch.map((item: any) => {
-        const [date, time] = item.created_date.split('T');
+        const [date]= item.date.split(' ');
         const formattedDate = new Date(date); // Convertir a formato Date
-        const formattedTime = time.split('.')[0].substring(0, 5); // Obtener solo HH:MM
 
         return prisma.excelData.create({
           data: {
-            channel_name: item.channel_name,
-            fecha: formattedDate, // Fecha en formato Date
-            hora: formattedTime, // Hora en formato HH:MM
-            youtube: item.youtube,
-            likes: item.likes,
-            title: item.title,
+            date: formattedDate, // Fecha en formato Date
+            hour: item.hour, // Hora en formato HH:MM
+            luzu: item.luzu,
+            olga: item.olga,
+            gelatina: item.gelatina,
+            blender: item.blender,
+            lacasa: item.lacasa,
+            vorterix: item.vorterix,
+            bondi: item.bondi,
+            carajo: item.carajo,
+            azz: item.azz,
           },
         });
       });

@@ -11,7 +11,7 @@
 .card-small.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
-  border: 1px solid #ffffff; /* Borde blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
   padding: 24px; /* Ajustar padding según sea necesario */
   min-height: 300px;
   max-height: 394px;
@@ -38,3 +38,6 @@
   background-color: #000000; /* Fondo negro para modo oscuro */
   margin-top: 20px; /* Añadir margen superior en modo oscuro */
 }
+/* En tu archivo BarChart.css */
+/* Ajustes adicionales para los tooltips */
+

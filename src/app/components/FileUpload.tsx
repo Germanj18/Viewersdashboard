@@ -4,11 +4,17 @@ import { useTheme } from '../ThemeContext'; // Importar el contexto del tema
 import { CheckCircleIcon, ArrowPathIcon } from '@heroicons/react/20/solid'; // Importar los íconos de verificación y carga para Heroicons v2
 
 interface UploadedDataChannel {
-  channel_name: string;
-  created_date: string; // Cambiar a created_date para consistencia
-  youtube: number;
-  likes: number;
-  title: string;
+  date: string;
+  hour: string;
+  luzu: number;
+  olga: number;
+  gelatina: number;
+  blender: number;
+  lacasa: number;
+  vorterix: number;
+  bondi: number;
+  carajo: number;
+  azz: number;
 }
 
 interface FileUploadProps {
@@ -29,6 +35,10 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
     setSuccessMessage(null); // Limpiar el mensaje de éxito al cambiar el archivo
   };
 
+  const cleanQuotes = (value: string) => {
+    return value.replace(/^'|'$/g, '');
+  };
+
   const handleFileUpload = async () => {
     if (!file) return;
 
@@ -40,18 +50,35 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData: UploadedDataChannel[] = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      // Separar la fecha y la hora antes de enviar los datos
-      const formattedData = jsonData.map(item => {
-        const [date, time] = item.created_date.split('T');
-        const formattedTime = time.split('.')[0].substring(0, 5); // Obtener solo HH:MM
+      // Obtener las claves de la primera fila y limpiar las comillas
+      const keys = jsonData[0].map((key: string) => cleanQuotes(key));
+
+      // Formatear los datos antes de enviarlos
+      const formattedData: UploadedDataChannel[] = jsonData.slice(1).map(row => {
+        const cleanedRow = row.map((value: string) => cleanQuotes(value));
+        const item = Object.fromEntries(keys.map((key: string, index: number) => [key, cleanedRow[index]]));
+
+        if (!item.date || !item.hour) {
+          console.error('Datos inválidos:', item);
+          return null;
+        }
+        const [date, time] = item.date.split(' ');
         return {
-          ...item,
-          fecha: date,
-          hora: formattedTime,
+          date,
+          hour: item.hour,
+          luzu: Number(item.luzu),
+          olga: Number(item.olga),
+          gelatina: Number(item.gelatina),
+          blender: Number(item.blender),
+          lacasa: Number(item.lacasa),
+          vorterix: Number(item.vorterix),
+          bondi: Number(item.bondi),
+          carajo: Number(item.carajo),
+          azz: Number(item.azz),
         };
-      });
+      }).filter(item => item !== null) as UploadedDataChannel[]; // Filtrar elementos nulos y asegurar el tipo
 
       onFileUpload(formattedData);
 
@@ -93,18 +120,35 @@ export default function FileUpload({ onFileUpload }: FileUploadProps) {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData: UploadedDataChannel[] = XLSX.utils.sheet_to_json(worksheet);
+      const jsonData: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      // Separar la fecha y la hora antes de enviar los datos
-      const formattedData = jsonData.map(item => {
-        const [date, time] = item.created_date.split('T');
-        const formattedTime = time.split('.')[0].substring(0, 5); // Obtener solo HH:MM
+      // Obtener las claves de la primera fila y limpiar las comillas
+      const keys = jsonData[0].map((key: string) => cleanQuotes(key));
+
+      // Formatear los datos antes de enviarlos
+      const formattedData: UploadedDataChannel[] = jsonData.slice(1).map(row => {
+        const cleanedRow = row.map((value: string) => cleanQuotes(value));
+        const item = Object.fromEntries(keys.map((key: string, index: number) => [key, cleanedRow[index]]));
+
+        if (!item.date || !item.hour) {
+          console.error('Datos inválidos:', item);
+          return null;
+        }
+        const [date, time] = item.date.split(' ');
         return {
-          ...item,
-          fecha: date,
-          hora: formattedTime,
+          date,
+          hour: item.hour,
+          luzu: Number(item.luzu),
+          olga: Number(item.olga),
+          gelatina: Number(item.gelatina),
+          blender: Number(item.blender),
+          lacasa: Number(item.lacasa),
+          vorterix: Number(item.vorterix),
+          bondi: Number(item.bondi),
+          carajo: Number(item.carajo),
+          azz: Number(item.azz),
         };
-      });
+      }).filter(item => item !== null) as UploadedDataChannel[]; // Filtrar elementos nulos y asegurar el tipo
 
       onFileUpload(formattedData);
 

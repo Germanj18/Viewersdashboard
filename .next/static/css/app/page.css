@@ -15,7 +15,7 @@
 .card-chart.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
-  border: 1px solid #ffffff; /* Borde blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
 }
 
 .chart-container {
@@ -28,10 +28,10 @@
   flex-direction: column;
   align-items: center; /* Centrar horizontalmente */
 }
+
 .chart-container.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
 }
-
 
 .chart-container canvas {
   width: 100% !important;
@@ -80,7 +80,7 @@
   background-color: #000000; /* Fondo negro para modo claro */
   color: #ffffff; /* Texto blanco para modo claro */
   border: none;
-  padding: 10px 20px;
+  padding: 5px 10px;
   font-size: 14px;
   cursor: pointer;
   border-radius: 5px;
@@ -166,7 +166,7 @@
 
 .modal-content-chart.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
-  border: 2px solid #ffffff; /* Borde blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
 }
 
 .modal-chart {
@@ -239,48 +239,35 @@
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
 }
-/*!*****************************************************************************************************************************************************************************************************************************************************************************!*\
-  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[3]!./src/app/components/BarChart.css ***!
-  \*****************************************************************************************************************************************************************************************************************************************************************************/
-.card-small {
 
-  background-color: #ffffff; /* Fondo blanco para modo claro */
-  color: #000000; /* Texto negro para modo claro */
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  padding: 24px; /* Ajustar padding según sea necesario */
-  min-height: 300px;
-  max-height: 394px;
+/* Estilos para el filtro de rango horario */
+.time-range-filters {
+  display: flex;
+  
+  margin-bottom: 16px;
 }
-.card-small.dark {
+
+.time-range-filters label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 14px;
+  color: inherit; /* Heredar color del tema */
+  padding: 5px;
+}
+
+.time-range-filters input[type="time"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  margin-top: 4px;
+}
+
+.time-range-filters input[type="time"].dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
-  border: 1px solid #ffffff; /* Borde blanco para modo oscuro */
-  padding: 24px; /* Ajustar padding según sea necesario */
-  min-height: 300px;
-  max-height: 394px;
-}
-
-
-.chart-container-small {
-  position: relative;
-  
-  width: 100%;
-  overflow: hidden;
- 
-  margin-top: 20px; /* Añadir margen superior */
-}
-
-.chart-container-small-bar {
-  position: relative;
-  
-  width: 100%;
-  flex: 1;
-  z-index: 1;
-}
-.chart-container-small-bar.dark {
-  background-color: #000000; /* Fondo negro para modo oscuro */
-  margin-top: 20px; /* Añadir margen superior en modo oscuro */
 }
 /*!*********************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[3]!./src/app/components/SummaryTable.css ***!
@@ -296,7 +283,8 @@
 .card-summary.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
-  border: 1px solid #ffffff; /* Borde blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
+  /* Borde gris claro para modo oscuro */
   padding: 24px; /* Ajustar padding según sea necesario */
 }
 
@@ -306,22 +294,21 @@
   max-height: 400px;
   width: 100%;
   overflow: hidden;
- 
   margin-top: 20px; /* Añadir margen superior */
-  
 }
 
 .chart-container-sumary.dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   margin-top: 20px; /* Añadir margen superior en modo oscuro */
 }
+
 h3 {
   color: inherit; /* Heredar color del tema */
-
   margin-bottom: 16px;
   text-align: center;
   font-family: 'Roboto', sans-serif;
 }
+
 .chart-container-small-sumary {
   position: relative;
   height: 100%;
@@ -374,6 +361,53 @@ h3 {
   color: #cccccc; /* Texto gris claro */
 }
 
+.channel-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.channel-filter {
+  margin: 5px;
+}
+
+.channel-filter input[type="checkbox"] {
+  display: none;
+}
+
+.channel-filter label {
+  display: flex;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-radius: 20px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.channel-filter label:hover {
+  background-color: #e0e0e0;
+}
+
+.channel-filter input[type="checkbox"]:checked + label {
+  background-color: #333333;
+  color: #ffffff;
+}
+
+.channel-filter.dark label {
+  background-color: #161717;
+}
+
+.channel-filter.dark label:hover {
+  background-color: #161717;
+}
+
+.channel-filter input[type="checkbox"]:checked + .dark label {
+  background-color: #333333;
+  color: #ffffff;
+}
+
 @media (max-width: 768px) {
   .card-summary {
     padding: 16px;
@@ -385,7 +419,6 @@ h3 {
     width: 90%;
   }
 }
-
 /*!**********************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[3]!./node_modules/animate.css/animate.css ***!
   \**********************************************************************************************************************************************************************************************************************************************************************************/
@@ -4802,8 +4835,13 @@ h3 {
   --card-bg-color-dark: #1e1e1e;
   --text-color-light: #212529;
   --text-color-dark: #ffffff;
+  --primary-color: #4CAF50; /* Color primario para botones y otros elementos */
+  --secondary-color: #388E3C; /* Color secundario para botones y otros elementos */
+  --danger-color: #F44336; /* Color para botones de peligro */
+  --danger-hover-color: #D32F2F; /* Color para hover en botones de peligro */
 }
 
+/* Temas */
 [data-theme="light"] {
   --card-bg-color: var(--card-bg-color-light);
   --text-color: var(--text-color-light);
@@ -4835,8 +4873,52 @@ h3 {
   color: var(--text-color-dark);
 }
 
-/* Otros estilos */
+/* Estilos para botones */
+.btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
 
+.btn-primary {
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 200px;
+  background-color: var(--primary-color);
+  color: var(--text-color-dark);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+}
+
+
+.btn-secondary {
+  padding: 0.5rem;
+  width: 100%;
+  max-width: 200px;
+  background-color: #3e403f;
+  color: #cac9c9;
+}
+
+.btn-secondary:hover {
+  background-color: #575454;
+}
+
+/* Estilos para inputs */
+input[type="date"] {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  width: 100%;
+  max-width: 200px;
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+}
+
+/* Estilos para contenedores de gráficos */
 .chart-container {
   position: relative;
   width: 100%;
@@ -4844,30 +4926,83 @@ h3 {
   z-index: 0; /* Asegurar que el z-index sea el mismo para todos los gráficos */
 }
 
-/* Estilos adicionales para el panel lateral */
-aside {
-  transition: background-color 0.1s, color 0.3s;
-}
-
-aside.light {
-  background-color: var(--card-bg-color-light);
-  color: var(--text-color-light);
-}
-
-aside.dark {
-  background-color: var(--card-bg-color-dark);
-  color: var(--text-color-dark);
-}
-
-aside h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-}
-
-aside .btn {
+.chart-container-small-bar,
+.chart-container-small-sumary {
   width: 100%;
 }
 
-aside input[type="date"] {
+/* Estilos para tablas */
+.youtube-stats-table {
   width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.youtube-stats-table th,
+.youtube-stats-table td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.youtube-stats-table th {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+}
+
+.youtube-stats-table td {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+}
+
+/* Estilos para el preloader */
+.preloader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.preloader-chart {
+  width: 100px;
+  height: 100px;
+  position: relative;
+}
+
+.line {
+  width: 100%;
+  height: 100%;
+  border-left: 2px solid var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.line::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary-color) 50%, transparent 50%);
+  background-size: 200% 100%;
+  animation: zigzag 2s infinite;
+}
+
+@keyframes zigzag {
+  0% {
+    clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%);
+  }
+  25% {
+    clip-path: polygon(0% 100%, 25% 75%, 50% 100%, 75% 75%, 100% 100%);
+  }
+  50% {
+    clip-path: polygon(0% 100%, 25% 75%, 50% 50%, 75% 25%, 100% 0%);
+  }
+  75% {
+    clip-path: polygon(0% 100%, 25% 75%, 50% 50%, 75% 25%, 100% 0%);
+  }
+  100% {
+    clip-path: polygon(0% 100%, 25% 75%, 50% 50%, 75% 25%, 100% 0%);
+  }
 }

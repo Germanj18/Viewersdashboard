@@ -27,13 +27,16 @@ model Programas {
 }
 
 model ExcelData {
-  id           Int      @id @default(autoincrement())
-  channel_name String
-  fecha    DateTime 
-  hora     String
-  youtube      Int
-  
-  likes        Int
-  title        String
- 
+  id       Int      @id @default(autoincrement())
+  date    DateTime
+  hour     String
+  luzu     Int
+  olga     Int
+  gelatina Int
+  blender  Int
+  lacasa   Int
+  vorterix Int
+  bondi    Int
+  carajo   Int
+  azz      Int
 }

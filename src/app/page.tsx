@@ -5,9 +5,10 @@ import { useTheme } from './ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faChartLine, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import Charts from './components/Charts';
-import BarChart from './components/BarChart';
+
 import SummaryTable from './components/SummaryTable';
 import Modal from './components/Modal';
+
 import 'animate.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -24,6 +25,20 @@ interface UploadedData {
   youtube: number;
   likes: number;
   title: string;
+}
+
+interface UploadedDataChannel extends UploadedData {
+  date: string;
+  hour: string;
+  luzu: number;
+  olga: number;
+  gelatina: number;
+  blender: number;
+  lacasa: number;
+  vorterix: number;
+  bondi: number;
+  carajo: number;
+  azz: number;
 }
 
 const Preloader = () => (
@@ -86,7 +101,7 @@ export default function Home() {
   const { data: session, status } = useSession();
   const { theme, toggleTheme } = useTheme();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [data, setData] = useState<UploadedData[]>([]);
+  const [data, setData] = useState<UploadedDataChannel[]>([]);
   const [showDateInputs, setShowDateInputs] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -131,7 +146,7 @@ export default function Home() {
           <h1 className="text-2xl font-bold">YouTube Viewers Analysis</h1>
         </div>
         <div className="flex items-center">
-          <button onClick={toggleTheme} className="btn btn-secondary mr-4 transition-transform transform hover:scale-110">
+          <button onClick={toggleTheme} className="btn btn-theme mr-4 transition-transform transform hover:scale-110">
             {theme === 'dark' ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />}
           </button>
           {status === 'loading' ? (
@@ -187,26 +202,24 @@ export default function Home() {
         </div>
 
         <section className="flex-grow p-8">
-          <h2 className="text-3xl font-bold mt-8 mb-4">Consulta las métricas de los canales</h2>
-
           {isLoading ? (
             <Preloader />
           ) : (
             data.length > 0 && (
               <>
-                <div>
-                  <div>
-                    <Charts data={data} onRendered={handleChartsRendered} />
+                <section className="mb-8">
+                  <h2 className="text-2xl font-bold mb-4">Gráficos de Línea</h2>
+                  <Charts data={data} onRendered={handleChartsRendered} />
+                </section>
+                <section className="mb-8">
+                  <h2 className="text-2xl font-bold mb-4">Gráficos de Barras</h2>
+                  <div className="flex flex-col md:flex-row justify-between w-full space-y-4 md:space-y-0 md:space-x-4">
+                   
+                    <div className="chart-container-small-sumary w-full md:w-1/2">
+                      <SummaryTable data={data} onRendered={handleChartsRendered} />
+                    </div>
                   </div>
-                </div>
-                <div className="flex flex-col md:flex-row justify-between w-full mt-8 space-y-4 md:space-y-0 md:space-x-4 px-4 md:px-16">
-                  <div className="chart-container-small-bar w-full md:w-1/2">
-                    <BarChart data={data} onRendered={handleChartsRendered} />
-                  </div>
-                  <div className="chart-container-small-sumary w-full md:w-1/2">
-                    <SummaryTable data={data} onRendered={handleChartsRendered} />
-                  </div>
-                </div>
+                </section>
               </>
             )
           )}

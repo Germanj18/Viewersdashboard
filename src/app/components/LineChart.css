@@ -77,7 +77,7 @@
   background-color: #000000; /* Fondo negro para modo claro */
   color: #ffffff; /* Texto blanco para modo claro */
   border: none;
-  padding: 10px 20px;
+  padding: 5px 10px;
   font-size: 14px;
   cursor: pointer;
   border-radius: 5px;
@@ -233,6 +233,36 @@
 }
 
 .channel-select.dark option {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+  color: #ffffff; /* Texto blanco para modo oscuro */
+}
+
+/* Estilos para el filtro de rango horario */
+.time-range-filters {
+  display: flex;
+  
+  margin-bottom: 16px;
+}
+
+.time-range-filters label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 14px;
+  color: inherit; /* Heredar color del tema */
+  padding: 5px;
+}
+
+.time-range-filters input[type="time"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  margin-top: 4px;
+}
+
+.time-range-filters input[type="time"].dark {
   background-color: #000000; /* Fondo negro para modo oscuro */
   color: #ffffff; /* Texto blanco para modo oscuro */
 }
