@@ -35,7 +35,6 @@ interface BlocksContextProps {
   generateExcel: (block: Block) => void;
   updateBlockConfig: (index: number, totalOperations: number) => void;
   updateOperationConfig: (blockIndex: number, operationIndex: number, serviceId: number, quantity: number) => void;
- 
 }
 
 const BlocksContext = createContext<BlocksContextProps | undefined>(undefined);
@@ -51,7 +50,6 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Programa: Madres 5G', totalViewers: 0 },
     ];
   });
- 
 
   useEffect(() => {
     localStorage.setItem('blocks', JSON.stringify(blocks));
@@ -81,10 +79,9 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [blocks, link]);
 
-
   const checkOrderStatus = async (orderId: number) => {
     try {
-      const response = await fetch(`http://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=order_info&id=${orderId}`);
+      const response = await fetch(`https://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=order_info&id=${orderId}`);
       const data = await response.json();
       return data.status;
     } catch (error) {
@@ -132,23 +129,23 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       'Costo de la Operación': status.details.sum, // Incluye el costo en el resumen
       ...status.details,
     }));
-  
+
     // Generar intervalos de tiempo desde las 10:25 AM hasta las 23:00 PM
     const startTime = new Date("1970-01-01T10:25:00Z");
     const endTime = new Date("1970-01-01T23:00:00Z");
     const timeIntervals: { Hora: string; [key: string]: number | string }[] = [];
-    
+
     let currentTime = new Date(startTime);
-  
+
     // Inicializar el arreglo de intervalos de tiempo
     while (currentTime <= endTime) {
       timeIntervals.push({ Hora: currentTime.toISOString().substr(11, 5) });
       currentTime = new Date(currentTime.getTime() + 60000); // Incremento de 1 minuto
     }
-  
+
     // Crear una fila para los costos de cada operación (primera fila del Excel)
     const costRow: { Hora: string; [key: string]: number | string } = { Hora: 'Costo' };
-  
+
     // Rellenar las columnas de cada operación
     block.status.forEach((status) => {
       if (status.status === 'success' && status.count && status.timestamp) {
@@ -156,22 +153,22 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         const startTimeString = operationStartTime.toISOString().substr(11, 5);
         const duration = status.duration || 0;
         const orderIdColumn = `Operación ${status.orderId}`;
-  
+
         // Añadir el costo de la operación en la fila de costos
         if (!(orderIdColumn in costRow)) {
           costRow[orderIdColumn] = status.details.sum || 0;
         }
-  
+
         // Crear una columna para esta operación en los intervalos de tiempo si no existe
         timeIntervals.forEach((interval) => {
           if (!(orderIdColumn in interval)) {
             interval[orderIdColumn] = '';
           }
         });
-  
+
         // Encontrar el índice de la hora de inicio de la operación en los intervalos de tiempo
         const startIndex = timeIntervals.findIndex((entry) => entry.Hora === startTimeString);
-  
+
         // Rellenar los datos en los intervalos correspondientes
         if (startIndex !== -1) {
           for (let i = 0; i < duration && startIndex + i < timeIntervals.length; i++) {
@@ -180,22 +177,20 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       }
     });
-  
+
     // Añadir la fila de costos al inicio del arreglo de intervalos
     const allRows = [costRow, ...timeIntervals];
-  
+
     // Crear hojas en el libro de Excel
     const wsSummary = XLSX.utils.json_to_sheet(summary);
     const wsViewers = XLSX.utils.json_to_sheet(allRows);
-  
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen de Operaciones');
     XLSX.utils.book_append_sheet(wb, wsViewers, 'Viewers por Minuto');
-  
+
     XLSX.writeFile(wb, `${block.title}.xlsx`);
   };
-  
-  
 
   const handleApiCall = async (index: number) => {
     if (!link || blocks[index].state !== 'running') return;
@@ -205,7 +200,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const operation = block.status[block.currentOperation];
       const { service_id, count } = operation.details;
 
-      const response = await fetch(`http://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=new_order&service_id=${service_id}&count=${count}&link=${link}`);
+      const response = await fetch(`https://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=new_order&service_id=${service_id}&count=${count}&link=${link}`);
       const data = await response.json();
       const timestamp = new Date().toLocaleTimeString();
       const duration = getServiceDuration(service_id) || 90; // Obtener la duración en función del serviceId o usar una duración de prueba
@@ -250,7 +245,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       setBlocks(newBlocks);
-    
+
     } catch (error) {
       console.log(`Block ${index + 1}, Operation ${blocks[index].currentOperation + 1}:`, error);
 
@@ -274,7 +269,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       setBlocks(newBlocks);
-     
+
     }
   };
 
