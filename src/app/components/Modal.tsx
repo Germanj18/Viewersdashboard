@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import './modallogin.css'; // Importar el archivo CSS
 
 interface ModalProps {
   isOpen: boolean;
@@ -36,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-80 relative">
+      <div className="modal-card relative">
         <img src="/logo-expansion-verde.png" alt="Logo" className="absolute top-4 right-4 w-8 h-8" />
         <h2 className="text-2xl font-semibold mb-6 text-center text-white">Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
@@ -57,7 +58,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               Nombre de Usuario
             </label>
           </div>
-          <div className="mb-4 relative">
+          <div className="mb-4 relative password-container">
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}

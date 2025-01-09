@@ -2,14 +2,14 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import * as XLSX from 'xlsx';
 
 interface BlockStatus {
-  status: 'success' | 'error';
+  status: 'success' | 'error' | 'pending';
   message: string;
   details: any;
   timestamp: string;
   orderId?: number;
   orderStatus?: string;
   duration?: number;
-  count?: number; // Añadir el campo count
+  count?: number;
 }
 
 interface Block {
@@ -33,6 +33,9 @@ interface BlocksContextProps {
   finalizeBlock: (index: number) => void;
   resetBlock: (index: number) => void;
   generateExcel: (block: Block) => void;
+  updateBlockConfig: (index: number, totalOperations: number) => void;
+  updateOperationConfig: (blockIndex: number, operationIndex: number, serviceId: number, quantity: number) => void;
+  fetchBalance: () => Promise<number>;
 }
 
 const BlocksContext = createContext<BlocksContextProps | undefined>(undefined);
@@ -48,6 +51,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Programa: Madres 5G', totalViewers: 0 },
     ];
   });
+  const [balance, setBalance] = useState<number>(0);
 
   useEffect(() => {
     localStorage.setItem('blocks', JSON.stringify(blocks));
@@ -76,6 +80,19 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [blocks, link]);
+
+  const fetchBalance = async (): Promise<number> => {
+    try {
+      const response = await fetch('http://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=balance');
+      const data = await response.json();
+      const balance = parseFloat(data.res.balance);
+      setBalance(balance);
+      return balance;
+    } catch (error) {
+      console.error('Error fetching balance:', error);
+      return 0;
+    }
+  };
 
   const checkOrderStatus = async (orderId: number) => {
     try {
@@ -192,46 +209,33 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   
   
 
-  const simulateApiCall = () => {
-    return new Promise<{ res?: any; error?: any }>((resolve) => {
-      setTimeout(() => {
-        resolve({
-          res: {
-            status: 'ok',
-            balance: '131.29568',
-            order_id: Math.floor(Math.random() * 1000000),
-            start_count: '0',
-            sum: 8.37,
-            service_id: 335,
-          },
-        });
-      }, 1000);
-    });
-  };
-
   const handleApiCall = async (index: number) => {
     if (!link || blocks[index].state !== 'running') return;
 
     try {
-      const { count, serviceId } = extractParamsFromUrl(link); // Extraer los parámetros count y serviceId de la URL
-      const data = await simulateApiCall(); // Usar la simulación de la API en lugar de la llamada real
-      const timestamp = new Date().toLocaleTimeString();
-      const duration = getServiceDuration(serviceId) || 90; // Obtener la duración en función del serviceId o usar una duración de prueba
+      const block = blocks[index];
+      const operation = block.status[block.currentOperation];
+      const { service_id, count } = operation.details;
 
-      console.log(`Block ${index + 1}, Operation ${blocks[index].currentOperation + 1}:`, data);
+      const response = await fetch(`http://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=new_order&service_id=${service_id}&count=${count}&link=${link}`);
+      const data = await response.json();
+      const timestamp = new Date().toLocaleTimeString();
+      const duration = getServiceDuration(service_id) || 90; // Obtener la duración en función del serviceId o usar una duración de prueba
+
+      console.log(`Block ${index + 1}, Operation ${block.currentOperation + 1}:`, data);
 
       const newStatus: BlockStatus = {
-        status: data.res?.status === 'ok' ? 'success' : 'error',
-        message: data.res?.status === 'ok' ? 'Operación exitosa' : 'Error en la operación',
-        details: data.res || data.error,
+        status: data.status === 'ok' ? 'success' : 'error',
+        message: data.status === 'ok' ? 'Operación exitosa' : 'Error en la operación',
+        details: data,
         timestamp,
-        orderId: data.res?.order_id,
+        orderId: data.order_id,
         duration,
         count: count || 100, // Generar viewers de prueba si no hay count
       };
 
       const newBlocks = [...blocks];
-      newBlocks[index].status.push(newStatus);
+      newBlocks[index].status[newBlocks[index].currentOperation] = newStatus;
       newBlocks[index].currentOperation += 1;
 
       if (newStatus.status === 'success') {
@@ -258,6 +262,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       setBlocks(newBlocks);
+      await fetchBalance(); // Actualizar el saldo después de cada operación
     } catch (error) {
       console.log(`Block ${index + 1}, Operation ${blocks[index].currentOperation + 1}:`, error);
 
@@ -270,7 +275,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       };
 
       const newBlocks = [...blocks];
-      newBlocks[index].status.push(newStatus);
+      newBlocks[index].status[blocks[index].currentOperation] = newStatus;
       newBlocks[index].currentOperation += 1;
 
       if (newBlocks[index].currentOperation >= newBlocks[index].totalOperations) {
@@ -281,6 +286,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       setBlocks(newBlocks);
+      await fetchBalance(); // Actualizar el saldo después de cada operación
     }
   };
 
@@ -339,8 +345,36 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setBlocks(newBlocks);
   };
 
+  const updateBlockConfig = (index: number, totalOperations: number) => {
+    setBlocks((prevBlocks) => {
+      const updatedBlocks = [...prevBlocks];
+      const block = updatedBlocks[index];
+      block.totalOperations = totalOperations;
+      return updatedBlocks;
+    });
+  };
+
+  const updateOperationConfig = (blockIndex: number, operationIndex: number, serviceId: number, quantity: number) => {
+    setBlocks((prevBlocks) => {
+      const updatedBlocks = [...prevBlocks];
+      const block = updatedBlocks[blockIndex];
+      let operation = block.status[operationIndex];
+      if (!operation) {
+        operation = { status: 'pending', message: '', details: {}, timestamp: '', count: 0 };
+        updatedBlocks[blockIndex].status[operationIndex] = operation;
+      }
+      if (!operation.details) {
+        operation.details = {};
+      }
+      operation.details.service_id = serviceId;
+      operation.details.count = quantity; // Asegurarse de que el campo count esté en operation.details
+      operation.status = 'pending'; // Asegurarse de que el estado sea 'pending'
+      return updatedBlocks;
+    });
+  };
+
   return (
-    <BlocksContext.Provider value={{ blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel }}>
+    <BlocksContext.Provider value={{ blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig, fetchBalance }}>
       {children}
     </BlocksContext.Provider>
   );

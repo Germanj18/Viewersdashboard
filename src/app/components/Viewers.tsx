@@ -1,15 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBlocks } from '../admin/BlocksContext';
 import { useTheme } from '../ThemeContext';
 import * as XLSX from 'xlsx';
 import './Viewers.css';
 
 const Viewers = () => {
-  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel } = useBlocks();
+  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig, fetchBalance } = useBlocks();
   const { theme } = useTheme();
   const [showWarning, setShowWarning] = useState<{ type: string, index: number } | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [editBlockIndex, setEditBlockIndex] = useState<number | null>(null);
+  const [totalOperations, setTotalOperations] = useState<number>(0);
+  const [operations, setOperations] = useState<{ serviceId: number; quantity: number }[]>([]);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [bulkServiceId, setBulkServiceId] = useState<number>(0);
+  const [bulkQuantity, setBulkQuantity] = useState<number>(0);
+
+  useEffect(() => {
+    const getBalance = async () => {
+      const balanceData = await fetchBalance();
+      setBalance(balanceData);
+    };
+
+    getBalance();
+  }, [fetchBalance]);
 
   const handleLinkChange = (link: string) => {
     setLink(link);
@@ -20,9 +35,10 @@ const Viewers = () => {
       setFile(e.target.files[0]);
     }
   };
+
   const handleConvert = () => {
     if (!file) return;
-  
+
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target?.result as ArrayBuffer);
@@ -30,73 +46,107 @@ const Viewers = () => {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-  
+
       const rows = jsonData.slice(1); // Omitir la primera fila de encabezados
-  
+
       const operations = rows.map((row: any) => ({
-        Inicio: row[0], // Columna Inicio (A)
-        Views: row[1], // Columna Views (B)
-        Duracion: row[2], // Columna Duracion (C)
-        Fin: row[3], // Columna Fin (D)
-        Gasto: row[4], // Columna Gasto (E)
+        Inicio: row[1], // Columna B
+        Views: row[2], // Columna C
+        Duracion: row[3], // Columna D
+        Fin: row[4], // Columna E
+        Gasto: row[5], // Columna F
       }));
-  
+
       const startTime = new Date('1970-01-01T10:25:00Z');
       const endTime = new Date('1970-01-01T23:00:00Z');
-      const timeIntervals: { Hora: string, [key: string]: any }[] = [];
-      
+      const timeIntervals: { Hora: string; [key: string]: number | string }[] = [];
+
       let currentTime = new Date(startTime);
       while (currentTime <= endTime) {
         timeIntervals.push({ Hora: currentTime.toISOString().substr(11, 5) });
         currentTime = new Date(currentTime.getTime() + 60000); // Incremento de 1 minuto
       }
-  
-      // Fila para los costos de cada operación
-      const costRow: { Hora: string, [key: string]: any } = { Hora: 'Costo' };
-  
+
       operations.forEach((operation, index) => {
-        if (operation.Inicio && typeof operation.Inicio === 'string' && operation.Views) {
-          const [startHours, startMinutes] = operation.Inicio.split(':').map(Number);
+        if (operation.Inicio && typeof operation.Inicio === 'string') {
+          const [hours, minutes] = operation.Inicio.split(':').map(Number);
           const operationStartTime = new Date(startTime);
-          operationStartTime.setHours(startHours, startMinutes, 0, 0);
+          operationStartTime.setHours(hours, minutes, 0, 0);
           const startTimeString = operationStartTime.toTimeString().substr(0, 5);
-  
-          const [durationHours, durationMinutes] = operation.Duracion.split(':').map(Number);
-          const durationInMinutes = (durationHours * 60) + durationMinutes + 1;
+          const duration = parseInt(operation.Duracion.split(':')[0]) * 60 + parseInt(operation.Duracion.split(':')[1]);
           const orderIdColumn = `Operación ${index + 1}`;
-  
-          costRow[orderIdColumn] = operation.Gasto || 0;
-  
+
           timeIntervals.forEach((interval) => {
             if (!(orderIdColumn in interval)) {
               interval[orderIdColumn] = '';
             }
           });
-  
+
           const startIndex = timeIntervals.findIndex((entry) => entry.Hora === startTimeString);
-  
+
           if (startIndex !== -1) {
-            for (let i = 0; i < durationInMinutes && startIndex + i < timeIntervals.length; i++) {
+            timeIntervals[startIndex][orderIdColumn] = operation.Views; // Registrar la hora de inicio
+            for (let i = 0; i < duration && startIndex + i < timeIntervals.length; i++) {
               timeIntervals[startIndex + i][orderIdColumn] = operation.Views;
             }
           }
         }
       });
-  
-      const allRows = [costRow, ...timeIntervals];
-  
-      const wsViewers = XLSX.utils.json_to_sheet(allRows);
+
+      const wsViewers = XLSX.utils.json_to_sheet(timeIntervals);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, wsViewers, 'Viewers por Minuto');
       XLSX.writeFile(wb, 'ViewersPorMinuto.xlsx');
     };
-  
+
     reader.readAsArrayBuffer(file);
     setShowModal(false);
   };
-  
-  
-  
+
+  const handleEditBlock = (index: number) => {
+    const block = blocks[index];
+    setEditBlockIndex(index);
+    setTotalOperations(block.totalOperations);
+    setOperations(
+      Array.from({ length: block.totalOperations }).map((_, i) => ({
+        serviceId: block.status[i]?.details.service_id || 0,
+        quantity: block.status[i]?.count || 0,
+      }))
+    );
+    setShowModal(true);
+  };
+
+  const handleSaveBlockConfig = () => {
+    if (editBlockIndex !== null) {
+      updateBlockConfig(editBlockIndex, totalOperations);
+      const updatedOperations = Array.from({ length: totalOperations }).map((_, i) => ({
+        serviceId: operations[i]?.serviceId || 0,
+        quantity: operations[i]?.quantity || 0,
+      }));
+      updatedOperations.forEach((operation, index) => {
+        updateOperationConfig(editBlockIndex, index, operation.serviceId, operation.quantity);
+      });
+      setOperations(updatedOperations);
+      setShowModal(false);
+    }
+  };
+
+  const handleOperationChange = (index: number, field: 'serviceId' | 'quantity', value: number) => {
+    const updatedOperations = [...operations];
+    if (!updatedOperations[index]) {
+      updatedOperations[index] = { serviceId: 0, quantity: 0 };
+    }
+    updatedOperations[index][field] = value;
+    setOperations(updatedOperations);
+  };
+
+  const handleBulkUpdate = () => {
+    const updatedOperations = Array.from({ length: totalOperations }).map((_, i) => ({
+      serviceId: bulkServiceId,
+      quantity: bulkQuantity,
+    }));
+    setOperations(updatedOperations);
+  };
 
   const totalViewers = blocks.reduce((acc, block) => acc + block.totalViewers, 0);
 
@@ -112,6 +162,11 @@ const Viewers = () => {
       <div className="total-viewers-header">
         Total de espectadores cargado: {totalViewers}
       </div>
+      {balance !== null && (
+        <div className="balance">
+          Saldo: {balance}
+        </div>
+      )}
       <button onClick={() => setShowModal(true)} className="upload-button">
         Subir Excel
       </button>
@@ -124,6 +179,9 @@ const Viewers = () => {
                 <span className="icon-download"></span>
               </button>
             )}
+            <button onClick={() => handleEditBlock(index)} className="edit-button">
+              Editar
+            </button>
             <div className="status" style={{ maxHeight: '200px', overflowY: 'scroll' }}>
               {Array.from({ length: block.totalOperations }).map((_, statusIndex) => (
                 <div key={statusIndex} className="status-item">
@@ -205,11 +263,66 @@ const Viewers = () => {
       )}
       {showModal && (
         <div className="modal">
-          <div className="modal-content">
-            <h2>Subir Excel</h2>
-            <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-            <button onClick={handleConvert} className="convert-button">
-              Convertir
+          <div className={`modal-content ${theme}`}>
+            <h2>Editar Configuración del Bloque</h2>
+            <label>
+              Total Operations:
+              <input
+                type="number"
+                value={totalOperations}
+                onChange={(e) => setTotalOperations(Number(e.target.value))}
+                className={theme === 'dark' ? 'input-dark' : ''}
+              />
+            </label>
+            <div className="bulk-edit-container">
+              <label>
+                Servicio ID:
+                <input
+                  type="number"
+                  value={bulkServiceId}
+                  onChange={(e) => setBulkServiceId(Number(e.target.value))}
+                  className={theme === 'dark' ? 'input-dark' : ''}
+                />
+              </label>
+              <label>
+                Cantidad:
+                <input
+                  type="number"
+                  value={bulkQuantity}
+                  onChange={(e) => setBulkQuantity(Number(e.target.value))}
+                  className={theme === 'dark' ? 'input-dark' : ''}
+                />
+              </label>
+              <button onClick={handleBulkUpdate} className="bulk-update-button">
+                Aplicar a todas las operaciones
+              </button>
+            </div>
+            <div className="operations-container">
+              {Array.from({ length: totalOperations }).map((_, index) => (
+                <div key={index} className="operation-config">
+                  <label>
+                    Servicio ID:
+                    <input
+                      type="number"
+                      value={operations[index]?.serviceId || 0}
+                      onChange={(e) => handleOperationChange(index, 'serviceId', Number(e.target.value))}
+                      className={theme === 'dark' ? 'input-dark' : ''}
+                    />
+                  </label>
+                  <label>
+                    Cantidad:
+                    <input
+                      type="number"
+                      value={operations[index]?.quantity || 0}
+                      onChange={(e) => handleOperationChange(index, 'quantity', Number(e.target.value))}
+                      className={theme === 'dark' ? 'input-dark' : ''}
+                    />
+                  </label>
+                </div>
+              ))}
+            </div>
+            <button onClick={handleSaveBlockConfig} className="save-button">
+              Guardar
             </button>
             <button onClick={() => setShowModal(false)} className="close-button">
               Cerrar
