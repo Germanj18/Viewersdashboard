@@ -194,19 +194,19 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const handleApiCall = async (index: number) => {
     if (!link || blocks[index].state !== 'running') return;
-
+  
     try {
       const block = blocks[index];
       const operation = block.status[block.currentOperation];
       const { service_id, count } = operation.details;
-
-      const response = await fetch(`https://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=new_order&service_id=${service_id}&count=${count}&link=${link}`);
+  
+      const response = await fetch(`/api/proxy?service_id=${service_id}&count=${count}&link=${link}`);
       const data = await response.json();
       const timestamp = new Date().toLocaleTimeString();
       const duration = getServiceDuration(service_id) || 90; // Obtener la duración en función del serviceId o usar una duración de prueba
-
+  
       console.log(`Block ${index + 1}, Operation ${block.currentOperation + 1}:`, data);
-
+  
       const newStatus: BlockStatus = {
         status: data.status === 'ok' ? 'success' : 'error',
         message: data.status === 'ok' ? 'Operación exitosa' : 'Error en la operación',
@@ -216,15 +216,15 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         duration,
         count: count || 100, // Generar viewers de prueba si no hay count
       };
-
+  
       const newBlocks = [...blocks];
       newBlocks[index].status[newBlocks[index].currentOperation] = newStatus;
       newBlocks[index].currentOperation += 1;
-
+  
       if (newStatus.status === 'success') {
         const newTotalViewers = newBlocks[index].totalViewers + (newStatus.count || 0); // Usar el campo count
         newBlocks[index].totalViewers = newTotalViewers;
-
+  
         const intervalId = setInterval(async () => {
           const orderStatus = await checkOrderStatus(newStatus.orderId!);
           const updatedBlocks = [...newBlocks];
@@ -236,19 +236,19 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }, 60000);
         newBlocks[index].intervalId = intervalId;
       }
-
+  
       if (newBlocks[index].currentOperation >= newBlocks[index].totalOperations) {
         clearInterval(newBlocks[index].intervalId!);
         newBlocks[index].intervalId = null;
         newBlocks[index].state = 'completed' as 'completed';
         generateExcel(newBlocks[index]);
       }
-
+  
       setBlocks(newBlocks);
-
+  
     } catch (error) {
       console.log(`Block ${index + 1}, Operation ${blocks[index].currentOperation + 1}:`, error);
-
+  
       const newStatus: BlockStatus = {
         status: 'error',
         message: 'Error en la operación',
@@ -256,20 +256,20 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         timestamp: new Date().toLocaleTimeString(),
         duration: 90, // Duración de prueba en caso de error
       };
-
+  
       const newBlocks = [...blocks];
       newBlocks[index].status[blocks[index].currentOperation] = newStatus;
       newBlocks[index].currentOperation += 1;
-
+  
       if (newBlocks[index].currentOperation >= newBlocks[index].totalOperations) {
         clearInterval(newBlocks[index].intervalId!);
         newBlocks[index].intervalId = null;
         newBlocks[index].state = 'completed';
         generateExcel(newBlocks[index]);
       }
-
+  
       setBlocks(newBlocks);
-
+  
     }
   };
 
