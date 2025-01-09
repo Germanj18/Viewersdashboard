@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx';
 import './Viewers.css';
 
 const Viewers = () => {
-  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig, fetchBalance } = useBlocks();
+  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig } = useBlocks();
   const { theme } = useTheme();
   const [showWarning, setShowWarning] = useState<{ type: string, index: number } | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -13,19 +13,13 @@ const Viewers = () => {
   const [editBlockIndex, setEditBlockIndex] = useState<number | null>(null);
   const [totalOperations, setTotalOperations] = useState<number>(0);
   const [operations, setOperations] = useState<{ serviceId: number; quantity: number }[]>([]);
-  const [balance, setBalance] = useState<number | null>(null);
+
   const [bulkServiceId, setBulkServiceId] = useState<number>(0);
   const [bulkQuantity, setBulkQuantity] = useState<number>(0);
 
-  useEffect(() => {
-    const getBalance = async () => {
-      const balanceData = await fetchBalance();
-      setBalance(balanceData);
-    };
+ 
 
-    getBalance();
-  }, [fetchBalance]);
-
+  
   const handleLinkChange = (link: string) => {
     setLink(link);
   };
@@ -162,11 +156,7 @@ const Viewers = () => {
       <div className="total-viewers-header">
         Total de espectadores cargado: {totalViewers}
       </div>
-      {balance !== null && (
-        <div className="balance">
-          Saldo: {balance}
-        </div>
-      )}
+     
       <button onClick={() => setShowModal(true)} className="upload-button">
         Subir Excel
       </button>

@@ -35,7 +35,7 @@ interface BlocksContextProps {
   generateExcel: (block: Block) => void;
   updateBlockConfig: (index: number, totalOperations: number) => void;
   updateOperationConfig: (blockIndex: number, operationIndex: number, serviceId: number, quantity: number) => void;
-  fetchBalance: () => Promise<number | null>;
+ 
 }
 
 const BlocksContext = createContext<BlocksContextProps | undefined>(undefined);
@@ -51,7 +51,15 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Programa: Madres 5G', totalViewers: 0 },
     ];
   });
-  const [balance, setBalance] = useState<number | null>(null);
+ 
+
+  useEffect(() => {
+    localStorage.setItem('blocks', JSON.stringify(blocks));
+  }, [blocks]);
+
+  useEffect(() => {
+    localStorage.setItem('link', link);
+  }, [link]);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -73,20 +81,10 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     };
   }, [blocks, link]);
 
-  const fetchBalance = async () => {
-    try {
-      const response = await fetch('https://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=balance'); // Cambiado a HTTPS
-      const data = await response.json();
-      return parseFloat(data.res.balance);
-    } catch (error) {
-      console.error('Error fetching balance:', error);
-      return null;
-    }
-  };
 
   const checkOrderStatus = async (orderId: number) => {
     try {
-      const response = await fetch(`https://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=order_info&id=${orderId}`); // Cambiado a HTTPS
+      const response = await fetch(`http://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=order_info&id=${orderId}`);
       const data = await response.json();
       return data.status;
     } catch (error) {
@@ -207,7 +205,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const operation = block.status[block.currentOperation];
       const { service_id, count } = operation.details;
 
-      const response = await fetch(`https://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=new_order&service_id=${service_id}&count=${count}&link=${link}`); // Cambiado a HTTPS
+      const response = await fetch(`http://top4smm.com/api.php?key=r6oPvhkIA5Pkbt4p&act=new_order&service_id=${service_id}&count=${count}&link=${link}`);
       const data = await response.json();
       const timestamp = new Date().toLocaleTimeString();
       const duration = getServiceDuration(service_id) || 90; // Obtener la duración en función del serviceId o usar una duración de prueba
@@ -252,10 +250,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       setBlocks(newBlocks);
-
-      // Actualizar el saldo después de cada operación
-      const balanceData = await fetchBalance();
-      setBalance(balanceData);
+    
     } catch (error) {
       console.log(`Block ${index + 1}, Operation ${blocks[index].currentOperation + 1}:`, error);
 
@@ -279,17 +274,11 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
 
       setBlocks(newBlocks);
-
-      // Actualizar el saldo después de cada operación
-      const balanceData = await fetchBalance();
-      setBalance(balanceData);
+     
     }
   };
 
-  const startBlock = async (index: number) => {
-    const balanceData = await fetchBalance();
-    setBalance(balanceData);
-
+  const startBlock = (index: number) => {
     const intervalId = setInterval(() => handleApiCall(index), 60000);
     const newBlocks = [...blocks];
     newBlocks[index].intervalId = intervalId;
@@ -373,7 +362,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   return (
-    <BlocksContext.Provider value={{ blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig, fetchBalance }}>
+    <BlocksContext.Provider value={{ blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig }}>
       {children}
     </BlocksContext.Provider>
   );
