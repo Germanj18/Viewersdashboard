@@ -272,7 +272,6 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   
     }
   };
-
   const startBlock = (index: number) => {
     const intervalId = setInterval(() => handleApiCall(index), 60000);
     const newBlocks = [...blocks];
