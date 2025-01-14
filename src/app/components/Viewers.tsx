@@ -1,25 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useBlocks } from '../admin/BlocksContext';
 import { useTheme } from '../ThemeContext';
 import * as XLSX from 'xlsx';
 import './Viewers.css';
 
 const Viewers = () => {
-  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, updateBlockConfig, updateOperationConfig } = useBlocks();
+  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, editBlock } = useBlocks();
   const { theme } = useTheme();
   const [showWarning, setShowWarning] = useState<{ type: string, index: number } | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [editBlockIndex, setEditBlockIndex] = useState<number | null>(null);
-  const [totalOperations, setTotalOperations] = useState<number>(0);
-  const [operations, setOperations] = useState<{ serviceId: number; quantity: number }[]>([]);
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [editOperations, setEditOperations] = useState<number>(0);
+  const [editServiceId, setEditServiceId] = useState<number>(0);
+  const [editCount, setEditCount] = useState<number>(0);
 
-  const [bulkServiceId, setBulkServiceId] = useState<number>(0);
-  const [bulkQuantity, setBulkQuantity] = useState<number>(0);
-
- 
-
-  
   const handleLinkChange = (link: string) => {
     setLink(link);
   };
@@ -44,16 +39,16 @@ const Viewers = () => {
       const rows = jsonData.slice(1); // Omitir la primera fila de encabezados
 
       const operations = rows.map((row: any) => ({
-        Inicio: row[1], // Columna B
-        Views: row[2], // Columna C
-        Duracion: row[3], // Columna D
-        Fin: row[4], // Columna E
-        Gasto: row[5], // Columna F
+        Inicio: row[0], // Columna Inicio (A)
+        Views: row[1], // Columna Views (B)
+        Duracion: row[2], // Columna Duracion (C)
+        Fin: row[3], // Columna Fin (D)
+        Gasto: row[4], // Columna Gasto (E)
       }));
 
       const startTime = new Date('1970-01-01T10:25:00Z');
       const endTime = new Date('1970-01-01T23:00:00Z');
-      const timeIntervals: { Hora: string; [key: string]: number | string }[] = [];
+      const timeIntervals: { Hora: string, [key: string]: any }[] = [];
 
       let currentTime = new Date(startTime);
       while (currentTime <= endTime) {
@@ -61,14 +56,21 @@ const Viewers = () => {
         currentTime = new Date(currentTime.getTime() + 60000); // Incremento de 1 minuto
       }
 
+      // Fila para los costos de cada operación
+      const costRow: { Hora: string, [key: string]: any } = { Hora: 'Costo' };
+
       operations.forEach((operation, index) => {
-        if (operation.Inicio && typeof operation.Inicio === 'string') {
-          const [hours, minutes] = operation.Inicio.split(':').map(Number);
+        if (operation.Inicio && typeof operation.Inicio === 'string' && operation.Views) {
+          const [startHours, startMinutes] = operation.Inicio.split(':').map(Number);
           const operationStartTime = new Date(startTime);
-          operationStartTime.setHours(hours, minutes, 0, 0);
+          operationStartTime.setHours(startHours, startMinutes, 0, 0);
           const startTimeString = operationStartTime.toTimeString().substr(0, 5);
-          const duration = parseInt(operation.Duracion.split(':')[0]) * 60 + parseInt(operation.Duracion.split(':')[1]);
+
+          const [durationHours, durationMinutes] = operation.Duracion.split(':').map(Number);
+          const durationInMinutes = (durationHours * 60) + durationMinutes + 1;
           const orderIdColumn = `Operación ${index + 1}`;
+
+          costRow[orderIdColumn] = operation.Gasto || 0;
 
           timeIntervals.forEach((interval) => {
             if (!(orderIdColumn in interval)) {
@@ -79,15 +81,16 @@ const Viewers = () => {
           const startIndex = timeIntervals.findIndex((entry) => entry.Hora === startTimeString);
 
           if (startIndex !== -1) {
-            timeIntervals[startIndex][orderIdColumn] = operation.Views; // Registrar la hora de inicio
-            for (let i = 0; i < duration && startIndex + i < timeIntervals.length; i++) {
+            for (let i = 0; i < durationInMinutes && startIndex + i < timeIntervals.length; i++) {
               timeIntervals[startIndex + i][orderIdColumn] = operation.Views;
             }
           }
         }
       });
 
-      const wsViewers = XLSX.utils.json_to_sheet(timeIntervals);
+      const allRows = [costRow, ...timeIntervals];
+
+      const wsViewers = XLSX.utils.json_to_sheet(allRows);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, wsViewers, 'Viewers por Minuto');
       XLSX.writeFile(wb, 'ViewersPorMinuto.xlsx');
@@ -99,47 +102,21 @@ const Viewers = () => {
 
   const handleEditBlock = (index: number) => {
     const block = blocks[index];
-    setEditBlockIndex(index);
-    setTotalOperations(block.totalOperations);
-    setOperations(
-      Array.from({ length: block.totalOperations }).map((_, i) => ({
-        serviceId: block.status[i]?.details.service_id || 0,
-        quantity: block.status[i]?.count || 0,
-      }))
-    );
-    setShowModal(true);
+    setEditIndex(index);
+    setEditOperations(block.totalOperations || 0);
+    setEditServiceId(block.serviceId || 0);
+    setEditCount(block.count || 0);
   };
 
-  const handleSaveBlockConfig = () => {
-    if (editBlockIndex !== null) {
-      updateBlockConfig(editBlockIndex, totalOperations);
-      const updatedOperations = Array.from({ length: totalOperations }).map((_, i) => ({
-        serviceId: operations[i]?.serviceId || 0,
-        quantity: operations[i]?.quantity || 0,
-      }));
-      updatedOperations.forEach((operation, index) => {
-        updateOperationConfig(editBlockIndex, index, operation.serviceId, operation.quantity);
+  const handleSaveEdit = () => {
+    if (editIndex !== null) {
+      editBlock(editIndex, {
+        totalOperations: editOperations,
+        serviceId: editServiceId,
+        count: editCount,
       });
-      setOperations(updatedOperations);
-      setShowModal(false);
+      setEditIndex(null);
     }
-  };
-
-  const handleOperationChange = (index: number, field: 'serviceId' | 'quantity', value: number) => {
-    const updatedOperations = [...operations];
-    if (!updatedOperations[index]) {
-      updatedOperations[index] = { serviceId: 0, quantity: 0 };
-    }
-    updatedOperations[index][field] = value;
-    setOperations(updatedOperations);
-  };
-
-  const handleBulkUpdate = () => {
-    const updatedOperations = Array.from({ length: totalOperations }).map((_, i) => ({
-      serviceId: bulkServiceId,
-      quantity: bulkQuantity,
-    }));
-    setOperations(updatedOperations);
   };
 
   const totalViewers = blocks.reduce((acc, block) => acc + block.totalViewers, 0);
@@ -156,7 +133,6 @@ const Viewers = () => {
       <div className="total-viewers-header">
         Total de espectadores cargado: {totalViewers}
       </div>
-     
       <button onClick={() => setShowModal(true)} className="upload-button">
         Subir Excel
       </button>
@@ -169,9 +145,6 @@ const Viewers = () => {
                 <span className="icon-download"></span>
               </button>
             )}
-            <button onClick={() => handleEditBlock(index)} className="edit-button">
-              Editar
-            </button>
             <div className="status" style={{ maxHeight: '200px', overflowY: 'scroll' }}>
               {Array.from({ length: block.totalOperations }).map((_, statusIndex) => (
                 <div key={statusIndex} className="status-item">
@@ -226,6 +199,9 @@ const Viewers = () => {
                   </button>
                 </>
               )}
+              <button onClick={() => handleEditBlock(index)} className="edit-button">
+                Editar
+              </button>
             </div>
             <div className="total-viewers">Total de espectadores: {block.totalViewers}</div>
           </div>
@@ -254,65 +230,10 @@ const Viewers = () => {
       {showModal && (
         <div className="modal">
           <div className={`modal-content ${theme}`}>
-            <h2>Editar Configuración del Bloque</h2>
-            <label>
-              Total Operations:
-              <input
-                type="number"
-                value={totalOperations}
-                onChange={(e) => setTotalOperations(Number(e.target.value))}
-                className={theme === 'dark' ? 'input-dark' : ''}
-              />
-            </label>
-            <div className="bulk-edit-container">
-              <label>
-                Servicio ID:
-                <input
-                  type="number"
-                  value={bulkServiceId}
-                  onChange={(e) => setBulkServiceId(Number(e.target.value))}
-                  className={theme === 'dark' ? 'input-dark' : ''}
-                />
-              </label>
-              <label>
-                Cantidad:
-                <input
-                  type="number"
-                  value={bulkQuantity}
-                  onChange={(e) => setBulkQuantity(Number(e.target.value))}
-                  className={theme === 'dark' ? 'input-dark' : ''}
-                />
-              </label>
-              <button onClick={handleBulkUpdate} className="bulk-update-button">
-                Aplicar a todas las operaciones
-              </button>
-            </div>
-            <div className="operations-container">
-              {Array.from({ length: totalOperations }).map((_, index) => (
-                <div key={index} className="operation-config">
-                  <label>
-                    Servicio ID:
-                    <input
-                      type="number"
-                      value={operations[index]?.serviceId || 0}
-                      onChange={(e) => handleOperationChange(index, 'serviceId', Number(e.target.value))}
-                      className={theme === 'dark' ? 'input-dark' : ''}
-                    />
-                  </label>
-                  <label>
-                    Cantidad:
-                    <input
-                      type="number"
-                      value={operations[index]?.quantity || 0}
-                      onChange={(e) => handleOperationChange(index, 'quantity', Number(e.target.value))}
-                      className={theme === 'dark' ? 'input-dark' : ''}
-                    />
-                  </label>
-                </div>
-              ))}
-            </div>
-            <button onClick={handleSaveBlockConfig} className="save-button">
-              Guardar
+            <h2>Subir Excel</h2>
+            <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
+            <button onClick={handleConvert} className="convert-button">
+              Convertir
             </button>
             <button onClick={() => setShowModal(false)} className="close-button">
               Cerrar
@@ -320,7 +241,46 @@ const Viewers = () => {
           </div>
         </div>
       )}
-      
+      {editIndex !== null && (
+        <div className="modal">
+          <div className={`modal-content ${theme}`}>
+            <h2>Editar Bloque</h2>
+            <label>
+              Cantidad de Operaciones:
+              <input
+                type="number"
+                value={editOperations}
+                onChange={(e) => setEditOperations(Number(e.target.value))}
+                className={`input-${theme}`}
+              />
+            </label>
+            <label>
+              Service ID:
+              <input
+                type="number"
+                value={editServiceId}
+                onChange={(e) => setEditServiceId(Number(e.target.value))}
+                className={`input-${theme}`}
+              />
+            </label>
+            <label>
+              Count:
+              <input
+                type="number"
+                value={editCount}
+                onChange={(e) => setEditCount(Number(e.target.value))}
+                className={`input-${theme}`}
+              />
+            </label>
+            <button onClick={handleSaveEdit} className="save-button">
+              Guardar
+            </button>
+            <button onClick={() => setEditIndex(null)} className="cancel-button">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
