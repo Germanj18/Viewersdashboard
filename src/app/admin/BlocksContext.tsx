@@ -122,7 +122,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       'Order Status': status.orderStatus,
       'Duración (minutos)': status.duration,
       'Cantidad de Viewers': status.count,
-      'Costo de la Operación': status.details.sum,
+      'Costo de la Operación': status.details.res.sum,
       ...status.details,
     }));
 
@@ -205,7 +205,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         message: data.error ? 'Error en la operación' : 'Operación exitosa',
         details: data,
         timestamp,
-        orderId: data.order_id,
+        orderId: data.res.order_id,
         duration,
         count: count, // Generar viewers de prueba si no hay count
         serviceId: serviceId, // Generar serviceId de prueba si no hay serviceId
