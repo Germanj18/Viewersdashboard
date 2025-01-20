@@ -51,6 +51,10 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 10, title: 'Programa: Rumis', totalViewers: 0, serviceId: 335, count: 100 },
       { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 15, title: 'Programa: Circuito cerrado', totalViewers: 0, serviceId: 335, count: 100 },
       { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Programa: Madres 5G', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 25, title: 'Jugate', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 30, title: 'Corte y queda', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Adicionales 1', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Adicionales 2', totalViewers: 0, serviceId: 335, count: 100 },
     ];
   });
 
@@ -122,7 +126,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       'Order Status': status.orderStatus,
       'Duración (minutos)': status.duration,
       'Cantidad de Viewers': status.count,
-      'Costo de la Operación': status.details.res.sum,
+      'Costo de la Operación': status.details?.res?.sum || 0,
       ...status.details,
     }));
 
@@ -152,7 +156,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         // Añadir el costo de la operación en la fila de costos
         if (!(orderIdColumn in costRow)) {
-          costRow[orderIdColumn] = status.details.sum || 0;
+          costRow[orderIdColumn] = status.details?.res?.sum || 0;
         }
 
         // Crear una columna para esta operación en los intervalos de tiempo si no existe
