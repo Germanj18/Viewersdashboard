@@ -24,8 +24,6 @@ interface Block {
   totalViewers: number;
   serviceId: number;
   count: number;
-  autoStart?: boolean; // Nueva propiedad
-  startTime?: string; // Nueva propiedad
 }
 
 interface BlocksContextProps {
@@ -49,14 +47,14 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [blocks, setBlocks] = useState<Block[]>(() => {
     const savedBlocks = localStorage.getItem('blocks');
     return savedBlocks ? JSON.parse(savedBlocks) : [
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 1', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 2', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 3', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 4', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 5', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 6', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 7', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
-      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Block 8', totalViewers: 0, serviceId: 335, count: 100, autoStart: false, startTime: '' },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 35, title: 'Programa: Tengo capturas', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 10, title: 'Programa: Rumis', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 15, title: 'Programa: Circuito cerrado', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Programa: Madres 5G', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 25, title: 'Jugate', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 30, title: 'Corte y queda', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Adicionales 1', totalViewers: 0, serviceId: 335, count: 100 },
+      { status: [], intervalId: null, isPaused: false, currentOperation: 0, state: 'idle', totalOperations: 20, title: 'Adicionales 2', totalViewers: 0, serviceId: 335, count: 100 },
     ];
   });
 
@@ -87,20 +85,6 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [blocks, link]);
-  useEffect(() => {
-    blocks.forEach((block, index) => {
-      if (block.autoStart && block.startTime) {
-        const [hours, minutes] = block.startTime.split(':').map(Number);
-        const now = new Date();
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0, 0);
-        const delay = start.getTime() - now.getTime();
-  
-        if (delay > 0) {
-          setTimeout(() => startBlock(index, true), delay);
-        }
-      }
-    });
-  }, [blocks]);
 
   const checkOrderStatus = async (orderId: number) => {
     try {
@@ -286,15 +270,13 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
   };
 
-  const startBlock = (index: number, isAutoStart: boolean = false) => {
+  const startBlock = (index: number) => {
     const intervalId = setInterval(() => handleApiCall(index), 120000); // Cambiar a 2 minutos
     const newBlocks = [...blocks];
     newBlocks[index].intervalId = intervalId;
     newBlocks[index].isPaused = false;
     newBlocks[index].state = 'running' as 'running';
     setBlocks(newBlocks);
-  
-    // Llamar a la API inmediatamente después de iniciar, incluso si es inicio automático
     handleApiCall(index);
   };
 
