@@ -362,3 +362,8 @@
   border-radius: 4px;
   cursor: pointer;
 }
+.auto-start-info {
+  font-size: 12px;
+  color: orange;
+  margin-bottom: 10px;
+}
