@@ -255,16 +255,23 @@ const Viewers = () => {
               />
             </label>
             <label>
-              Service ID:
-              <input
-                type="number"
+              Duración:
+              <select
                 value={editServiceId}
                 onChange={(e) => setEditServiceId(Number(e.target.value))}
                 className={`input-${theme}`}
-              />
+              >
+                <option value={334}>1h</option>
+                <option value={335}>1.30h</option>
+                <option value={336}>2h</option>
+                <option value={337}>2.30h</option>
+                <option value={338}>3h</option>
+                <option value={459}>4h</option>
+                <option value={460}>6h</option>
+              </select>
             </label>
             <label>
-              Count:
+              Cantidad:
               <input
                 type="number"
                 value={editCount}
