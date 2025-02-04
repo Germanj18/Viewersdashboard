@@ -294,16 +294,20 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const resumeBlock = (index: number) => {
-    const newBlocks = [...blocks];
-    newBlocks[index].isPaused = false;
-    newBlocks[index].state = 'running' as 'running';
-    setBlocks(newBlocks);
-
-    const intervalId = setInterval(() => handleApiCall(index), 120000); // Reiniciar el intervalo a 2 minutos
-    newBlocks[index].intervalId = intervalId;
-    setBlocks(newBlocks);
-
-    handleApiCall(index); // Llamar a la API inmediatamente después de reanudar
+    setBlocks(prevBlocks => {
+      const newBlocks = [...prevBlocks];
+      newBlocks[index].isPaused = false;
+      newBlocks[index].state = 'running' as 'running';
+  
+      // Enviar la siguiente operación inmediatamente después de reanudar
+      handleApiCall(index);
+  
+      // Configurar el intervalo para las siguientes operaciones
+      const intervalId = setInterval(() => handleApiCall(index), 120000); // Reiniciar el intervalo a 2 minutos
+      newBlocks[index].intervalId = intervalId;
+  
+      return newBlocks;
+    });
   };
 
   const finalizeBlock = (index: number) => {
