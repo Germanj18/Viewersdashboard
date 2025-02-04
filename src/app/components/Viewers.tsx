@@ -14,6 +14,8 @@ const Viewers = () => {
   const [editOperations, setEditOperations] = useState<number>(0);
   const [editServiceId, setEditServiceId] = useState<number>(0);
   const [editCount, setEditCount] = useState<number>(0);
+  const [editAutoStart, setEditAutoStart] = useState<boolean>(false);
+  const [editStartTime, setEditStartTime] = useState<string>('');
 
   const handleLinkChange = (link: string) => {
     setLink(link);
@@ -106,14 +108,17 @@ const Viewers = () => {
     setEditOperations(block.totalOperations || 0);
     setEditServiceId(block.serviceId || 0);
     setEditCount(block.count || 0);
+    setEditAutoStart(block.autoStart || false);
+    setEditStartTime(block.startTime || '');
   };
-
   const handleSaveEdit = () => {
     if (editIndex !== null) {
       editBlock(editIndex, {
         totalOperations: editOperations,
         serviceId: editServiceId,
         count: editCount,
+        autoStart: editAutoStart,
+        startTime: editStartTime,
       });
       setEditIndex(null);
     }
@@ -140,6 +145,11 @@ const Viewers = () => {
         {blocks.map((block, index) => (
           <div key={index} className={`block ${theme}`}>
             <h2 className="block-title">{block.title}</h2>
+            {block.autoStart && block.startTime && (
+    <div className="auto-start-info">
+      Configurado para iniciar automáticamente a las {block.startTime}
+    </div>
+  )}
             {(block.state === 'paused' || block.state === 'completed') && (
               <button onClick={() => generateExcel(block)} className="download-icon">
                 <span className="icon-download"></span>
@@ -241,20 +251,20 @@ const Viewers = () => {
           </div>
         </div>
       )}
-      {editIndex !== null && (
-        <div className="modal">
-          <div className={`modal-content ${theme}`}>
-            <h2>Editar Bloque</h2>
-            <label>
-              Cantidad de Operaciones:
-              <input
-                type="number"
-                value={editOperations}
-                onChange={(e) => setEditOperations(Number(e.target.value))}
-                className={`input-${theme}`}
-              />
-            </label>
-            <label>
+     {editIndex !== null && (
+  <div className="modal">
+    <div className={`modal-content ${theme}`}>
+      <h2>Editar Bloque</h2>
+      <label>
+        Cantidad de Operaciones:
+        <input
+          type="number"
+          value={editOperations}
+          onChange={(e) => setEditOperations(Number(e.target.value))}
+          className={`input-${theme}`}
+        />
+      </label>
+      <label>
               Duración:
               <select
                 value={editServiceId}
@@ -279,15 +289,34 @@ const Viewers = () => {
                 className={`input-${theme}`}
               />
             </label>
-            <button onClick={handleSaveEdit} className="save-button">
-              Guardar
-            </button>
-            <button onClick={() => setEditIndex(null)} className="cancel-button">
-              Cancelar
-            </button>
-          </div>
-        </div>
+      <label>
+        Inicio Automático:
+        <input
+          type="checkbox"
+          checked={editAutoStart}
+          onChange={(e) => setEditAutoStart(e.target.checked)}
+        />
+      </label>
+      {editAutoStart && (
+        <label>
+          Hora de Inicio:
+          <input
+            type="time"
+            value={editStartTime}
+            onChange={(e) => setEditStartTime(e.target.value)}
+            className={`input-${theme}`}
+          />
+        </label>
       )}
+      <button onClick={handleSaveEdit} className="save-button">
+        Guardar
+      </button>
+      <button onClick={() => setEditIndex(null)} className="cancel-button">
+        Cancelar
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 };
