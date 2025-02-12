@@ -113,6 +113,8 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return 240;
       case 460:
         return 360;
+      case 657:
+        return 480;  
       default:
         return 0;
     }
