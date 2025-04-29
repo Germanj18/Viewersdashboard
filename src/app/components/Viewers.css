@@ -1,0 +1,364 @@
+.viewers-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  position: relative;
+}
+
+.total-viewers-header {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 15px;
+  font-weight: bold;
+  width: 250px;
+  text-align: right;
+}
+
+.input-link {
+  margin-bottom: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.input-link.dark {
+  background-color: black;
+  border: 1px solid hsl(240, 1%, 14%);
+  color: white;
+}
+
+.input-link.light {
+  background-color: white;
+  color: black;
+}
+
+.blocks-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  width: 100%;
+}
+
+.block {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 20px;
+  width: 300px;
+  position: relative;
+}
+
+.block.dark {
+  background-color: black;
+  color: white;
+  border: 1px solid #444;
+}
+
+.block-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.status-success {
+  color: green;
+  margin-right: 5px;
+}
+
+.status-error {
+  color: red;
+  margin-right: 5px;
+}
+
+.status-pending {
+  color: gray;
+  margin-right: 5px;
+}
+
+.timestamp {
+  font-size: 12px;
+  color: gray;
+}
+
+.order-status {
+  font-size: 12px;
+  color: blue;
+  margin-left: 5px;
+}
+
+.block-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.block-controls button {
+  flex: 1;
+  padding: 5px 10px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.start-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.pause-button {
+  background-color: #ff9800;
+  color: white;
+}
+
+.resume-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.finalize-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.reset-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.edit-button {
+  background-color: #ff9800;
+  color: white;
+}
+
+.download-icon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #2196f3;
+}
+
+.icon-download {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 10px solid #2196f3;
+}
+
+.completed-message {
+  color: green;
+  font-weight: bold;
+}
+
+.total-viewers {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 12px;
+  color: gray;
+}
+
+.warning-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.warning-content {
+  background: white;
+  padding: 20px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.warning-content.dark {
+  background: #333;
+  color: white;
+}
+
+.warning-content.light {
+  background: white;
+  color: black;
+}
+
+.continue-button,
+.cancel-button {
+  margin: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.continue-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
+.modal-content.dark {
+  background: black;
+  color: white;
+  border: 1px solid #444;
+}
+
+.modal-content.light {
+  background: white;
+  color: black;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.input-dark {
+  background-color: #050505;
+  color: white;
+  border: 1px solid #555;
+}
+
+.input-light {
+  background-color: white;
+  color: black;
+}
+
+.operations-container {
+  max-height: 60vh; /* Limitar la altura máxima del contenedor de operaciones */
+  overflow-y: auto; /* Habilitar el scroll vertical */
+  display: flex;
+  flex-direction: column; /* Asegurar que las operaciones se vean una debajo de la otra */
+  gap: 10px; /* Espacio entre cada operación */
+}
+
+.operation-config {
+  display: flex;
+  flex-direction: row; /* Asegurar que los inputs dentro de cada operación se vean uno al lado del otro */
+  gap: 10px; /* Espacio entre los inputs dentro de cada operación */
+}
+
+.operation-config label {
+  flex: 1; /* Asegurar que los labels ocupen el mismo espacio */
+}
+
+.convert-button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.close-button {
+  background-color: #f44336;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.upload-button {
+  background-color: #2196f3;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.save-button,
+.close-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.save-button {
+  background: #4caf50;
+  color: white;
+}
+
+.bulk-edit-container {
+  margin-bottom: 15px;
+}
+
+.bulk-update-button {
+  background-color: #0d0f10;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}

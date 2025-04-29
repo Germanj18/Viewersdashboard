@@ -1,0 +1,65 @@
+/* Agregar estilos para la tarjeta del formulario de inicio de sesión */
+.modal-card {
+    background-color: black;
+    color: white;
+    border: 1px solid #444;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  
+  .modal-card label {
+    display: block;
+    margin-bottom: 8px;
+  }
+  
+  .modal-card input {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 16px;
+    border: 1px solid #555;
+    border-radius: 4px;
+    background-color: #333;
+    color: white;
+  }
+  
+  .modal-card button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .modal-card button:hover {
+    background-color: #45a049;
+  }
+  
+  .modal-card .password-container {
+    position: relative;
+  }
+  
+  .modal-card .password-container input {
+    padding-right: 40px; /* Espacio para el botón de mostrar/ocultar contraseña */
+  }
+  
+  .modal-card .password-container button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    padding: 0; /* Asegurarse de que el botón no tenga padding */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* Ajustar el ancho del botón */
+    height: 30px; /* Ajustar la altura del botón */
+  }

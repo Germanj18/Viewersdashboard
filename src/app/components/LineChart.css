@@ -1,0 +1,268 @@
+/* LineChart.css */
+
+.card-chart {
+  background-color: #ffffff; /* Fondo blanco para modo claro */
+  color: #000000; /* Texto negro para modo claro */
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 24px;
+  margin: 16px;
+}
+
+.card-chart.dark {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+  color: #ffffff; /* Texto blanco para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
+}
+
+.chart-container {
+  position: relative;
+  min-height: 300px;
+  max-height: 400px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Centrar horizontalmente */
+}
+
+.chart-container.dark {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+}
+
+.chart-container canvas {
+  width: 100% !important;
+  height: auto !important;
+}
+
+.expand-text {
+  margin-top: -5px; /* Ajusta esto si es necesario */
+  cursor: pointer;
+  font-size: 14px; /* Tamaño de texto */
+  text-align: center;
+  color: inherit; /* Heredar color del tema */
+  margin-bottom: 10px; /* Espacio debajo del texto */
+}
+
+.expand-text.dark {
+  color: #ffffff; /* Texto blanco para modo oscuro */
+}
+
+.expand-text:not(.dark) {
+  color: #000000; /* Texto negro para modo claro */
+}
+
+.combined-chart-container {
+  width: 100%;
+  max-width: 1000px;
+  height: 400px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.charts-grid-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+  max-width: 1000px;
+}
+
+.button-combine, .button-revert {
+  background-color: #000000; /* Fondo negro para modo claro */
+  color: #ffffff; /* Texto blanco para modo claro */
+  border: none;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.button-combine.dark, .button-revert.dark {
+  background-color: #ffffff; /* Fondo blanco para modo oscuro */
+  color: #000000; /* Texto negro para modo oscuro */
+}
+
+.button-combine:hover, .button-revert:hover {
+  background-color: #cccccc; /* Fondo gris claro */
+}
+
+.selection-list {
+  position: absolute;
+  background-color: #ffffff; /* Fondo blanco para modo claro */
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2); /* Sombra negra para modo claro */
+  z-index: 1;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  display: none;
+  transition: opacity 0.3s ease;
+}
+
+.selection-list.dark {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+  box-shadow: 0px 8px 16px 0px rgba(255, 255, 255, 0.2); /* Sombra blanca para modo oscuro */
+}
+
+.selection-list.show {
+  display: block;
+}
+
+.selection-list-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.selection-list-checkbox {
+  margin-right: 10px;
+}
+
+.selection-list-label {
+  font-size: 16px;
+  color: #000000; /* Texto negro para modo claro */
+}
+
+.selection-list-label.dark {
+  color: #ffffff; /* Texto blanco para modo oscuro */
+}
+
+.selection-list-label:hover {
+  background-color: #cccccc; /* Fondo gris claro */
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content-chart {
+  background-color: #ffffff; /* Fondo blanco para modo claro */
+  padding: 0;
+  border-radius: 15px;
+  width: 95%;
+  max-width: 70%;
+  height: 70%;
+  position: relative;
+  z-index: 1001;
+  border: none; /* Sin borde para modo claro */
+}
+
+.modal-content-chart.dark {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+  border: 1px solid hsl(240, 1%, 14%);
+}
+
+.modal-chart {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  color: #000000; /* Texto negro para modo claro */
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.close-button.dark {
+  color: #ffffff; /* Texto blanco para modo oscuro */
+}
+
+.view-mode-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.button-toggle {
+  background-color: #000000; /* Fondo negro para modo claro */
+  color: #ffffff; /* Texto blanco para modo claro */
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.button-toggle.dark {
+  background-color: #ffffff; /* Fondo blanco para modo oscuro */
+  color: #000000; /* Texto negro para modo oscuro */
+}
+
+.button-toggle:hover {
+  background-color: #cccccc; /* Fondo gris claro */
+}
+
+.channel-select {
+  padding: 10px;
+  color: #000000; /* Texto negro para modo claro */
+  background-color: #ffffff; /* Fondo blanco para modo claro */
+  border: none;
+  border-radius: 5px;
+}
+
+.channel-select.dark {
+  color: #ffffff; /* Texto blanco para modo oscuro */
+  background-color: #000000; /* Fondo negro para modo oscuro */
+}
+
+.channel-select option {
+  background-color: #ffffff; /* Fondo blanco para modo claro */
+  color: #000000; /* Texto negro para modo claro */
+}
+
+.channel-select.dark option {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+  color: #ffffff; /* Texto blanco para modo oscuro */
+}
+
+/* Estilos para el filtro de rango horario */
+.time-range-filters {
+  display: flex;
+  
+  margin-bottom: 16px;
+}
+
+.time-range-filters label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 14px;
+  color: inherit; /* Heredar color del tema */
+  padding: 5px;
+}
+
+.time-range-filters input[type="time"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  margin-top: 4px;
+}
+
+.time-range-filters input[type="time"].dark {
+  background-color: #000000; /* Fondo negro para modo oscuro */
+  color: #ffffff; /* Texto blanco para modo oscuro */
+}
