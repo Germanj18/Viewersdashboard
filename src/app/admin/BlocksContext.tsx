@@ -141,81 +141,95 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   };
 
   const generateExcel = (block: Block) => {
-    // Crear el resumen para el Excel
-    const summary = block.status.map((status) => ({
-      'Estado': status.status,
-      'Mensaje': status.message,
-      'Timestamp': status.timestamp,
-      'Order ID': status.orderId,
-      'Order Status': status.orderStatus,
-      'Duración (minutos)': status.duration,
-      'Cantidad de Viewers': status.count,
-      'Costo de la Operación': status.details?.res?.sum || 0,
-      ...status.details,
-    }));
-
-    // Generar intervalos de tiempo desde las 10:25 AM hasta las 23:00 PM
-    const startTime = new Date("1970-01-01T10:25:00Z");
-    const endTime = new Date("1970-01-01T23:00:00Z");
-    const timeIntervals: { Hora: string; [key: string]: number | string }[] = [];
-
-    let currentTime = new Date(startTime);
-
-    // Inicializar el arreglo de intervalos de tiempo
-    while (currentTime <= endTime) {
-      timeIntervals.push({ Hora: currentTime.toISOString().substr(11, 5) });
-      currentTime = new Date(currentTime.getTime() + 60000); // Incremento de 1 minuto
-    }
-
-    // Crear una fila para los costos de cada operación (primera fila del Excel)
-    const costRow: { Hora: string; [key: string]: number | string } = { Hora: 'Costo' };
-
-    // Rellenar las columnas de cada operación
-    block.status.forEach((status) => {
-      if (status.status === 'success' && status.count && status.timestamp) {
-        const operationStartTime = new Date(`1970-01-01T${status.timestamp}Z`);
-        const startTimeString = operationStartTime.toISOString().substr(11, 5);
-        const duration = status.duration || 0;
-        const orderIdColumn = `Operación ${status.orderId}`;
-
-        // Añadir el costo de la operación en la fila de costos
-        if (!(orderIdColumn in costRow)) {
-          costRow[orderIdColumn] = status.details?.res?.sum || 0;
+    try {
+      console.log(`Generando Excel para el bloque: ${block.title}`);
+  
+      // Crear el resumen para el Excel
+      const summary = block.status.map((status) => ({
+        'Estado': status.status,
+        'Mensaje': status.message,
+        'Timestamp': status.timestamp,
+        'Order ID': status.orderId,
+        'Order Status': status.orderStatus,
+        'Duración (minutos)': status.duration,
+        'Cantidad de Viewers': status.count,
+        'Costo de la Operación': status.details?.res?.sum || 0,
+        ...status.details,
+      }));
+  
+      // Generar intervalos de tiempo desde las 10:25 AM hasta las 23:00 PM
+      const startTime = new Date("1970-01-01T10:25:00Z");
+      const endTime = new Date("1970-01-01T23:00:00Z");
+      const timeIntervals: { Hora: string; [key: string]: number | string }[] = [];
+  
+      let currentTime = new Date(startTime);
+  
+      // Inicializar el arreglo de intervalos de tiempo
+      while (currentTime <= endTime) {
+        if (!isNaN(currentTime.getTime())) {
+          timeIntervals.push({ Hora: currentTime.toISOString().substr(11, 5) });
+        } else {
+          console.error('Fecha inválida detectada durante la generación de intervalos:', currentTime);
         }
-
-        // Crear una columna para esta operación en los intervalos de tiempo si no existe
-        timeIntervals.forEach((interval) => {
-          if (!(orderIdColumn in interval)) {
-            interval[orderIdColumn] = '';
-          }
-        });
-
-        // Encontrar el índice de la hora de inicio de la operación en los intervalos de tiempo
-        const startIndex = timeIntervals.findIndex((entry) => entry.Hora === startTimeString);
-
-        // Rellenar los datos en los intervalos correspondientes
-        if (startIndex !== -1) {
-          for (let i = 0; i < duration && startIndex + i < timeIntervals.length; i++) {
-            timeIntervals[startIndex + i][orderIdColumn] = status.count;
-          }
-        }
+        currentTime = new Date(currentTime.getTime() + 60000); // Incremento de 1 minuto
       }
-    });
-
-    // Añadir la fila de costos al inicio del arreglo de intervalos
-    const allRows = [costRow, ...timeIntervals];
-
-    // Crear hojas en el libro de Excel
-    const wsSummary = XLSX.utils.json_to_sheet(summary);
-    const wsViewers = XLSX.utils.json_to_sheet(allRows);
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen de Operaciones');
-    XLSX.utils.book_append_sheet(wb, wsViewers, 'Viewers por Minuto');
-
-    XLSX.writeFile(wb, `${block.title}.xlsx`);
+  
+      // Crear una fila para los costos de cada operación (primera fila del Excel)
+      const costRow: { Hora: string; [key: string]: number | string } = { Hora: 'Costo' };
+  
+      // Rellenar las columnas de cada operación
+      block.status.forEach((status) => {
+        if (status.status === 'success' && status.count && status.timestamp) {
+          const operationStartTime = new Date(`1970-01-01T${status.timestamp}Z`);
+          if (!isNaN(operationStartTime.getTime())) {
+            const startTimeString = operationStartTime.toISOString().substr(11, 5);
+            const duration = status.duration || 0;
+            const orderIdColumn = `Operación ${status.orderId}`;
+  
+            // Añadir el costo de la operación en la fila de costos
+            if (!(orderIdColumn in costRow)) {
+              costRow[orderIdColumn] = status.details?.res?.sum || 0;
+            }
+  
+            // Crear una columna para esta operación en los intervalos de tiempo si no existe
+            timeIntervals.forEach((interval) => {
+              if (!(orderIdColumn in interval)) {
+                interval[orderIdColumn] = '';
+              }
+            });
+  
+            // Encontrar el índice de la hora de inicio de la operación en los intervalos de tiempo
+            const startIndex = timeIntervals.findIndex((entry) => entry.Hora === startTimeString);
+  
+            // Rellenar los datos en los intervalos correspondientes
+            if (startIndex !== -1) {
+              for (let i = 0; i < duration && startIndex + i < timeIntervals.length; i++) {
+                timeIntervals[startIndex + i][orderIdColumn] = status.count;
+              }
+            }
+          } else {
+            console.error('Timestamp inválido detectado:', status.timestamp);
+          }
+        }
+      });
+  
+      // Añadir la fila de costos al inicio del arreglo de intervalos
+      const allRows = [costRow, ...timeIntervals];
+  
+      // Crear hojas en el libro de Excel
+      const wsSummary = XLSX.utils.json_to_sheet(summary);
+      const wsViewers = XLSX.utils.json_to_sheet(allRows);
+  
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen de Operaciones');
+      XLSX.utils.book_append_sheet(wb, wsViewers, 'Viewers por Minuto');
+  
+      XLSX.writeFile(wb, `${block.title}.xlsx`);
+      console.log(`Archivo Excel generado para el bloque: ${block.title}`);
+    } catch (error) {
+      console.error('Error al generar el archivo Excel:', error);
+    }
   };
-
   const handleApiCall = async (index: number) => {
     if (!link || blocks[index].state !== 'running') return;
   
@@ -343,12 +357,11 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         clearInterval(newBlocks[index].intervalId);
         newBlocks[index].intervalId = null;
       }
-      if (newBlocks[index].state !== 'completed') { 
+      if (newBlocks[index].state !== 'completed') {
+        console.log(`Finalizando bloque: ${newBlocks[index].title}`);
         newBlocks[index].state = 'completed';
         generateExcel(newBlocks[index]); // Asegurar que solo se llama una vez
       }
-      
-     
       newBlocks[index].autoStart = false;
       return newBlocks;
     });
