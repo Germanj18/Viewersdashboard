@@ -362,3 +362,12 @@
   border-radius: 4px;
   cursor: pointer;
 }
+.input-error {
+  border: 2px solid #e74c3c !important;
+  background: #fff0f0 !important;
+}
+.input-error.input-dark {
+  background: #2d0000 !important;
+  color: #fff !important;
+  border: 2px solid #e74c3c !important;
+}

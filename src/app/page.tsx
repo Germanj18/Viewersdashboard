@@ -5,9 +5,10 @@ import { useTheme } from './ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faChartLine, faSignInAlt, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import Charts from './components/Charts';
-
+//import LiveChart from './components/LiveChart';
 import SummaryTable from './components/SummaryTable';
 import Modal from './components/Modal';
+import { useRouter } from 'next/navigation';
 
 import 'animate.css';
 import 'slick-carousel/slick/slick.css';
@@ -19,17 +20,12 @@ import './page.css';
 const logoVerde = '/logo-expansion-verde.png';
 
 interface UploadedData {
-  date: string;
-  hour: string;
-  luzu: number;
-  olga: number;
-  gelatina: number;
-  blender: number;
-  lacasa: number;
-  vorterix: number;
-  bondi: number;
-  carajo: number;
-  azz: number;
+  channel_name: string;
+  fecha: string;
+  hora: string;
+  youtube: number;
+  likes: number;
+  title: string;
 }
 
 interface UploadedDataChannel extends UploadedData {
@@ -111,7 +107,8 @@ export default function Home() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(false); // Estado para el preloader
-
+  const [showLiveChart, setShowLiveChart] = useState(false); // Estado para mostrar el gráfico en vivo
+ const router = useRouter();
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
@@ -143,7 +140,7 @@ export default function Home() {
     setIsLoading(false); // Ocultar preloader cuando los gráficos estén renderizados
   };
 
-  return (
+return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
       <header className={`w-full flex justify-between items-center p-4 shadow-md ${theme === 'dark' ? 'header-dark' : 'header-light'}`}>
         <div className="flex items-center">
@@ -154,6 +151,19 @@ export default function Home() {
           <button onClick={toggleTheme} className="btn btn-theme mr-4 transition-transform transform hover:scale-110">
             {theme === 'dark' ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />}
           </button>
+          {/* Nuevo botón para ir a Admin */}
+       <button
+  onClick={() => {
+    if (session) {
+      router.push('/admin');
+    } else {
+      handleSignInClick(); // Esto abre el modal de login
+    }
+  }}
+  className="btn btn-secondary p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700 transition-transform transform hover:scale-110 mr-2"
+>
+  Ir a Admin
+</button>
           {status === 'loading' ? (
             <p>Cargando...</p>
           ) : !session ? (
@@ -172,14 +182,14 @@ export default function Home() {
 
       <main className="flex-grow flex">
         <div className={`w-64 p-4 shadow-md ${theme === 'dark' ? 'bg-[#1e1e1e] text-white' : 'bg-white text-black'}`}>
-          <button 
+        {/**<button 
             onClick={handleConsultMetricsClick} 
             className="btn btn-primary w-full mb-4 p-2 rounded-lg text-white hover:bg-gray-900 transition-transform transform hover:scale-110" 
             style={{ backgroundColor: '#4CAF50' }}
           >
             <FontAwesomeIcon icon={faChartLine} className="mr-2" />
             Consultar Métricas
-          </button>
+          </button> */}  
 
           {showDateInputs && (
             <div className="flex flex-col space-y-4">
@@ -210,23 +220,30 @@ export default function Home() {
           {isLoading ? (
             <Preloader />
           ) : (
-            data.length > 0 && (
-              <>
+            <>
+            {/* {showLiveChart && (
                 <section className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Gráficos de Línea</h2>
-                  <Charts data={data} onRendered={handleChartsRendered} />
+                  <h2 className="text-2xl font-bold mb-4">Gráfico en Vivo</h2>
+                  <LiveChart />
                 </section>
-                <section className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Gráficos de Barras</h2>
-                  <div className="flex flex-col md:flex-row justify-between w-full space-y-4 md:space-y-0 md:space-x-4">
-                   
-                    <div className="chart-container-small-sumary w-full md:w-1/2">
-                      <SummaryTable data={data} onRendered={handleChartsRendered} />
+              )}*/}
+              {data.length > 0 && (
+                <>
+                  <section className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4">Gráficos de Línea</h2>
+                    <Charts data={data} onRendered={handleChartsRendered} />
+                  </section>
+                  <section className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4">Gráficos de Barras</h2>
+                    <div className="flex flex-col md:flex-row justify-between w-full space-y-4 md:space-y-0 md:space-x-4">
+                      <div className="chart-container-small-sumary w-full md:w-1/2">
+                        <SummaryTable data={data} onRendered={handleChartsRendered} />
+                      </div>
                     </div>
-                  </div>
-                </section>
-              </>
-            )
+                  </section>
+                </>
+              )}
+            </>
           )}
 
           <Modal isOpen={isModalOpen} onClose={handleModalClose} />

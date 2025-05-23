@@ -288,24 +288,32 @@ const Viewers = () => {
                 <option value={657}>8h</option>
               </select>
             </label>
-            <label>
-              Cantidad:
-              <input
-                type="number"
-                value={editCount}
-                onChange={(e) => setEditCount(Number(e.target.value))}
-                className={`input-${theme}`}
-              />
-            </label>
-            <label>
-              Cantidad a Restar/Sumar:
-              <input
-                type="number"
-                value={editDecrement}
-                onChange={(e) => setEditDecrement(Number(e.target.value))}
-                className={`input-${theme}`}
-              />
-            </label>
+           <div style={{ color: '#4CAF50', fontWeight: 'bold', marginBottom: 8 }}>
+        Solo se permiten múltiplos de 10. Ejemplo: 30, 40, 100, 150...
+      </div>
+      <label>
+        Cantidad:
+        <input
+          type="number"
+          min={0}
+          step={10}
+          value={editCount}
+          onChange={(e) => setEditCount(Number(e.target.value))}
+          className={`input-${theme} ${editCount % 10 !== 0 ? 'input-error' : ''}`}
+        />
+      </label>
+      <label>
+        Cantidad a Restar/Sumar:
+        <input
+          type="number"
+          min={0}
+          step={10}
+          value={editDecrement}
+          onChange={(e) => setEditDecrement(Number(e.target.value))}
+          className={`input-${theme} ${editDecrement % 10 !== 0 ? 'input-error' : ''}`}
+        />
+      </label>
+         
             <label>
               Operación:
               <select
