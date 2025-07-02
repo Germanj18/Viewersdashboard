@@ -5,8 +5,8 @@ import { useTheme } from '../ThemeContext';
 import Preloader from '../components/Preloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import MercadoPagoPayment from '../components/MercadoPagoPayment';
-// import MercadoPagoPaymentReact from '../components/MercadoPagoPaymentReact'; // Versión alternativa con SDK React
+import MercadoPagoPaymentReactFixed from '../components/MercadoPagoPaymentReactFixed';
+// import MercadoPagoPayment from '../components/MercadoPagoPayment'; // Versión vanilla JS
 
 export default function PagoPage() {
   const { data: session, status } = useSession();
@@ -46,8 +46,8 @@ export default function PagoPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center p-8">
         <div className={`w-full max-w-2xl p-8 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className="text-3xl font-bold text-center mb-8">Procesar Pago</h2>
-          <MercadoPagoPayment />
+          <h2 className="text-3xl font-bold text-center mb-8">ServicioAnalisisDatos</h2>
+          <MercadoPagoPaymentReactFixed />
         </div>
       </main>
     </div>

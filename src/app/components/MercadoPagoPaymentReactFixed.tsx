@@ -1,67 +1,29 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeContext';
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
-// Declarar tipos para el SDK
-declare global {
-  interface Window {
-    MercadoPago: any;
-  }
+// Inicializar Mercado Pago con tu public key
+if (typeof window !== 'undefined') {
+  initMercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY || '');
 }
 
-export default function MercadoPagoPayment() {
+export default function MercadoPagoPaymentReact() {
   const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(true);
-  const [mp, setMp] = useState<any>(null);
-  const [checkout, setCheckout] = useState<any>(null);
+  const [preferenceId, setPreferenceId] = useState('');
   const [error, setError] = useState('');
 
   // Configuración fija del servicio
   const FIXED_AMOUNT = 50000;
   const FIXED_DESCRIPTION = 'ServicioAnalisisDatos';
 
-  // Cargar SDK de Mercado Pago y crear el pago automáticamente
   useEffect(() => {
-    const initializeMercadoPago = async () => {
-      try {
-        // Cargar SDK
-        const script = document.createElement('script');
-        script.src = 'https://sdk.mercadopago.com/js/v2';
-        script.async = true;
-        
-        script.onload = async () => {
-          // Inicializar MercadoPago
-          const mercadopago = new window.MercadoPago(process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY);
-          setMp(mercadopago);
-          
-          // Crear pago automáticamente
-          await createPaymentAutomatically(mercadopago);
-        };
-
-        script.onerror = () => {
-          setError('Error al cargar Mercado Pago');
-          setIsLoading(false);
-        };
-
-        document.body.appendChild(script);
-
-        return () => {
-          if (document.body.contains(script)) {
-            document.body.removeChild(script);
-          }
-        };
-      } catch (error) {
-        setError('Error al inicializar');
-        setIsLoading(false);
-      }
-    };
-
-    initializeMercadoPago();
+    createPaymentAutomatically();
   }, []);
 
-  const createPaymentAutomatically = async (mercadopago: any) => {
+  const createPaymentAutomatically = async () => {
     try {
-      // Crear orden automáticamente con datos fijos
       const response = await fetch('/api/mercadopago/create-order', {
         method: 'POST',
         headers: {
@@ -76,18 +38,7 @@ export default function MercadoPagoPayment() {
       const data = await response.json();
 
       if (response.ok) {
-        // Crear checkout con la orden
-        const checkoutInstance = mercadopago.checkout({
-          preference: {
-            id: data.preferenceId
-          },
-          render: {
-            container: '.mercadopago-checkout',
-            label: 'Pagar $50.000',
-          }
-        });
-
-        setCheckout(checkoutInstance);
+        setPreferenceId(data.preferenceId);
         setIsLoading(false);
       } else {
         setError('Error al crear el pago: ' + data.error);
@@ -134,8 +85,14 @@ export default function MercadoPagoPayment() {
             </div>
           </div>
 
-          {/* Contenedor de Mercado Pago */}
-          <div className="mercadopago-checkout"></div>
+          {/* Wallet de Mercado Pago - Interfaz oficial */}
+          <div className="wallet-container bg-white rounded-lg shadow-lg">
+            {preferenceId && (
+              <Wallet 
+                initialization={{ preferenceId: preferenceId }}
+              />
+            )}
+          </div>
 
           {/* Información de seguridad */}
           <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
