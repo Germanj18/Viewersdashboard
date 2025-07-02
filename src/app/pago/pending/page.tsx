@@ -1,11 +1,13 @@
 "use client";
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../../ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import PaymentLoading from '../../components/PaymentLoading';
 
-export default function PaymentPending() {
+function PaymentPendingContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
@@ -53,5 +55,13 @@ export default function PaymentPending() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function PaymentPending() {
+  return (
+    <Suspense fallback={<PaymentLoading />}>
+      <PaymentPendingContent />
+    </Suspense>
   );
 }

@@ -1,11 +1,13 @@
 "use client";
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../../ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import PaymentLoading from '../../components/PaymentLoading';
 
-export default function PaymentFailure() {
+function PaymentFailureContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { theme } = useTheme();
@@ -61,5 +63,13 @@ export default function PaymentFailure() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function PaymentFailure() {
+  return (
+    <Suspense fallback={<PaymentLoading />}>
+      <PaymentFailureContent />
+    </Suspense>
   );
 }
