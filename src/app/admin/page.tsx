@@ -51,6 +51,12 @@ export default function AdminDashboard() {
             >
               Administrar Viewers
             </button>
+            <button
+              onClick={() => router.push('/pago')}
+              className="bg-green-500 text-white py-1 px-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300 mb-2 text-sm"
+            >
+              Pagos
+            </button>
           </aside>
 
           <main className="flex-1 flex flex-col items-center justify-start p-8">
