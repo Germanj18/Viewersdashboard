@@ -24,7 +24,7 @@ export default function MercadoPagoPaymentReact() {
 
   const createPaymentAutomatically = async () => {
     try {
-      const response = await fetch('/api/mercadopago/create-order', {
+      const response = await fetch('/api/mercadopago/create-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -41,12 +41,13 @@ export default function MercadoPagoPaymentReact() {
         setPreferenceId(data.preferenceId);
         setIsLoading(false);
       } else {
-        setError('Error al crear el pago: ' + data.error);
+        setError(`Error al crear el pago: ${data.error || 'Error desconocido'}`);
         setIsLoading(false);
+        console.error('API Error details:', data);
       }
     } catch (error) {
-      console.error('Error:', error);
-      setError('Error al procesar el pago');
+      console.error('Network Error:', error);
+      setError('Error de conexión al procesar el pago');
       setIsLoading(false);
     }
   };
@@ -63,14 +64,22 @@ export default function MercadoPagoPaymentReact() {
         </div>
       ) : error ? (
         <div className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-red-900' : 'bg-red-100'} text-center`}>
-          <h3 className="text-xl font-semibold text-red-600 mb-2">Error</h3>
+          <h3 className="text-xl font-semibold text-red-600 mb-2">Error al cargar el pago</h3>
           <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300"
-          >
-            Reintentar
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300 mx-2"
+            >
+              Reintentar
+            </button>
+            <button
+              onClick={() => window.open('/api/mercadopago/create-simple', '_blank')}
+              className="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 mx-2"
+            >
+              Debug API
+            </button>
+          </div>
         </div>
       ) : (
         <>
