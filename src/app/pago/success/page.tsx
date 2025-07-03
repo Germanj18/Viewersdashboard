@@ -34,18 +34,32 @@ function PaymentSuccessContent() {
         <div className={`w-full max-w-md p-8 rounded-lg shadow-lg text-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
           <FontAwesomeIcon icon={faCheckCircle} className="text-6xl text-green-500 mb-4" />
           <h2 className="text-2xl font-bold text-green-500 mb-4">¡Pago Exitoso!</h2>
-          <p className="text-lg mb-4">Tu pago ha sido procesado correctamente.</p>
+          <p className="text-lg mb-4">Tu servicio de análisis de datos ha sido confirmado.</p>
           
           {paymentId && (
             <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-4">
+              <h3 className="font-semibold text-green-600 mb-2">Detalles del Pago:</h3>
+              <p className="text-sm"><strong>Servicio:</strong> Análisis de Datos - ServiceDG</p>
+              <p className="text-sm"><strong>Monto:</strong> $50.000 ARS</p>
               <p className="text-sm"><strong>ID de Pago:</strong> {paymentId}</p>
               {status && <p className="text-sm"><strong>Estado:</strong> {status}</p>}
               {externalReference && <p className="text-sm"><strong>Referencia:</strong> {externalReference}</p>}
             </div>
           )}
 
+          <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg mb-4">
+            <h3 className="font-semibold text-blue-600 mb-2">Próximos Pasos:</h3>
+            <ul className="text-sm text-left space-y-1">
+              <li>• ✅ Pago confirmado y procesado</li>
+              <li>• 📧 Email de confirmación enviado</li>
+              <li>• 🔍 Análisis iniciado automáticamente</li>
+              <li>• 📞 Contacto en 24-48 horas</li>
+              <li>• 📊 Entrega en 5-7 días hábiles</li>
+            </ul>
+          </div>
+
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-            Recibirás un email de confirmación en breve.
+            Tu servicio digital está confirmado y será procesado inmediatamente.
           </p>
 
           <button

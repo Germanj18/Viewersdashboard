@@ -24,26 +24,58 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No amount' }, { status: 400 });
     }
 
-    // Crear preferencia mínima para checkout embebido
+    // Crear preferencia optimizada para liberación rápida de fondos
     const preference = {
       items: [{
-        title: description || 'ServicioAnalisisDatos',
+        id: 'SERVICEDG_ANALISIS_001',
+        title: 'Servicio de Análisis de Datos - ServiceDG',
+        description: 'Análisis completo de métricas y datos empresariales',
+        category_id: 'services', // Categoría de servicios
         unit_price: parseFloat(amount),
         quantity: 1,
+        currency_id: 'ARS',
       }],
-      // Solo URLs de retorno, sin auto_return para evitar conflictos
+      // Información del negocio para mejorar confianza
+      purpose: 'wallet_purchase', // Compra de servicio
+      marketplace: 'NONE', // No es marketplace
+      
+      // URLs de retorno
       back_urls: {
         success: `${process.env.NEXTAUTH_URL}/pago/success`,
         failure: `${process.env.NEXTAUTH_URL}/pago/failure`,
         pending: `${process.env.NEXTAUTH_URL}/pago/pending`,
       },
-      // Configuraciones adicionales para mejor experiencia
+      
+      // Configuraciones de pago
       payment_methods: {
-        installments: 12, // Hasta 12 cuotas
+        installments: 12,
+        default_installments: 1, // Promover pago en una cuota
+        excluded_payment_methods: [], // Permitir todos los métodos
+        excluded_payment_types: [], // Permitir todos los tipos
       },
+      
+      // Información adicional para acelerar liberación
+      metadata: {
+        business_type: 'services',
+        service_type: 'data_analysis',
+        delivery_type: 'digital',
+        seller_category: 'professional_services'
+      },
+      
+      // URLs y referencias
       notification_url: `${process.env.NEXTAUTH_URL}/api/mercadopago/webhook`,
-      external_reference: `servicedg-${Date.now()}`,
-      statement_descriptor: 'SERVICEDG',
+      external_reference: `SERVICEDG-ANALISIS-${Date.now()}`,
+      statement_descriptor: 'SERVICEDG ANALISIS',
+      
+      // Configuraciones de experiencia
+      shipments: {
+        mode: 'not_specified', // Servicio digital, no requiere envío
+      },
+      
+      // Configuración de expiración (24 horas)
+      expires: true,
+      expiration_date_from: new Date().toISOString(),
+      expiration_date_to: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     };
 
     console.log('Sending to MP:', JSON.stringify(preference, null, 2));
