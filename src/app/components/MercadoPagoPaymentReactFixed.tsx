@@ -15,7 +15,7 @@ export default function MercadoPagoPaymentReact() {
   const [error, setError] = useState('');
 
   // Configuración fija del servicio
-  const FIXED_AMOUNT = 50000;
+  const FIXED_AMOUNT = 1000;
   const FIXED_DESCRIPTION = 'ServicioAnalisisDatos';
 
   useEffect(() => {
