@@ -1,37 +1,152 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# ServiceDG Dashboard - Sistema de Pagos
 
-## Getting Started
+Dashboard profesional para servicios de análisis de datos con sistema de pagos integrado usando Mercado Pago y Stripe.
 
-First, run the development server:
+## 🚀 Características
+
+- **Dashboard de Analytics**: Visualización de datos y métricas
+- **Sistema de Pagos Dual**:
+  - **Mercado Pago**: Pagos en ARS con checkout oficial
+  - **Stripe**: Pagos en USD con tarjetas internacionales
+- **Autenticación**: Sistema seguro con NextAuth
+- **UI Moderna**: Interfaz responsive con soporte para modo oscuro
+- **Base de Datos**: PostgreSQL con Prisma ORM
+
+## 🛠️ Configuración
+
+### 1. Instalar Dependencias
+
+```bash
+npm install
+```
+
+### 2. Configurar Variables de Entorno
+
+Copia `.env.example` a `.env.local` y configura las variables:
+
+```bash
+cp .env.example .env.local
+```
+
+#### Variables Requeridas:
+
+```env
+# Base de datos
+DATABASE_URL="postgresql://username:password@localhost:5432/database_name"
+
+# NextAuth
+NEXTAUTH_SECRET="your-nextauth-secret-here"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Mercado Pago
+MERCADOPAGO_ACCESS_TOKEN="your-mercadopago-access-token"
+NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY="your-mercadopago-public-key"
+
+# Stripe
+STRIPE_SECRET_KEY="sk_test_your-stripe-secret-key"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_your-stripe-publishable-key"
+```
+
+### 3. Configurar Base de Datos
+
+```bash
+# Generar cliente Prisma
+npx prisma generate
+
+# Ejecutar migraciones
+npx prisma db push
+```
+
+### 4. Ejecutar el Proyecto
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 💳 Configuración de Pagos
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Mercado Pago
 
-## Learn More
+1. Crea una cuenta en [Mercado Pago Developers](https://www.mercadopago.com.ar/developers)
+2. Obtén tus credenciales de prueba/producción
+3. Configura las variables `MERCADOPAGO_ACCESS_TOKEN` y `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
 
-To learn more about Next.js, take a look at the following resources:
+**Características:**
+- Pagos en pesos argentinos (ARS)
+- Checkout oficial de Mercado Pago
+- Soporte para todos los métodos de pago locales
+- Financiación disponible
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Stripe
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. Crea una cuenta en [Stripe Dashboard](https://dashboard.stripe.com)
+2. Obtén tus claves API de prueba/producción
+3. Configura las variables `STRIPE_SECRET_KEY` y `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
-## Deploy on Vercel
+**Características:**
+- Pagos en dólares estadounidenses (USD)
+- Tarjetas de crédito/débito internacionales
+- Procesamiento global
+- Máxima seguridad
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔧 Scripts Disponibles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-# Viewersdashboard
+```bash
+npm run dev          # Servidor de desarrollo
+npm run build        # Build para producción
+npm run start        # Servidor de producción
+npm run lint         # Linter
+```
+
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── app/
+│   ├── admin/           # Panel administrativo
+│   ├── api/             # APIs del backend
+│   │   ├── mercadopago/ # APIs de Mercado Pago
+│   │   └── stripe/      # APIs de Stripe
+│   ├── components/      # Componentes React
+│   ├── pago/           # Páginas de pago
+│   └── lib/            # Utilidades
+├── public/             # Archivos estáticos
+└── migrations/         # Migraciones de base de datos
+```
+
+## 🚀 Despliegue
+
+### Variables de Entorno en Producción
+
+Asegúrate de configurar todas las variables de entorno en tu plataforma de despliegue:
+
+- **Vercel**: Ve a Project Settings > Environment Variables
+- **Railway**: Usa el dashboard de Railway
+- **Heroku**: Usa `heroku config:set`
+
+### Consideraciones de Seguridad
+
+1. **Nunca** expongas las claves secretas en el frontend
+2. Usa HTTPS en producción
+3. Valida todos los pagos en el backend
+4. Implementa webhooks para confirmación de pagos
+
+## 🧪 Testing
+
+### Tarjetas de Prueba Mercado Pago:
+- **Visa**: 4509 9535 6623 3704
+- **Mastercard**: 5031 7557 3453 0604
+
+### Tarjetas de Prueba Stripe:
+- **Visa**: 4242 4242 4242 4242
+- **Visa (Declined)**: 4000 0000 0000 0002
+
+## 📞 Soporte
+
+Para soporte técnico, contacta a ServiceDG.
+
+---
+
+**ServiceDG** - Soluciones profesionales de análisis de datos
