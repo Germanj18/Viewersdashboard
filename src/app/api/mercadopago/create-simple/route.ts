@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     });
 
     console.log('MP Response status:', response.status);
+
     
     
     if (!response.ok) {

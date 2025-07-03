@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       external_reference: `servicedg-${Date.now()}`,
     };
 
+    
     const response = await preference.create({ body: preferenceData });
 
     return NextResponse.json({

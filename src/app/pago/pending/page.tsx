@@ -12,6 +12,7 @@ function PaymentPendingContent() {
   const router = useRouter();
   const { theme } = useTheme();
   
+  
   const paymentId = searchParams.get('payment_id');
   const status = searchParams.get('status');
 

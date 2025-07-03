@@ -66,6 +66,7 @@ function PaymentFailureContent() {
   );
 }
 
+
 export default function PaymentFailure() {
   return (
     <Suspense fallback={<PaymentLoading />}>

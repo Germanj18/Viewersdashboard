@@ -10,19 +10,22 @@ if (typeof window !== 'undefined') {
 
 export default function MercadoPagoPaymentReact() {
   const { theme } = useTheme();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [preferenceId, setPreferenceId] = useState('');
   const [error, setError] = useState('');
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('ServicioAnalisisDatos');
+  const [showPayment, setShowPayment] = useState(false);
 
-  // Configuración fija del servicio
-  const FIXED_AMOUNT = 1000;
-  const FIXED_DESCRIPTION = 'ServicioAnalisisDatos';
+  const createPayment = async () => {
+    if (!amount || parseFloat(amount) <= 0) {
+      setError('Por favor ingresa un monto válido');
+      return;
+    }
 
-  useEffect(() => {
-    createPaymentAutomatically();
-  }, []);
+    setIsLoading(true);
+    setError('');
 
-  const createPaymentAutomatically = async () => {
     try {
       const response = await fetch('/api/mercadopago/create-simple', {
         method: 'POST',
@@ -30,8 +33,8 @@ export default function MercadoPagoPaymentReact() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          amount: FIXED_AMOUNT,
-          description: FIXED_DESCRIPTION,
+          amount: parseFloat(amount),
+          description: description,
         }),
       });
 
@@ -39,6 +42,7 @@ export default function MercadoPagoPaymentReact() {
 
       if (response.ok) {
         setPreferenceId(data.preferenceId);
+        setShowPayment(true);
         setIsLoading(false);
       } else {
         setError(`Error al crear el pago: ${data.error || 'Error desconocido'}`);
@@ -54,7 +58,62 @@ export default function MercadoPagoPaymentReact() {
 
   return (
     <div className="space-y-6">
-      {isLoading ? (
+      {!showPayment ? (
+        // Formulario para ingresar monto
+        <div className={`p-6 rounded-lg border-2 border-blue-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-blue-50'}`}>
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold text-blue-600 mb-2">ServicioAnalisisDatos</h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Análisis completo de datos para tu negocio - ServiceDG
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Descripción del Servicio</label>
+              <input
+                type="text"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className={`w-full px-4 py-3 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                placeholder="ServicioAnalisisDatos"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Monto a Pagar (ARS)</label>
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className={`w-full px-4 py-3 rounded-lg border text-2xl font-bold ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                placeholder="50000"
+                min="1"
+                step="1"
+              />
+              <p className="text-sm text-gray-500 mt-1">Ingresa el monto en pesos argentinos</p>
+            </div>
+
+            {error && (
+              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-red-900' : 'bg-red-100'} text-center`}>
+                <p className="text-red-600">{error}</p>
+              </div>
+            )}
+
+            <button
+              onClick={createPayment}
+              disabled={isLoading || !amount}
+              className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition duration-300 ${
+                isLoading || !amount 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {isLoading ? 'Preparando Pago...' : 'Continuar con el Pago'}
+            </button>
+          </div>
+        </div>
+      ) : isLoading ? (
         <div className="text-center py-12">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <h3 className="text-xl font-semibold mb-2">Preparando tu pago...</h3>
@@ -68,10 +127,14 @@ export default function MercadoPagoPaymentReact() {
           <p className="text-red-600 mb-4">{error}</p>
           <div className="space-y-2">
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                setShowPayment(false);
+                setError('');
+                setPreferenceId('');
+              }}
               className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300 mx-2"
             >
-              Reintentar
+              Volver
             </button>
             <button
               onClick={() => window.open('/api/mercadopago/create-simple', '_blank')}
@@ -86,11 +149,20 @@ export default function MercadoPagoPaymentReact() {
           {/* Información del servicio */}
           <div className={`p-6 rounded-lg border-2 border-blue-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-blue-50'}`}>
             <div className="text-center">
-              <h3 className="text-2xl font-bold text-blue-600 mb-2">ServicioAnalisisDatos</h3>
-              <p className="text-3xl font-bold mb-2">$50.000 ARS</p>
+              <h3 className="text-2xl font-bold text-blue-600 mb-2">{description}</h3>
+              <p className="text-3xl font-bold mb-2">${parseFloat(amount).toLocaleString('es-AR')} ARS</p>
               <p className="text-gray-600 dark:text-gray-400">
-                Análisis completo de datos para tu negocio - ServiceDG
+                Servicio profesional - ServiceDG
               </p>
+              <button
+                onClick={() => {
+                  setShowPayment(false);
+                  setPreferenceId('');
+                }}
+                className="mt-4 text-blue-600 hover:text-blue-800 text-sm font-medium"
+              >
+                ← Cambiar monto o descripción
+              </button>
             </div>
           </div>
 

@@ -46,7 +46,7 @@ export default function PagoPage() {
 
       <main className="flex-1 flex flex-col items-center justify-center p-8">
         <div className={`w-full max-w-2xl p-8 rounded-lg shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <h2 className="text-3xl font-bold text-center mb-8">ServicioAnalisisDatos</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Realizar Pago - ServiceDG</h2>
           <MercadoPagoPaymentReactFixed />
         </div>
       </main>

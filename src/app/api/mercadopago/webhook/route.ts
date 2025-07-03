@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
         email: paymentData.payer?.email,
       });
 
+      
       // Aquí puedes agregar lógica para actualizar tu base de datos
       // Por ejemplo, marcar un servicio como pagado, enviar emails, etc.
       

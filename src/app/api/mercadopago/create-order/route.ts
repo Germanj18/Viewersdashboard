@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
       auto_return: 'approved',
     };
 
+    
     console.log('Creating preference with data:', JSON.stringify(preferenceData, null, 2));
 
     // Llamar directamente a la API de Mercado Pago
