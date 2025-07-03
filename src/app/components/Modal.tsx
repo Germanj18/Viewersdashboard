@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { signIn } from 'next-auth/react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -38,7 +39,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="modal-card relative">
-        <img src="/servicedg-logo.svg" alt="ServiceDG" className="absolute top-4 right-4 w-8 h-8" />
+        <Image 
+          src="/servicedg-logo.svg" 
+          alt="ServiceDG" 
+          width={32}
+          height={32}
+          className="absolute top-4 right-4"
+        />
         <h2 className="text-2xl font-semibold mb-6 text-center text-white">Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-6 relative">

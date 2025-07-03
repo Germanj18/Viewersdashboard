@@ -267,7 +267,7 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
             <p>• Encriptación SSL de 256 bits</p>
             <p>• No almacenamos tu información de tarjeta</p>
             <p>• Procesamiento PCI DSS Level 1</p>
-            <p>• En tu estado de cuenta aparecerá como "*SERVICEDG"</p>
+            <p>• En tu estado de cuenta aparecerá como &quot;*SERVICEDG&quot;</p>
           </div>
         </div>
 
