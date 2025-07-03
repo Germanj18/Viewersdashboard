@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     console.log('MP Response status:', response.status);
     
+    
     if (!response.ok) {
       const errorData = await response.text();
       console.error('MP Error:', errorData);
