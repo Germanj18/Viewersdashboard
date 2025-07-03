@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       items: [
         {
           id: `item-${Date.now()}`,
-          title: description || 'Servicio de Métricas LaCasa',
+          title: description || 'ServicioAnalisisDatos',
           unit_price: amount,
           quantity: 1,
         },
@@ -50,8 +50,8 @@ export async function POST(request: NextRequest) {
         pending: `${process.env.NEXTAUTH_URL}/pago/pending`,
       },
       notification_url: `${process.env.NEXTAUTH_URL}/api/mercadopago/webhook`,
-      statement_descriptor: 'LACASA-METRICAS',
-      external_reference: `lacasa-order-${Date.now()}`,
+      statement_descriptor: 'SERVICEDG',
+      external_reference: `servicedg-order-${Date.now()}`,
       expires: false,
       auto_return: 'approved',
     };

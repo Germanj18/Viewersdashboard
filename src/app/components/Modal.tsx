@@ -38,7 +38,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="modal-card relative">
-        <img src="/logo-expansion-verde.png" alt="Logo" className="absolute top-4 right-4 w-8 h-8" />
+        <img src="/servicedg-logo.svg" alt="ServiceDG" className="absolute top-4 right-4 w-8 h-8" />
         <h2 className="text-2xl font-semibold mb-6 text-center text-white">Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-6 relative">

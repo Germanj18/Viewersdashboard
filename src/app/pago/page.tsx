@@ -32,7 +32,7 @@ export default function PagoPage() {
           >
             <FontAwesomeIcon icon={faArrowLeft} />
           </button>
-          <h1 className="text-2xl font-bold">Pagos - Metricas LaCasa</h1>
+          <h1 className="text-2xl font-bold">Servicios - ServiceDG</h1>
         </div>
         <div className="flex items-center space-x-4">
           <button

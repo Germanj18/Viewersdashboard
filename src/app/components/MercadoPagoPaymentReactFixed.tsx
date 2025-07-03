@@ -89,7 +89,7 @@ export default function MercadoPagoPaymentReact() {
               <h3 className="text-2xl font-bold text-blue-600 mb-2">ServicioAnalisisDatos</h3>
               <p className="text-3xl font-bold mb-2">$50.000 ARS</p>
               <p className="text-gray-600 dark:text-gray-400">
-                Análisis completo de datos y métricas para tu negocio
+                Análisis completo de datos para tu negocio - ServiceDG
               </p>
             </div>
           </div>

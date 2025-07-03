@@ -17,7 +17,7 @@ import Slider from 'react-slick';
 import Image from 'next/image';
 import './page.css';
 
-const logoVerde = '/logo-expansion-verde.png';
+const logoServiceDG = '/servicedg-logo.svg';
 
 interface UploadedData {
   channel_name: string;
@@ -144,7 +144,7 @@ return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
       <header className={`w-full flex justify-between items-center p-4 shadow-md ${theme === 'dark' ? 'header-dark' : 'header-light'}`}>
         <div className="flex items-center">
-          <Image src={logoVerde} alt="Logo Verde" width={50} height={50} className="mr-4" />
+          <Image src={logoServiceDG} alt="ServiceDG Logo" width={50} height={50} className="mr-4" />
           <h1 className="text-2xl font-bold">YouTube Viewers Analysis</h1>
         </div>
         <div className="flex items-center">

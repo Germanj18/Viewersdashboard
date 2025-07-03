@@ -42,8 +42,8 @@ export async function POST(request: NextRequest) {
         installments: 12, // Hasta 12 cuotas
       },
       notification_url: `${process.env.NEXTAUTH_URL}/api/mercadopago/webhook`,
-      external_reference: `lacasa-${Date.now()}`,
-      statement_descriptor: 'LACASA-ANALISIS',
+      external_reference: `servicedg-${Date.now()}`,
+      statement_descriptor: 'SERVICEDG',
     };
 
     console.log('Sending to MP:', JSON.stringify(preference, null, 2));

@@ -11,7 +11,7 @@ if (typeof window !== 'undefined') {
 export default function MercadoPagoPaymentReact() {
   const { theme } = useTheme();
   const [amount, setAmount] = useState('');
-  const [description, setDescription] = useState('Servicio de Métricas LaCasa');
+  const [description, setDescription] = useState('ServicioAnalisisDatos');
   const [isLoading, setIsLoading] = useState(false);
   const [preferenceId, setPreferenceId] = useState('');
   const [showWallet, setShowWallet] = useState(false);

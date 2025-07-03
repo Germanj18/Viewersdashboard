@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       // Obtener información del pago
       const paymentData = await payment.get({ id: paymentId });
       
-      console.log('Payment notification:', {
+      console.log('ServiceDG - Payment notification:', {
         id: paymentData.id,
         status: paymentData.status,
         external_reference: paymentData.external_reference,
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       
       if (paymentData.status === 'approved') {
         // Pago aprobado - aquí puedes ejecutar la lógica de negocio
-        console.log('✅ Pago aprobado:', paymentData.id);
+        console.log('✅ ServiceDG - Pago aprobado:', paymentData.id);
       }
     }
 
