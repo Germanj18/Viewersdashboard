@@ -24,22 +24,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No amount' }, { status: 400 });
     }
 
-    // Crear preferencia simple
+    // Crear preferencia mínima para checkout embebido
     const preference = {
       items: [{
         title: description || 'ServicioAnalisisDatos',
         unit_price: parseFloat(amount),
         quantity: 1,
       }],
+      // Solo URLs de retorno, sin auto_return para evitar conflictos
       back_urls: {
         success: `${process.env.NEXTAUTH_URL}/pago/success`,
         failure: `${process.env.NEXTAUTH_URL}/pago/failure`,
         pending: `${process.env.NEXTAUTH_URL}/pago/pending`,
       },
-      auto_return: 'approved',
+      // Configuraciones adicionales para mejor experiencia
+      payment_methods: {
+        installments: 12, // Hasta 12 cuotas
+      },
+      notification_url: `${process.env.NEXTAUTH_URL}/api/mercadopago/webhook`,
+      external_reference: `lacasa-${Date.now()}`,
+      statement_descriptor: 'LACASA-ANALISIS',
     };
 
-    console.log('Sending to MP:', preference);
+    console.log('Sending to MP:', JSON.stringify(preference, null, 2));
 
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
