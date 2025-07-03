@@ -71,13 +71,10 @@ export default function MercadoPagoPaymentReact() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2">Descripción del Servicio</label>
-              <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
-                placeholder="ServicioAnalisisDatos"
-              />
+              <div className={`w-full px-4 py-3 rounded-lg border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-gray-300' : 'bg-gray-100 border-gray-300 text-gray-700'}`}>
+                {description}
+              </div>
+              <p className="text-sm text-gray-500 mt-1">Servicio predefinido</p>
             </div>
 
             <div>
@@ -86,7 +83,11 @@ export default function MercadoPagoPaymentReact() {
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className={`w-full px-4 py-3 rounded-lg border text-2xl font-bold ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`}
+                className={`w-full px-4 py-3 rounded-lg border text-2xl font-bold placeholder-gray-400 ${
+                  theme === 'dark' 
+                    ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500' 
+                    : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                }`}
                 placeholder="50000"
                 min="1"
                 step="1"
