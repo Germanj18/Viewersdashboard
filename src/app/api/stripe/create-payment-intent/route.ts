@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
         external_reference: `servicedg-stripe-${Date.now()}`,
         amount_usd: amount.toString(),
       },
-      statement_descriptor: 'SERVICEDG',
+      statement_descriptor_suffix: 'SERVICEDG',
       automatic_payment_methods: {
         enabled: true,
       },

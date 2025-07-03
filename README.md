@@ -142,6 +142,13 @@ Asegúrate de configurar todas las variables de entorno en tu plataforma de desp
 ### Tarjetas de Prueba Stripe:
 - **Visa**: 4242 4242 4242 4242
 - **Visa (Declined)**: 4000 0000 0000 0002
+- **Mastercard**: 5555 5555 5555 4444
+- **American Express**: 3782 822463 10005
+
+**Notas importantes:**
+- Usa cualquier fecha futura para expiración (ej: 12/34)
+- Usa cualquier CVC de 3 dígitos (ej: 123)
+- En el estado de cuenta aparecerá como "*SERVICEDG"
 
 ## 📞 Soporte
 
