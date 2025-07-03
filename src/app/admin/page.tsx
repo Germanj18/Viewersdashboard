@@ -26,7 +26,7 @@ export default function AdminDashboard() {
     <BlocksProvider>
       <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
         <header className={`w-full flex justify-between items-center p-4 ${theme === 'dark' ? 'bg-black' : 'bg-white shadow-md'}`}>
-          <h1 className="text-2xl font-bold">Metricas LaCasa</h1>
+          <h1 className="text-2xl font-bold">ServiceDG Dashboard</h1>
           <div className="flex items-center space-x-4">
             <button
               onClick={toggleTheme}
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
         </div>
 
         <footer className={`w-full p-4 ${theme === 'dark' ? 'bg-black' : 'bg-white shadow-md'}`}>
-          <p className="text-center">© 2023 Metricas LaCasa. Todos los derechos reservados.</p>
+          <p className="text-center">© 2025 ServiceDG. Todos los derechos reservados.</p>
         </footer>
       </div>
     </BlocksProvider>
