@@ -44,8 +44,9 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
     cardExpiry: '',
     cardCvc: '',
   });
+  const [cardholderName, setCardholderName] = useState('');
 
-  const isFormComplete = cardComplete.cardNumber && cardComplete.cardExpiry && cardComplete.cardCvc;
+  const isFormComplete = cardComplete.cardNumber && cardComplete.cardExpiry && cardComplete.cardCvc && cardholderName.trim();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -81,7 +82,7 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
         payment_method: {
           card: elements.getElement(CardNumberElement)!,
           billing_details: {
-            name: 'Cliente ServiceDG',
+            name: cardholderName.trim() || 'Cliente ServiceDG',
           },
         },
       });
@@ -149,6 +150,27 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
       {/* Formulario de tarjeta */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-4">
+          {/* Nombre del titular */}
+          <div>
+            <label className="block text-sm font-medium mb-2 flex items-center">
+              <FontAwesomeIcon icon={faCreditCard} className="mr-2 text-gray-500" />
+              Nombre del titular
+            </label>
+            <input
+              type="text"
+              value={cardholderName}
+              onChange={(e) => setCardholderName(e.target.value)}
+              className={`w-full p-4 rounded-lg border transition-all ${
+                theme === 'dark' 
+                  ? 'border-gray-600 bg-gray-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500' 
+                  : 'border-gray-300 bg-white text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500'
+              }`}
+              placeholder="Nombre como aparece en la tarjeta"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Ingresa el nombre exacto que aparece en tu tarjeta</p>
+          </div>
+
           {/* Número de tarjeta */}
           <div>
             <label className="block text-sm font-medium mb-2 flex items-center">
@@ -266,6 +288,7 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
           <div className="text-xs text-blue-700 dark:text-blue-300 space-y-1">
             <p>• Encriptación SSL de 256 bits</p>
             <p>• No almacenamos tu información de tarjeta</p>
+            <p>• Validación del nombre del titular</p>
             <p>• Procesamiento PCI DSS Level 1</p>
             <p>• En tu estado de cuenta aparecerá como &quot;*SERVICEDG&quot;</p>
           </div>
