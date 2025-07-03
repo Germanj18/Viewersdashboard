@@ -17,15 +17,17 @@ export default function PagoPage() {
     return <Preloader />;
   }
 
-  // Permitir acceso sin autenticación para el flujo de pago público
-  const isAuthenticated = !!session;
+  if (!session) {
+    router.replace('/');
+    return null;
+  }
 
   return (
     <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
       <header className={`w-full flex justify-between items-center p-4 ${theme === 'dark' ? 'bg-black' : 'bg-white shadow-md'}`}>
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => isAuthenticated ? router.back() : router.push('/')}
+            onClick={() => router.back()}
             className="bg-gray-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
           >
             <FontAwesomeIcon icon={faArrowLeft} />
