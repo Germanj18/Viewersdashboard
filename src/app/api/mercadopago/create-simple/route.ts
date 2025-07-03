@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       },
       notification_url: `${process.env.NEXTAUTH_URL}/api/mercadopago/webhook`,
       external_reference: `servicedg-${Date.now()}`,
-      statement_descriptor: 'SERVICEDG',
+      statement_descriptor: 'SDG ANALYTICS',
     };
 
     console.log('Sending to MP:', JSON.stringify(preference, null, 2));
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     console.log('MP Response status:', response.status);
 
-    
+
     
     if (!response.ok) {
       const errorData = await response.text();
