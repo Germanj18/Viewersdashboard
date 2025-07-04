@@ -37,72 +37,76 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
       <div className="modal-card relative">
         <Image 
           src="/servicedg-logo.svg" 
           alt="ServiceDG" 
           width={32}
           height={32}
-          className="absolute top-4 right-4"
+          className="absolute top-6 right-6 opacity-70 hover:opacity-100 transition-opacity"
         />
-        <h2 className="text-2xl font-semibold mb-6 text-center text-white">Iniciar Sesión</h2>
+        <h2>🔐 Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-6 relative">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-slate-300 mb-2"
+            >
+              👤 Nombre de Usuario
+            </label>
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="peer mt-1 block w-full bg-gray-700 text-white border-b-2 border-gray-600 focus:border-indigo-500 focus:outline-none transition-all duration-500 ease-in-out placeholder-transparent"
-              placeholder="Nombre de Usuario"
+              className="w-full px-4 py-3 bg-slate-800/60 text-slate-100 border-2 border-slate-600/50 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-200 placeholder-slate-400"
+              placeholder="Ingresa tu usuario"
             />
-            <label
-              htmlFor="username"
-              className="absolute left-0 -top-4 text-gray-400 text-sm transition-all duration-500 ease-in-out peer-placeholder-shown:top-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-indigo-500"
-            >
-              Nombre de Usuario
-            </label>
           </div>
-          <div className="mb-4 relative password-container">
+          <div className="password-container">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-300 mb-2"
+            >
+              🔒 Contraseña
+            </label>
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="peer mt-1 block w-full bg-gray-700 text-white border-b-2 border-gray-600 focus:border-indigo-500 focus:outline-none transition-all duration-500 ease-in-out placeholder-transparent"
-              placeholder="Contraseña"
+              className="w-full px-4 py-3 bg-slate-800/60 text-slate-100 border-2 border-slate-600/50 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-200 placeholder-slate-400"
+              placeholder="Ingresa tu contraseña"
             />
-            <label
-              htmlFor="password"
-              className="absolute left-0 -top-4 text-gray-400 text-sm transition-all duration-500 ease-in-out peer-placeholder-shown:top-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-4 peer-focus:text-sm peer-focus:text-indigo-500"
-            >
-              Contraseña
-            </label>
             <button
               type="button"
               onClick={toggleShowPassword}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-gray-400"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
             >
               <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
             </button>
           </div>
-          {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
-          <div className="flex justify-end">
+          {error && (
+            <div className="text-red-400 text-sm mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl backdrop-blur-sm">
+              ⚠️ {error}
+            </div>
+          )}
+          <div className="flex gap-4 mt-8">
             <button
               type="button"
               onClick={onClose}
-              className="mr-2 py-2 px-4 border border-gray-500 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-500 ease-in-out"
+              className="flex-1 py-3 px-4 bg-slate-600/60 border border-slate-600/50 rounded-xl text-slate-200 font-medium hover:bg-slate-600/80 hover:border-slate-600/80 transition-all duration-200 hover:-translate-y-0.5"
             >
-              Cancelar
+              ❌ Cancelar
             </button>
             <button
               type="submit"
-              className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-500 ease-in-out"
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-500/20 rounded-xl text-white font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
             >
-              Iniciar sesión
+              🚀 Iniciar sesión
             </button>
           </div>
         </form>
