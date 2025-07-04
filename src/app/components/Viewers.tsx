@@ -143,10 +143,10 @@ const Viewers = () => {
         className={`input-link ${theme}`}
       />
       <div className="total-viewers-header">
-        Total de espectadores cargado: {totalViewers}
+        💫 Total cargado: {totalViewers}
       </div>
       <button onClick={() => setShowModal(true)} className="upload-button">
-        Subir Excel
+        📊 Subir Excel
       </button>
       <div className="blocks-container">
         {blocks.map((block, index) => (
@@ -154,7 +154,7 @@ const Viewers = () => {
             <h2 className="block-title">{block.title}</h2>
             {block.autoStart && block.startTime && (
               <div className="auto-start-info">
-                Configurado para iniciar automáticamente a las {block.startTime}
+                ⏰ Inicio automático: {block.startTime}
               </div>
             )}
             {(block.state === 'paused' || block.state === 'completed') && (
@@ -162,20 +162,20 @@ const Viewers = () => {
                 <span className="icon-download"></span>
               </button>
             )}
-            <div className="status" style={{ maxHeight: '200px', overflowY: 'scroll' }}>
+            <div className="status">
               {Array.from({ length: block.totalOperations }).map((_, statusIndex) => (
                 <div key={statusIndex} className="status-item">
                   {`Operación ${statusIndex + 1}: `}
                   {block.status[statusIndex] ? (
                     <>
                       {block.status[statusIndex].status === 'success' ? (
-                        <span className="status-success">✔️</span>
+                        <span className="status-success">✅</span>
                       ) : (
                         <span className="status-error">❌</span>
                       )}
                       <span className="timestamp">{block.status[statusIndex].timestamp}</span>
                       {block.status[statusIndex].orderStatus && (
-                        <span className="order-status"> - {block.status[statusIndex].orderStatus}</span>
+                        <span className="order-status">{block.status[statusIndex].orderStatus}</span>
                       )}
                     </>
                   ) : (
@@ -187,169 +187,199 @@ const Viewers = () => {
             <div className="block-controls">
               {block.state === 'idle' && (
                 <button onClick={() => startBlock(index)} className="start-button">
-                  Iniciar
+                  ▶️ Iniciar
                 </button>
               )}
               {block.state === 'running' && (
                 <button onClick={() => pauseBlock(index)} className="pause-button">
-                  Pausar
+                  ⏸️ Pausar
                 </button>
               )}
               {block.state === 'paused' && (
                 <>
                   <button onClick={() => resumeBlock(index)} className="resume-button">
-                    Reanudar
+                    ▶️ Reanudar
                   </button>
                   <button onClick={() => setShowWarning({ type: 'finalizar', index })} className="finalize-button">
-                    Finalizar
+                    🏁 Finalizar
                   </button>
                   <button onClick={() => setShowWarning({ type: 'reiniciar', index })} className="reset-button">
-                    Reiniciar
+                    🔄 Reiniciar
                   </button>
                 </>
               )}
               {block.state === 'completed' && (
                 <>
-                  <div className="completed-message">Bloque finalizado</div>
+                  <div className="completed-message">✅ Bloque finalizado</div>
                   <button onClick={() => setShowWarning({ type: 'reiniciar', index })} className="reset-button">
-                    Reiniciar
+                    🔄 Reiniciar
                   </button>
                 </>
               )}
               <button onClick={() => handleEditBlock(index)} className="edit-button">
-                Editar
+                ✏️ Editar
               </button>
             </div>
-            <div className="total-viewers">Total de espectadores: {block.totalViewers}</div>
+            <div className="total-viewers">👥 {block.totalViewers}</div>
           </div>
         ))}
       </div>
       {showWarning && (
         <div className="warning-modal">
           <div className={`warning-content ${theme}`}>
-            <p>Estas por {showWarning.type === 'finalizar' ? 'finalizar' : 'reiniciar'} este bloque de operaciones, si estas seguro presiona continuar</p>
-            <button onClick={() => {
-              if (showWarning.type === 'finalizar') {
-                finalizeBlock(showWarning.index);
-              } else {
-                resetBlock(showWarning.index);
-              }
-              setShowWarning(null);
-            }} className="continue-button">
-              Continuar
-            </button>
-            <button onClick={() => setShowWarning(null)} className="cancel-button">
-              Cancelar
-            </button>
+            <div className="text-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h3 className="text-xl font-bold mb-4">
+                {showWarning.type === 'finalizar' ? '🏁 Finalizar Bloque' : '🔄 Reiniciar Bloque'}
+              </h3>
+              <p className="mb-6">
+                Estás por {showWarning.type === 'finalizar' ? 'finalizar' : 'reiniciar'} este bloque de operaciones.
+                <br />
+                <strong>Esta acción no se puede deshacer.</strong>
+              </p>
+              <div className="flex justify-center gap-4">
+                <button onClick={() => {
+                  if (showWarning.type === 'finalizar') {
+                    finalizeBlock(showWarning.index);
+                  } else {
+                    resetBlock(showWarning.index);
+                  }
+                  setShowWarning(null);
+                }} className="continue-button">
+                  ✅ Continuar
+                </button>
+                <button onClick={() => setShowWarning(null)} className="cancel-button">
+                  ❌ Cancelar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
       {showModal && (
         <div className="modal">
           <div className={`modal-content ${theme}`}>
-            <h2>Subir Excel</h2>
-            <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} />
-            <button onClick={handleConvert} className="convert-button">
-              Convertir
-            </button>
-            <button onClick={() => setShowModal(false)} className="close-button">
-              Cerrar
-            </button>
+            <h2>📊 Subir Excel</h2>
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-3">
+                📁 Selecciona tu archivo Excel
+              </label>
+              <input 
+                type="file" 
+                accept=".xlsx, .xls" 
+                onChange={handleFileChange}
+                className={`input-${theme}`}
+              />
+            </div>
+            <div className="flex gap-3">
+              <button onClick={handleConvert} className="convert-button">
+                🔄 Convertir
+              </button>
+              <button onClick={() => setShowModal(false)} className="close-button">
+                ✖️ Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}
       {editIndex !== null && (
         <div className="modal">
           <div className={`modal-content ${theme}`}>
-            <h2>Editar Bloque</h2>
-            <label>
-              Cantidad de Operaciones:
-              <input
-                type="number"
-                value={editOperations}
-                onChange={(e) => setEditOperations(Number(e.target.value))}
-                className={`input-${theme}`}
-              />
-            </label>
-            <label>
-              Duración:
-              <select
-                value={editServiceId}
-                onChange={(e) => setEditServiceId(Number(e.target.value))}
-                className={`input-${theme}`}
-              >
-                <option value={334}>1h</option>
-                <option value={335}>1.30h</option>
-                <option value={336}>2h</option>
-                <option value={337}>2.30h</option>
-                <option value={338}>3h</option>
-                <option value={459}>4h</option>
-                <option value={460}>6h</option>
-                <option value={657}>8h</option>
-              </select>
-            </label>
-           <div style={{ color: '#4CAF50', fontWeight: 'bold', marginBottom: 8 }}>
-        Solo se permiten múltiplos de 10. Ejemplo: 30, 40, 100, 150...
-      </div>
-      <label>
-        Cantidad:
-        <input
-          type="number"
-          min={0}
-          step={10}
-          value={editCount}
-          onChange={(e) => setEditCount(Number(e.target.value))}
-          className={`input-${theme} ${editCount % 10 !== 0 ? 'input-error' : ''}`}
-        />
-      </label>
-      <label>
-        Cantidad a Restar/Sumar:
-        <input
-          type="number"
-          min={0}
-          step={10}
-          value={editDecrement}
-          onChange={(e) => setEditDecrement(Number(e.target.value))}
-          className={`input-${theme} ${editDecrement % 10 !== 0 ? 'input-error' : ''}`}
-        />
-      </label>
-         
-            <label>
-              Operación:
-              <select
-                value={editOperationType}
-                onChange={(e) => setEditOperationType(e.target.value as 'add' | 'subtract')}
-                className={`input-${theme}`}
-              >
-                <option value="add">Sumar</option>
-                <option value="subtract">Restar</option>
-              </select>
-            </label>
-            <label>
-              Inicio Automático:
-              <input
-                type="checkbox"
-                checked={editAutoStart}
-                onChange={(e) => setEditAutoStart(e.target.checked)}
-              />
-            </label>
-            {editAutoStart && (
+            <h2>✏️ Editar Bloque</h2>
+            <div className="grid grid-cols-1 gap-4">
               <label>
-                Hora de Inicio:
+                🔢 Cantidad de Operaciones:
                 <input
-                  type="time"
-                  value={editStartTime}
-                  onChange={(e) => setEditStartTime(e.target.value)}
+                  type="number"
+                  value={editOperations}
+                  onChange={(e) => setEditOperations(Number(e.target.value))}
                   className={`input-${theme}`}
                 />
               </label>
-            )}
-            <button onClick={handleSaveEdit} className="save-button">
-              Guardar
-            </button>
-            <button onClick={() => setEditIndex(null)} className="cancel-button">
-              Cancelar
-            </button>
+              <label>
+                ⏱️ Duración:
+                <select
+                  value={editServiceId}
+                  onChange={(e) => setEditServiceId(Number(e.target.value))}
+                  className={`input-${theme}`}
+                >
+                  <option value={334}>1h</option>
+                  <option value={335}>1.30h</option>
+                  <option value={336}>2h</option>
+                  <option value={337}>2.30h</option>
+                  <option value={338}>3h</option>
+                  <option value={459}>4h</option>
+                  <option value={460}>6h</option>
+                  <option value={657}>8h</option>
+                </select>
+              </label>
+              <div className="p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800">
+                <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                  💡 Solo múltiplos de 10 (ej: 30, 40, 100, 150...)
+                </p>
+              </div>
+              <label>
+                👥 Cantidad:
+                <input
+                  type="number"
+                  min={0}
+                  step={10}
+                  value={editCount}
+                  onChange={(e) => setEditCount(Number(e.target.value))}
+                  className={`input-${theme} ${editCount % 10 !== 0 ? 'input-error' : ''}`}
+                />
+              </label>
+              <label>
+                ➕➖ Cantidad a Modificar:
+                <input
+                  type="number"
+                  min={0}
+                  step={10}
+                  value={editDecrement}
+                  onChange={(e) => setEditDecrement(Number(e.target.value))}
+                  className={`input-${theme} ${editDecrement % 10 !== 0 ? 'input-error' : ''}`}
+                />
+              </label>
+              <label>
+                🔄 Operación:
+                <select
+                  value={editOperationType}
+                  onChange={(e) => setEditOperationType(e.target.value as 'add' | 'subtract')}
+                  className={`input-${theme}`}
+                >
+                  <option value="add">➕ Sumar</option>
+                  <option value="subtract">➖ Restar</option>
+                </select>
+              </label>
+              <label className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={editAutoStart}
+                  onChange={(e) => setEditAutoStart(e.target.checked)}
+                  className="w-5 h-5"
+                />
+                <span>🕐 Inicio Automático</span>
+              </label>
+              {editAutoStart && (
+                <label>
+                  ⏰ Hora de Inicio:
+                  <input
+                    type="time"
+                    value={editStartTime}
+                    onChange={(e) => setEditStartTime(e.target.value)}
+                    className={`input-${theme}`}
+                  />
+                </label>
+              )}
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={handleSaveEdit} className="save-button">
+                💾 Guardar
+              </button>
+              <button onClick={() => setEditIndex(null)} className="cancel-button">
+                ❌ Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}

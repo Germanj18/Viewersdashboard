@@ -337,9 +337,7 @@ return (
                       <span className="text-white text-3xl">📊</span>
                     </div>
                     <h3 className="text-2xl font-bold mb-4">Sin datos para mostrar</h3>
-                    <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
-                      Selecciona un rango de fechas para consultar las métricas
-                    </p>
+                  
                   </div>
                 </div>
               )}
