@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+// Verificar que existe la clave secreta antes de inicializar Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  console.warn('STRIPE_SECRET_KEY not found in environment variables');
+}
+
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2025-06-30.basil',
-});
+}) : null;
 
 export async function GET() {
   return NextResponse.json({
@@ -18,8 +23,8 @@ export async function POST(request: NextRequest) {
   try {
     console.log('=== STRIPE PAYMENT INTENT API ===');
     
-    // Verificar que existe la clave secreta
-    if (!process.env.STRIPE_SECRET_KEY) {
+    // Verificar que existe la clave secreta y stripe está inicializado
+    if (!process.env.STRIPE_SECRET_KEY || !stripe) {
       console.error('STRIPE_SECRET_KEY not found in environment variables');
       return NextResponse.json({ 
         error: 'Stripe not configured',

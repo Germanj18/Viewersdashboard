@@ -141,38 +141,63 @@ export default function Home() {
   };
 
 return (
-    <div className={`flex flex-col min-h-screen ${theme === 'dark' ? 'bg-black text-white' : 'bg-gray-100 text-black'}`}>
-      <header className={`w-full flex justify-between items-center p-4 shadow-md ${theme === 'dark' ? 'header-dark' : 'header-light'}`}>
+    <div className={`flex flex-col min-h-screen transition-all duration-300 ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100' 
+        : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900'
+    }`}>
+      <header className={`w-full flex justify-between items-center p-6 backdrop-blur-sm ${
+        theme === 'dark' 
+          ? 'bg-slate-900/80 border-b border-slate-700/50' 
+          : 'bg-white/80 border-b border-gray-200/50 shadow-sm'
+      }`}>
         <div className="flex items-center">
-          <Image src={logoServiceDG} alt="ServiceDG Logo" width={50} height={50} className="mr-4" />
-          <h1 className="text-2xl font-bold">YouTube Viewers Analysis</h1>
+          <Image src={logoServiceDG} alt="ServiceDG Logo" width={50} height={50} className="mr-4 rounded-xl" />
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            YouTube Viewers Analysis
+          </h1>
         </div>
-        <div className="flex items-center">
-          <button onClick={toggleTheme} className="btn btn-theme mr-4 transition-transform transform hover:scale-110">
+        <div className="flex items-center space-x-4">
+          <button 
+            onClick={toggleTheme} 
+            className={`px-4 py-2 rounded-xl font-medium transition-all duration-200 ${
+              theme === 'dark'
+                ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                : 'bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 shadow-sm'
+            }`}
+          >
             {theme === 'dark' ? <FontAwesomeIcon icon={faSun} /> : <FontAwesomeIcon icon={faMoon} />}
           </button>
-          {/* Nuevo botón para ir a Admin */}
-       <button
-  onClick={() => {
-    if (session) {
-      router.push('/admin');
-    } else {
-      handleSignInClick(); // Esto abre el modal de login
-    }
-  }}
-  className="btn btn-secondary p-2 rounded-lg bg-blue-500 text-white hover:bg-blue-700 transition-transform transform hover:scale-110 mr-2"
->
-  Ir a Admin
-</button>
+          
+          <button
+            onClick={() => {
+              if (session) {
+                router.push('/admin');
+              } else {
+                handleSignInClick();
+              }
+            }}
+            className="px-6 py-2 rounded-xl font-medium bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+            {session ? 'Dashboard' : 'Acceder'}
+          </button>
+          
           {status === 'loading' ? (
-            <p>Cargando...</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
           ) : !session ? (
-            <button onClick={handleSignInClick} className="btn btn-primary p-2 rounded-lg bg-green-500 text-white hover:bg-green-700 transition-transform transform hover:scale-110">
+            <button 
+              onClick={handleSignInClick} 
+              className="px-6 py-2 rounded-xl font-medium bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
               <FontAwesomeIcon icon={faSignInAlt} className="mr-2" />
               Iniciar sesión
             </button>
           ) : (
-            <button onClick={() => signOut()} className="btn btn-secondary p-2 rounded-lg bg-red-500 text-white hover:bg-red-700 transition-transform transform hover:scale-110">
+            <button 
+              onClick={() => signOut()} 
+              className="px-6 py-2 rounded-xl font-medium bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
               <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
               Cerrar sesión
             </button>
@@ -181,36 +206,66 @@ return (
       </header>
 
       <main className="flex-grow flex">
-        <div className={`w-64 p-4 shadow-md ${theme === 'dark' ? 'bg-[#1e1e1e] text-white' : 'bg-white text-black'}`}>
-        {/**<button 
-            onClick={handleConsultMetricsClick} 
-            className="btn btn-primary w-full mb-4 p-2 rounded-lg text-white hover:bg-gray-900 transition-transform transform hover:scale-110" 
-            style={{ backgroundColor: '#4CAF50' }}
-          >
-            <FontAwesomeIcon icon={faChartLine} className="mr-2" />
-            Consultar Métricas
-          </button> */}  
+        <div className={`w-80 p-6 backdrop-blur-sm ${
+          theme === 'dark' 
+            ? 'bg-slate-800/60 border-r border-slate-700/50' 
+            : 'bg-white/80 border-r border-gray-200/50 shadow-sm'
+        }`}>
 
           {showDateInputs && (
-            <div className="flex flex-col space-y-4">
-              <input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className={`p-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
-              />
-              <input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className={`p-2 border rounded-lg ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-black'}`}
-              />
+            <div className="space-y-4">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <FontAwesomeIcon icon={faChartLine} className="text-white text-lg" />
+                </div>
+                <h3 className="font-bold text-lg">Consultar Métricas</h3>
+                <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
+                  Selecciona el rango de fechas
+                </p>
+              </div>
+
+              <div>
+                <label className={`block text-sm font-semibold mb-2 ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                }`}>
+                  Fecha de inicio
+                </label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                    theme === 'dark' 
+                      ? 'bg-slate-700/50 border-slate-600 text-slate-100 focus:border-green-500' 
+                      : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 shadow-sm'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-semibold mb-2 ${
+                  theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+                }`}>
+                  Fecha de fin
+                </label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className={`w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 ${
+                    theme === 'dark' 
+                      ? 'bg-slate-700/50 border-slate-600 text-slate-100 focus:border-green-500' 
+                      : 'bg-white border-gray-200 text-gray-900 focus:border-green-500 shadow-sm'
+                  }`}
+                />
+              </div>
+
               <button 
                 onClick={handleFetchData} 
-                className="btn btn-secondary w-full p-2 rounded-lg text-white hover:bg-gray-900 transition-transform transform hover:scale-110"
-                style={{ backgroundColor: '#4CAF50' }}
+                className="w-full py-4 px-6 rounded-xl font-bold text-white bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105"
               >
-                Consultar
+                <FontAwesomeIcon icon={faChartLine} className="mr-2" />
+                Consultar Datos
               </button>
             </div>
           )}
@@ -218,40 +273,91 @@ return (
 
         <section className="flex-grow p-8">
           {isLoading ? (
-            <Preloader />
+            <div className="flex items-center justify-center h-full">
+              <div className={`p-8 rounded-2xl backdrop-blur-sm ${
+                theme === 'dark' 
+                  ? 'bg-slate-800/60 border border-slate-700/50' 
+                  : 'bg-white/80 border border-gray-200/50 shadow-xl'
+              }`}>
+                <Preloader />
+              </div>
+            </div>
           ) : (
-            <>
-            {/* {showLiveChart && (
-                <section className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4">Gráfico en Vivo</h2>
-                  <LiveChart />
-                </section>
-              )}*/}
+            <div className="space-y-8">
               {data.length > 0 && (
                 <>
-                  <section className="mb-8">
-                    <h2 className="text-2xl font-bold mb-4">Gráficos de Línea</h2>
-                    <Charts data={data} onRendered={handleChartsRendered} />
+                  <section>
+                    <div className={`p-8 rounded-2xl backdrop-blur-sm ${
+                      theme === 'dark' 
+                        ? 'bg-slate-800/60 border border-slate-700/50 shadow-2xl' 
+                        : 'bg-white/80 border border-gray-200/50 shadow-xl'
+                    }`}>
+                      <div className="flex items-center mb-6">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4">
+                          <span className="text-white text-xl">📈</span>
+                        </div>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                          Gráficos de Línea
+                        </h2>
+                      </div>
+                      <Charts data={data} onRendered={handleChartsRendered} />
+                    </div>
                   </section>
-                  <section className="mb-8">
-                    <h2 className="text-2xl font-bold mb-4">Gráficos de Barras</h2>
-                    <div className="flex flex-col md:flex-row justify-between w-full space-y-4 md:space-y-0 md:space-x-4">
-                      <div className="chart-container-small-sumary w-full md:w-1/2">
+
+                  <section>
+                    <div className={`p-8 rounded-2xl backdrop-blur-sm ${
+                      theme === 'dark' 
+                        ? 'bg-slate-800/60 border border-slate-700/50 shadow-2xl' 
+                        : 'bg-white/80 border border-gray-200/50 shadow-xl'
+                    }`}>
+                      <div className="flex items-center mb-6">
+                        <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mr-4">
+                          <span className="text-white text-xl">📊</span>
+                        </div>
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                          Resumen de Datos
+                        </h2>
+                      </div>
+                      <div className="w-full">
                         <SummaryTable data={data} onRendered={handleChartsRendered} />
                       </div>
                     </div>
                   </section>
                 </>
               )}
-            </>
+              
+              {data.length === 0 && !isLoading && (
+                <div className="flex items-center justify-center h-96">
+                  <div className={`text-center p-12 rounded-2xl backdrop-blur-sm ${
+                    theme === 'dark' 
+                      ? 'bg-slate-800/60 border border-slate-700/50' 
+                      : 'bg-white/80 border border-gray-200/50 shadow-xl'
+                  }`}>
+                    <div className="w-20 h-20 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <span className="text-white text-3xl">📊</span>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-4">Sin datos para mostrar</h3>
+                    <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
+                      Selecciona un rango de fechas para consultar las métricas
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           <Modal isOpen={isModalOpen} onClose={handleModalClose} />
         </section>
       </main>
 
-      <footer className={`w-full p-4 text-center ${theme === 'dark' ? 'footer-dark' : 'footer-light'}`}>
-        <p>&copy; 2024 YouTube Viewers Analysis. Todos los derechos reservados.</p>
+      <footer className={`w-full p-6 backdrop-blur-sm ${
+        theme === 'dark' 
+          ? 'bg-slate-900/80 border-t border-slate-700/50' 
+          : 'bg-white/80 border-t border-gray-200/50 shadow-sm'
+      }`}>
+        <p className={`text-center ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
+          &copy; 2025 YouTube Viewers Analysis - ServiceDG. Todos los derechos reservados.
+        </p>
       </footer>
     </div>
   );
