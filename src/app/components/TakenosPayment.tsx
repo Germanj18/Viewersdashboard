@@ -93,45 +93,73 @@ export default function TakenosPayment() {
 
   if (success) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Mensaje de confirmación */}
-        <div className={`p-8 rounded-lg border-2 border-green-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-green-50'}`}>
+        <div className={`p-8 rounded-2xl border-2 transition-all duration-300 ${
+          theme === 'dark' 
+            ? 'bg-slate-800/60 border-green-500/30 backdrop-blur-sm' 
+            : 'bg-white/90 border-green-300 shadow-xl'
+        }`}>
           <div className="text-center">
-            <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FontAwesomeIcon icon={faCheck} className="text-green-600 text-2xl" />
+            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <FontAwesomeIcon icon={faCheck} className="text-white text-3xl" />
             </div>
-            <h3 className="text-2xl font-bold text-green-600 mb-4">¡Solicitud Enviada!</h3>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+            <h3 className="text-3xl font-bold text-green-600 mb-4">¡Solicitud Enviada!</h3>
+            <p className={`text-lg mb-8 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
               Tu solicitud de pago ha sido enviada correctamente
             </p>
             
             {/* Resumen de la solicitud */}
-            <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} mb-6`}>
-              <h4 className="font-semibold mb-3">Resumen de tu solicitud:</h4>
-              <div className="space-y-2 text-sm">
-                <p><strong>Nombre:</strong> {customerName}</p>
-                <p><strong>Monto:</strong> ${parseFloat(amount).toFixed(2)} USD</p>
-                <p><strong>Servicio:</strong> {description}</p>
-                <p><strong>Email:</strong> {email}</p>
-                <p><strong>WhatsApp:</strong> +{whatsapp}</p>
+            <div className={`p-6 rounded-2xl mb-8 ${
+              theme === 'dark' 
+                ? 'bg-slate-700/50 border border-slate-600/50' 
+                : 'bg-gray-50/80 border border-gray-200/50'
+            }`}>
+              <h4 className="font-bold text-lg mb-4">Resumen de tu solicitud:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div className="flex justify-between">
+                  <strong>Nombre:</strong> <span>{customerName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <strong>Monto:</strong> <span className="text-green-600 font-bold">${parseFloat(amount).toFixed(2)} USD</span>
+                </div>
+                <div className="flex justify-between">
+                  <strong>Servicio:</strong> <span>{description}</span>
+                </div>
+                <div className="flex justify-between">
+                  <strong>Email:</strong> <span>{email}</span>
+                </div>
+                <div className="flex justify-between md:col-span-2">
+                  <strong>WhatsApp:</strong> <span>+{whatsapp}</span>
+                </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100'}`}>
-                <p className="text-blue-800 dark:text-blue-200 font-medium mb-2">
+            <div className="grid md:grid-cols-2 gap-6 mb-8">
+              <div className={`p-6 rounded-2xl ${
+                theme === 'dark' ? 'bg-blue-900/30 border border-blue-800/50' : 'bg-blue-50 border border-blue-200'
+              }`}>
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FontAwesomeIcon icon={faEnvelope} className="text-white text-xl" />
+                </div>
+                <p className="text-blue-700 dark:text-blue-300 font-semibold mb-2">
                   📧 Te enviaremos el link de pago a tu email
                 </p>
-                <p className="text-blue-700 dark:text-blue-300 text-sm">
+                <p className="text-blue-600 dark:text-blue-400 text-sm">
                   Revisa tu bandeja de entrada y spam
                 </p>
               </div>
 
-              <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-green-900' : 'bg-green-100'}`}>
-                <p className="text-green-800 dark:text-green-200 font-medium mb-2">
+              <div className={`p-6 rounded-2xl ${
+                theme === 'dark' ? 'bg-green-900/30 border border-green-800/50' : 'bg-green-50 border border-green-200'
+              }`}>
+                <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FontAwesomeIcon icon={faCommentDots} className="text-white text-xl" />
+                </div>
+                <p className="text-green-700 dark:text-green-300 font-semibold mb-2">
                   📱 También te contactaremos por WhatsApp
                 </p>
-                <p className="text-green-700 dark:text-green-300 text-sm">
+                <p className="text-green-600 dark:text-green-400 text-sm">
                   Tiempo estimado: 15-30 minutos
                 </p>
               </div>
@@ -139,7 +167,11 @@ export default function TakenosPayment() {
 
             <button
               onClick={resetForm}
-              className="mt-6 bg-gray-600 text-white py-3 px-6 rounded-lg hover:bg-gray-700 transition duration-300"
+              className={`px-8 py-3 rounded-xl font-medium transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300'
+              }`}
             >
               Hacer otra solicitud
             </button>
@@ -150,34 +182,40 @@ export default function TakenosPayment() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className={`p-6 rounded-lg border-2 border-purple-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-purple-50'}`}>
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-              <FontAwesomeIcon icon={faDollarSign} className="text-purple-600 text-2xl" />
-            </div>
+      <div className={`p-8 rounded-2xl border-2 transition-all duration-300 ${
+        theme === 'dark' 
+          ? 'bg-slate-800/60 border-purple-500/30 backdrop-blur-sm' 
+          : 'bg-white/90 border-purple-300 shadow-xl'
+      }`}>
+        <div className="text-center mb-8">
+          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <FontAwesomeIcon icon={faDollarSign} className="text-white text-3xl" />
           </div>
-          <h3 className="text-2xl font-bold text-purple-600 mb-2">Pago con Takenos</h3>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h3 className="text-3xl font-bold text-purple-600 mb-4">Pago con Takenos</h3>
+          <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
             Te enviaremos un link personalizado para pagar en dólares
           </p>
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Nombre completo */}
           <div>
-            <label className="block text-sm font-medium mb-2">Nombre Completo</label>
+            <label className={`block text-sm font-semibold mb-3 ${
+              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+            }`}>
+              Nombre Completo
+            </label>
             <input
               type="text"
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border ${
+              className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-gray-700 border-gray-600 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500' 
-                  : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
               }`}
               placeholder="Tu nombre completo"
               required
@@ -186,57 +224,73 @@ export default function TakenosPayment() {
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <FontAwesomeIcon icon={faEnvelope} className="mr-2 text-gray-500" />
+            <label className={`block text-sm font-semibold mb-3 flex items-center ${
+              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+            }`}>
+              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
+                <FontAwesomeIcon icon={faEnvelope} className="text-white text-xs" />
+              </div>
               Email
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border ${
+              className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-gray-700 border-gray-600 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500' 
-                  : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
               }`}
               placeholder="tu@email.com"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">Te enviaremos el link de pago aquí</p>
+            <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+              Te enviaremos el link de pago aquí
+            </p>
           </div>
 
           {/* WhatsApp */}
           <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <FontAwesomeIcon icon={faCommentDots} className="mr-2 text-green-500" />
+            <label className={`block text-sm font-semibold mb-3 flex items-center ${
+              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+            }`}>
+              <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mr-3">
+                <FontAwesomeIcon icon={faCommentDots} className="text-white text-xs" />
+              </div>
               Número de WhatsApp
             </label>
             <input
               type="tel"
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value.replace(/[^0-9]/g, ''))}
-              className={`w-full px-4 py-3 rounded-lg border ${
+              className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-gray-700 border-gray-600 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500' 
-                  : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
               }`}
               placeholder="5491123456789 (sin +)"
               required
             />
-            <p className="text-xs text-gray-500 mt-1">También te contactaremos por WhatsApp</p>
+            <p className={`text-xs mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+              También te contactaremos por WhatsApp
+            </p>
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="block text-sm font-medium mb-2">Servicio</label>
+            <label className={`block text-sm font-semibold mb-3 ${
+              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+            }`}>
+              Servicio
+            </label>
             <input
               type="text"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border ${
+              className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-gray-700 border-gray-600 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500' 
-                  : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
               }`}
               placeholder="Servicio de Análisis de Datos"
             />
@@ -244,27 +298,35 @@ export default function TakenosPayment() {
 
           {/* Monto */}
           <div>
-            <label className="block text-sm font-medium mb-2">Monto en USD</label>
+            <label className={`block text-sm font-semibold mb-3 ${
+              theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
+            }`}>
+              Monto en USD
+            </label>
             <input
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className={`w-full px-4 py-3 rounded-lg border text-2xl font-bold placeholder-gray-400 ${
+              className={`w-full px-4 py-6 rounded-xl border-2 text-3xl font-bold text-center transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-gray-700 border-gray-600 text-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500' 
-                  : 'bg-white border-gray-300 text-gray-900 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
               }`}
               placeholder="100.00"
               min="1"
               step="0.01"
               required
             />
-            <p className="text-sm text-gray-500 mt-1">Monto en dólares estadounidenses</p>
+            <p className={`text-sm mt-2 text-center ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+              Monto en dólares estadounidenses
+            </p>
           </div>
 
           {error && (
-            <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-red-900' : 'bg-red-100'} text-center`}>
-              <p className="text-red-600">{error}</p>
+            <div className={`p-4 rounded-xl text-center ${
+              theme === 'dark' ? 'bg-red-900/50 border border-red-800/50' : 'bg-red-50 border border-red-200'
+            }`}>
+              <p className="text-red-600 font-medium">{error}</p>
             </div>
           )}
 
@@ -272,15 +334,15 @@ export default function TakenosPayment() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full py-4 px-6 rounded-lg font-semibold text-white transition duration-300 ${
+            className={`w-full py-5 px-6 rounded-xl font-bold text-lg text-white transition-all duration-300 ${
               isLoading 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-purple-600 hover:bg-purple-700'
+                : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg hover:shadow-xl hover:scale-105'
             }`}
           >
             {isLoading ? (
               <>
-                <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-2" />
+                <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-3" />
                 Enviando solicitud...
               </>
             ) : (
@@ -290,13 +352,34 @@ export default function TakenosPayment() {
         </form>
 
         {/* Información adicional */}
-        <div className={`mt-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
-          <h4 className="font-semibold mb-2">📋 ¿Cómo funciona?</h4>
-          <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-            <p>1. Completas este formulario con tus datos</p>
-            <p>2. Te enviamos un link personalizado de Takenos</p>
-            <p>3. Pagas con cualquier tarjeta en dólares</p>
-            <p>4. Confirmamos tu pago automáticamente</p>
+        <div className={`mt-8 p-6 rounded-2xl ${
+          theme === 'dark' 
+            ? 'bg-slate-700/50 border border-slate-600/50' 
+            : 'bg-gray-50/80 border border-gray-200/50'
+        }`}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mr-4">
+              <span className="text-white text-lg">📋</span>
+            </div>
+            <h4 className="font-bold text-lg">¿Cómo funciona?</h4>
+          </div>
+          <div className={`text-sm space-y-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
+            <div className="flex items-center">
+              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+              <span>Completas este formulario con tus datos</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+              <span>Te enviamos un link personalizado de Takenos</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+              <span>Pagas con cualquier tarjeta en dólares</span>
+            </div>
+            <div className="flex items-center">
+              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+              <span>Confirmamos tu pago automáticamente</span>
+            </div>
           </div>
         </div>
       </div>

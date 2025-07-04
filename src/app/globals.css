@@ -6,6 +6,15 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  
+  /* Tema claro */
+  --primary-bg: 255, 255, 255;
+  --secondary-bg: 248, 250, 252;
+  --card-bg: 255, 255, 255;
+  --border-color: 226, 232, 240;
+  --text-primary: 15, 23, 42;
+  --text-secondary: 100, 116, 139;
+  --hover-bg: 248, 250, 252;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,9 +25,74 @@
   }
 }
 
+/* Tema oscuro minimalista */
+.dark {
+  --primary-bg: 6, 8, 12;
+  --secondary-bg: 15, 17, 22;
+  --card-bg: 24, 26, 32;
+  --border-color: 39, 42, 50;
+  --text-primary: 248, 250, 252;
+  --text-secondary: 148, 163, 184;
+  --hover-bg: 30, 32, 38;
+}
+
+.light {
+  --primary-bg: 255, 255, 255;
+  --secondary-bg: 248, 250, 252;
+  --card-bg: 255, 255, 255;
+  --border-color: 226, 232, 240;
+  --text-primary: 15, 23, 42;
+  --text-secondary: 100, 116, 139;
+  --hover-bg: 248, 250, 252;
+}
+
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-start-rgb));
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Clases utilitarias para el tema */
+.bg-primary {
+  background-color: rgb(var(--primary-bg));
+}
+
+.bg-secondary {
+  background-color: rgb(var(--secondary-bg));
+}
+
+.bg-card {
+  background-color: rgb(var(--card-bg));
+}
+
+.bg-hover {
+  background-color: rgb(var(--hover-bg));
+}
+
+.border-theme {
+  border-color: rgb(var(--border-color));
+}
+
+.text-primary {
+  color: rgb(var(--text-primary));
+}
+
+.text-secondary {
+  color: rgb(var(--text-secondary));
+}
+
+/* Efectos de hover suaves */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 @layer utilities {
