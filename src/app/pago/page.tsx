@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from '../ThemeContext';
 import Preloader from '../components/Preloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon, faArrowLeft, faCreditCard, faUniversity } from '@fortawesome/free-solid-svg-icons';
+import { faSun, faMoon, faArrowLeft, faCreditCard, faUniversity, faCoins } from '@fortawesome/free-solid-svg-icons';
 import MercadoPagoPaymentReactFixed from '../components/MercadoPagoPaymentReactFixed';
 import StripePayment from '../components/StripePayment';
+import BinancePayment from '../components/BinancePayment';
 
-type PaymentMethod = 'mercadopago' | 'stripe' | null;
+type PaymentMethod = 'mercadopago' | 'stripe' | 'binance' | null;
 
 export default function PagoPage() {
   const { data: session, status } = useSession();
@@ -60,7 +61,7 @@ export default function PagoPage() {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-3 gap-6">
                 {/* Mercado Pago - ARS */}
                 <div 
                   className={`p-6 rounded-lg border-2 cursor-pointer transition duration-300 hover:scale-105 ${
@@ -124,6 +125,38 @@ export default function PagoPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Binance Pay - USD/Crypto */}
+                <div 
+                  className={`p-6 rounded-lg border-2 cursor-pointer transition duration-300 hover:scale-105 ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700 border-yellow-500 hover:border-yellow-400' 
+                      : 'bg-yellow-50 border-yellow-300 hover:border-yellow-500'
+                  }`}
+                  onClick={() => setSelectedMethod('binance')}
+                >
+                  <div className="text-center">
+                    <FontAwesomeIcon icon={faCoins} className="text-4xl text-yellow-500 mb-4" />
+                    <h3 className="text-xl font-bold mb-2">Binance Pay</h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                      Pago con tarjeta o criptomonedas
+                    </p>
+                    <div className="bg-yellow-100 dark:bg-yellow-900 p-3 rounded-lg mb-4">
+                      <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-200">
+                        ✓ Tarjetas y criptomonedas
+                      </p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        ✓ Conversión automática a USDT
+                      </p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        ✓ Comisiones bajas
+                      </p>
+                    </div>
+                    <button className="w-full bg-yellow-500 text-white py-3 px-6 rounded-lg font-semibold hover:bg-yellow-600 transition duration-300">
+                      Pagar con Binance
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Información adicional */}
@@ -153,10 +186,15 @@ export default function PagoPage() {
                       <FontAwesomeIcon icon={faUniversity} className="text-blue-500" />
                       <span className="font-semibold">Mercado Pago (ARS)</span>
                     </>
-                  ) : (
+                  ) : selectedMethod === 'stripe' ? (
                     <>
                       <FontAwesomeIcon icon={faCreditCard} className="text-indigo-500" />
                       <span className="font-semibold">Stripe (USD)</span>
+                    </>
+                  ) : (
+                    <>
+                      <FontAwesomeIcon icon={faCoins} className="text-yellow-500" />
+                      <span className="font-semibold">Binance Pay (USD/Crypto)</span>
                     </>
                   )}
                 </div>
@@ -165,8 +203,10 @@ export default function PagoPage() {
               {/* Componente de pago correspondiente */}
               {selectedMethod === 'mercadopago' ? (
                 <MercadoPagoPaymentReactFixed />
-              ) : (
+              ) : selectedMethod === 'stripe' ? (
                 <StripePayment />
+              ) : (
+                <BinancePayment />
               )}
             </div>
           )}
