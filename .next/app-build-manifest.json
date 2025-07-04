@@ -1,100 +1,16 @@
 {
   "pages": {
-    "/_not-found/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/chunks/app/_not-found/page-b92a16e10f0ab8c2.js"
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/page.css",
+      "static/chunks/app/page.js"
     ],
     "/layout": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/css/4949f144b931eceb.css",
-      "static/chunks/998-72f532dcf618f4ef.js",
-      "static/chunks/app/layout-7624920cba7bebe1.js"
-    ],
-    "/admin/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/css/29157aa7ff9af8c1.css",
-      "static/css/d33758b42aa5dbc2.css",
-      "static/chunks/870fdd6f-963e039a4ddfc708.js",
-      "static/chunks/2170a4aa-2d08f2e8926e1a99.js",
-      "static/chunks/168-48f2f59542d21440.js",
-      "static/chunks/998-72f532dcf618f4ef.js",
-      "static/chunks/648-f64b0848f6e685f9.js",
-      "static/chunks/app/admin/page-ccc97df179b2c255.js"
-    ],
-    "/api/auth/signin/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/css/29157aa7ff9af8c1.css",
-      "static/chunks/998-72f532dcf618f4ef.js",
-      "static/chunks/648-f64b0848f6e685f9.js",
-      "static/chunks/app/api/auth/signin/page-c3a858ccfd49b934.js"
-    ],
-    "/pago/failure/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/chunks/870fdd6f-963e039a4ddfc708.js",
-      "static/chunks/168-48f2f59542d21440.js",
-      "static/chunks/app/pago/failure/page-6fd2bf84c0ee8381.js"
-    ],
-    "/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/css/4ea308201d61d6bd.css",
-      "static/css/ae2565a571d9bb3d.css",
-      "static/css/842bf89b0003a236.css",
-      "static/chunks/870fdd6f-963e039a4ddfc708.js",
-      "static/chunks/ca377847-0910f4dead8c0df6.js",
-      "static/chunks/168-48f2f59542d21440.js",
-      "static/chunks/998-72f532dcf618f4ef.js",
-      "static/chunks/648-f64b0848f6e685f9.js",
-      "static/chunks/815-51206e4543bcbe71.js",
-      "static/chunks/app/page-f95e6812d98e127c.js"
-    ],
-    "/pago/pending/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/chunks/870fdd6f-963e039a4ddfc708.js",
-      "static/chunks/168-48f2f59542d21440.js",
-      "static/chunks/app/pago/pending/page-bacd118fa415ac04.js"
-    ],
-    "/pago/success/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/chunks/870fdd6f-963e039a4ddfc708.js",
-      "static/chunks/168-48f2f59542d21440.js",
-      "static/chunks/app/pago/success/page-f662e98ebbc4ab27.js"
-    ],
-    "/pago/page": [
-      "static/chunks/webpack-522fa2b5433ffefa.js",
-      "static/chunks/fd9d1056-566d181734b7e7f5.js",
-      "static/chunks/23-61e780d0f689654c.js",
-      "static/chunks/main-app-0ecc96b34a516f90.js",
-      "static/css/29157aa7ff9af8c1.css",
-      "static/chunks/870fdd6f-963e039a4ddfc708.js",
-      "static/chunks/168-48f2f59542d21440.js",
-      "static/chunks/998-72f532dcf618f4ef.js",
-      "static/chunks/648-f64b0848f6e685f9.js",
-      "static/chunks/705-cf7bfbc3997bb71a.js",
-      "static/chunks/app/pago/page-9c37577a7c1e1fe6.js"
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
     ]
   }
 }
