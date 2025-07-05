@@ -46,14 +46,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           height={32}
           className="absolute top-6 right-6 opacity-70 hover:opacity-100 transition-opacity"
         />
-        <h2>🔐 Iniciar Sesión</h2>
+        <h2>Acceso al Sistema</h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-6 relative">
             <label
               htmlFor="username"
               className="block text-sm font-medium text-slate-300 mb-2"
             >
-              👤 Nombre de Usuario
+              Usuario
             </label>
             <input
               id="username"
@@ -62,7 +62,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               onChange={(e) => setUsername(e.target.value)}
               required
               className="w-full px-4 py-3 bg-slate-800/60 text-slate-100 border-2 border-slate-600/50 rounded-xl focus:border-blue-500 focus:outline-none transition-all duration-200 placeholder-slate-400"
-              placeholder="Ingresa tu usuario"
+              placeholder="Ingresa tu nombre de usuario"
             />
           </div>
           <div className="password-container">
@@ -70,7 +70,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               htmlFor="password"
               className="block text-sm font-medium text-slate-300 mb-2"
             >
-              🔒 Contraseña
+              Contraseña
             </label>
             <input
               id="password"
@@ -91,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           </div>
           {error && (
             <div className="text-red-400 text-sm mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-xl backdrop-blur-sm">
-              ⚠️ {error}
+              {error}
             </div>
           )}
           <div className="flex gap-4 mt-8">
@@ -100,13 +100,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               onClick={onClose}
               className="flex-1 py-3 px-4 bg-slate-600/60 border border-slate-600/50 rounded-xl text-slate-200 font-medium hover:bg-slate-600/80 hover:border-slate-600/80 transition-all duration-200 hover:-translate-y-0.5"
             >
-              ❌ Cancelar
+              Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-500 to-blue-600 border border-blue-500/20 rounded-xl text-white font-medium hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-slate-700 to-slate-800 border border-slate-600/50 rounded-xl text-white font-medium hover:from-slate-600 hover:to-slate-700 transition-all duration-200 hover:-translate-y-0.5 shadow-lg hover:shadow-xl"
             >
-              🚀 Iniciar sesión
+              Iniciar Sesión
             </button>
           </div>
         </form>
