@@ -40,7 +40,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm" style={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}>
       <div className="modal-card relative">
         <Image 
-          src="/servicedg-logo.svg" 
+          src="/servicedg-logo-professional.svg" 
           alt="ServiceDG" 
           width={32}
           height={32}

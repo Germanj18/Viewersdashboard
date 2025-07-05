@@ -186,14 +186,14 @@ export default function TakenosPayment() {
       {/* Header */}
       <div className={`p-8 rounded-2xl border-2 transition-all duration-300 ${
         theme === 'dark' 
-          ? 'bg-slate-800/60 border-purple-500/30 backdrop-blur-sm' 
-          : 'bg-white/90 border-purple-300 shadow-xl'
+          ? 'bg-slate-800/60 border-emerald-500/30 backdrop-blur-sm' 
+          : 'bg-white/90 border-emerald-300 shadow-xl'
       }`}>
         <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
             <FontAwesomeIcon icon={faDollarSign} className="text-white text-3xl" />
           </div>
-          <h3 className="text-3xl font-bold text-purple-600 mb-4">Pago con Takenos</h3>
+          <h3 className="text-3xl font-bold text-emerald-600 mb-4">Pago con Takenos</h3>
           <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
             Te enviaremos un link personalizado para pagar en dólares
           </p>
@@ -214,8 +214,8 @@ export default function TakenosPayment() {
               onChange={(e) => setCustomerName(e.target.value)}
               className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
               placeholder="Tu nombre completo"
               required
@@ -238,8 +238,8 @@ export default function TakenosPayment() {
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
               placeholder="tu@email.com"
               required
@@ -265,8 +265,8 @@ export default function TakenosPayment() {
               onChange={(e) => setWhatsapp(e.target.value.replace(/[^0-9]/g, ''))}
               className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
               placeholder="5491123456789 (sin +)"
               required
@@ -289,8 +289,8 @@ export default function TakenosPayment() {
               onChange={(e) => setDescription(e.target.value)}
               className={`w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
               placeholder="Servicio de Análisis de Datos"
             />
@@ -309,8 +309,8 @@ export default function TakenosPayment() {
               onChange={(e) => setAmount(e.target.value)}
               className={`w-full px-4 py-6 rounded-xl border-2 text-3xl font-bold text-center transition-all duration-200 ${
                 theme === 'dark' 
-                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-purple-500 focus:bg-slate-700' 
-                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-purple-500 focus:bg-white shadow-sm'
+                  ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
+                  : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
               placeholder="100.00"
               min="1"
@@ -337,7 +337,7 @@ export default function TakenosPayment() {
             className={`w-full py-5 px-6 rounded-xl font-bold text-lg text-white transition-all duration-300 ${
               isLoading 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 shadow-lg hover:shadow-xl hover:scale-105'
+                : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl hover:scale-105'
             }`}
           >
             {isLoading ? (
@@ -365,19 +365,19 @@ export default function TakenosPayment() {
           </div>
           <div className={`text-sm space-y-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
             <div className="flex items-center">
-              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+              <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
               <span>Completas este formulario con tus datos</span>
             </div>
             <div className="flex items-center">
-              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+              <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
               <span>Te enviamos un link personalizado de Takenos</span>
             </div>
             <div className="flex items-center">
-              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+              <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
               <span>Pagas con cualquier tarjeta en dólares</span>
             </div>
             <div className="flex items-center">
-              <span className="w-6 h-6 bg-purple-100 dark:bg-purple-900/50 text-purple-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+              <span className="w-6 h-6 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
               <span>Confirmamos tu pago automáticamente</span>
             </div>
           </div>

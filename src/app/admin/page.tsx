@@ -34,7 +34,7 @@ export default function AdminDashboard() {
             ? 'bg-slate-900/80 border-b border-slate-700/50' 
             : 'bg-white/80 border-b border-gray-200/50 shadow-sm'
         }`}>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 bg-clip-text text-transparent">
             ServiceDG Dashboard
           </h1>
           <div className="flex items-center space-x-4">
@@ -65,7 +65,7 @@ export default function AdminDashboard() {
           }`}>
             <div className="space-y-4">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl">📊</span>
                 </div>
                 <h2 className="text-xl font-bold mb-2">Panel de Control</h2>

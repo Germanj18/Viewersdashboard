@@ -1,0 +1,23 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo del logo -->
+  <rect width="120" height="120" rx="24" fill="#1e293b"/>
+  
+  <!-- Borde sutil -->
+  <rect width="120" height="120" rx="24" fill="none" stroke="#475569" stroke-width="1"/>
+  
+  <!-- Texto ServiceDG -->
+  <text x="60" y="45" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="700" text-anchor="middle" fill="#e2e8f0">
+    Service
+  </text>
+  <text x="60" y="68" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="800" text-anchor="middle" fill="#64748b">
+    DG
+  </text>
+  
+  <!-- Línea decorativa -->
+  <line x1="30" y1="80" x2="90" y2="80" stroke="#475569" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Texto descriptivo -->
+  <text x="60" y="95" font-family="Inter, system-ui, sans-serif" font-size="8" font-weight="500" text-anchor="middle" fill="#94a3b8">
+    DATA ANALYTICS
+  </text>
+</svg>

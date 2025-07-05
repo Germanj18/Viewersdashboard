@@ -50,7 +50,7 @@ export default function PagoPage() {
             <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
             Volver
           </button>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-600 to-slate-700 bg-clip-text text-transparent">
             Servicios - ServiceDG
           </h1>
         </div>
@@ -75,7 +75,7 @@ export default function PagoPage() {
             : 'bg-white/80 border border-gray-200/50 shadow-xl'
         }`}>
           <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 bg-clip-text text-transparent">
               Realizar Pago
             </h2>
             <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
@@ -168,33 +168,33 @@ export default function PagoPage() {
                 <div 
                   className={`group p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
                     theme === 'dark' 
-                      ? 'bg-slate-800/80 border-purple-500/30 hover:border-purple-400 hover:bg-slate-700/80 hover:shadow-xl hover:shadow-purple-500/10' 
-                      : 'bg-white/90 border-purple-200 hover:border-purple-400 hover:bg-purple-50/50 hover:shadow-xl hover:shadow-purple-500/10'
+                      ? 'bg-slate-800/80 border-emerald-500/30 hover:border-emerald-400 hover:bg-slate-700/80 hover:shadow-xl hover:shadow-emerald-500/10' 
+                      : 'bg-white/90 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 hover:shadow-xl hover:shadow-emerald-500/10'
                   }`}
                   onClick={() => setSelectedMethod('takenos')}
                 >
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                       <FontAwesomeIcon icon={faDollarSign} className="text-3xl text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-3 text-purple-600">Takenos</h3>
+                    <h3 className="text-2xl font-bold mb-3 text-emerald-600">Takenos</h3>
                     <p className={`mb-6 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
                       Pago en dólares con link personalizado
                     </p>
                     <div className={`p-4 rounded-xl mb-6 ${
-                      theme === 'dark' ? 'bg-purple-900/30' : 'bg-purple-50'
+                      theme === 'dark' ? 'bg-emerald-900/30' : 'bg-emerald-50'
                     }`}>
-                      <p className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2">
+                      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2">
                         ✓ Link de pago personalizado
                       </p>
-                      <p className="text-sm text-purple-600 dark:text-purple-400">
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400">
                         ✓ Proceso asistido
                       </p>
-                      <p className="text-sm text-purple-600 dark:text-purple-400">
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400">
                         ✓ Soporte directo
                       </p>
                     </div>
-                    <button className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl">
+                    <button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl">
                       Solicitar Link
                     </button>
                   </div>
@@ -240,7 +240,7 @@ export default function PagoPage() {
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
                     selectedMethod === 'mercadopago' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
                     selectedMethod === 'stripe' ? 'bg-gradient-to-br from-indigo-500 to-indigo-600' :
-                    'bg-gradient-to-br from-purple-500 to-purple-600'
+                    'bg-gradient-to-br from-emerald-500 to-emerald-600'
                   }`}>
                     {selectedMethod === 'mercadopago' ? (
                       <FontAwesomeIcon icon={faUniversity} className="text-white text-lg" />
@@ -254,7 +254,7 @@ export default function PagoPage() {
                     <span className={`font-bold text-lg ${
                       selectedMethod === 'mercadopago' ? 'text-blue-600' :
                       selectedMethod === 'stripe' ? 'text-indigo-600' :
-                      'text-purple-600'
+                      'text-emerald-600'
                     }`}>
                       {selectedMethod === 'mercadopago' ? 'Mercado Pago' :
                        selectedMethod === 'stripe' ? 'Stripe' : 'Takenos'}

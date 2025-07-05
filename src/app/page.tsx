@@ -17,7 +17,7 @@ import Slider from 'react-slick';
 import Image from 'next/image';
 import './page.css';
 
-const logoServiceDG = '/servicedg-logo.svg';
+const logoServiceDG = '/servicedg-logo-professional.svg';
 
 interface UploadedData {
   channel_name: string;
@@ -153,7 +153,7 @@ return (
       }`}>
         <div className="flex items-center">
           <Image src={logoServiceDG} alt="ServiceDG Logo" width={50} height={50} className="mr-4 rounded-xl" />
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 bg-clip-text text-transparent">
             YouTube Viewers Analysis
           </h1>
         </div>
@@ -293,10 +293,10 @@ return (
                         : 'bg-white/80 border border-gray-200/50 shadow-xl'
                     }`}>
                       <div className="flex items-center mb-6">
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mr-4">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mr-4">
                           <span className="text-white text-xl">📈</span>
                         </div>
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">
                           Gráficos de Línea
                         </h2>
                       </div>
