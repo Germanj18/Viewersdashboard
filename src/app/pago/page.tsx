@@ -26,26 +26,152 @@ export default function PagoPage() {
       // Crear estilos críticos para prevenir layout shifts
       const style = document.createElement('style');
       style.textContent = `
-        .payment-component-wrapper input {
+        .payment-component-wrapper * {
+          box-sizing: border-box !important;
+        }
+        .payment-component-wrapper input,
+        .payment-component-wrapper textarea,
+        .payment-component-wrapper select {
           width: 100% !important;
           display: block !important;
           min-height: 48px !important;
           padding: 12px 16px !important;
           box-sizing: border-box !important;
+          font-size: 16px !important;
+          border-radius: 8px !important;
+          border: 2px solid #d1d5db !important;
+          background-color: white !important;
         }
         .payment-component-wrapper h1,
         .payment-component-wrapper h2,
-        .payment-component-wrapper h3 {
+        .payment-component-wrapper h3,
+        .payment-component-wrapper h4 {
           text-align: center !important;
           width: 100% !important;
           display: block !important;
           margin-bottom: 16px !important;
+          font-weight: bold !important;
+          line-height: 1.2 !important;
+        }
+        .payment-component-wrapper h3 {
+          font-size: 1.875rem !important;
+          line-height: 2.25rem !important;
+        }
+        .payment-component-wrapper label {
+          display: block !important;
+          width: 100% !important;
+          margin-bottom: 8px !important;
+          font-weight: 600 !important;
+          font-size: 14px !important;
+          line-height: 1.5 !important;
+          text-align: left !important;
+          min-height: 20px !important;
+        }
+        .payment-component-wrapper label.flex {
+          display: flex !important;
+          align-items: center !important;
+          min-height: 24px !important;
+        }
+        .payment-component-wrapper label .fa,
+        .payment-component-wrapper label svg {
+          margin-right: 8px !important;
+          width: 16px !important;
+          height: 16px !important;
+          flex-shrink: 0 !important;
         }
         .payment-component-wrapper button {
           min-height: 48px !important;
           display: inline-flex !important;
           align-items: center !important;
           justify-content: center !important;
+          width: 100% !important;
+          padding: 12px 24px !important;
+          font-size: 16px !important;
+          border-radius: 8px !important;
+          font-weight: 600 !important;
+          cursor: pointer !important;
+          transition: all 0.2s ease !important;
+        }
+        .payment-component-wrapper .space-y-6 > * + * {
+          margin-top: 1.5rem !important;
+        }
+        .payment-component-wrapper .space-y-4 > * + * {
+          margin-top: 1rem !important;
+        }
+        .payment-component-wrapper .space-y-8 > * + * {
+          margin-top: 2rem !important;
+        }
+        .payment-component-wrapper .text-center {
+          text-align: center !important;
+        }
+        .payment-component-wrapper .flex {
+          display: flex !important;
+        }
+        .payment-component-wrapper .items-center {
+          align-items: center !important;
+        }
+        .payment-component-wrapper .justify-center {
+          justify-content: center !important;
+        }
+        .payment-component-wrapper .w-full {
+          width: 100% !important;
+        }
+        .payment-component-wrapper .block {
+          display: block !important;
+        }
+        .payment-component-wrapper .w-20 {
+          width: 5rem !important;
+          height: 5rem !important;
+          flex-shrink: 0 !important;
+        }
+        .payment-component-wrapper .h-20 {
+          height: 5rem !important;
+        }
+        .payment-component-wrapper .w-5 {
+          width: 1.25rem !important;
+          height: 1.25rem !important;
+          flex-shrink: 0 !important;
+        }
+        .payment-component-wrapper .h-5 {
+          height: 1.25rem !important;
+        }
+        .payment-component-wrapper .mr-3 {
+          margin-right: 0.75rem !important;
+        }
+        .payment-component-wrapper .mb-3 {
+          margin-bottom: 0.75rem !important;
+        }
+        .payment-component-wrapper .mb-6 {
+          margin-bottom: 1.5rem !important;
+        }
+        .payment-component-wrapper .mx-auto {
+          margin-left: auto !important;
+          margin-right: auto !important;
+        }
+        /* Forzar que los contenedores mantengan su estructura */
+        .payment-component-wrapper > div {
+          width: 100% !important;
+          display: block !important;
+        }
+        /* Prevenir layout shifts con FontAwesome */
+        .payment-component-wrapper .fa,
+        .payment-component-wrapper svg {
+          display: inline-block !important;
+          vertical-align: middle !important;
+        }
+        /* Asegurar que los gradientes de fondo se rendericen correctamente */
+        .payment-component-wrapper .bg-gradient-to-br {
+          background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)) !important;
+        }
+        /* Forzar layout para elementos específicos de Stripe */
+        .payment-component-wrapper .StripeElement {
+          width: 100% !important;
+          display: block !important;
+          min-height: 48px !important;
+          padding: 12px 16px !important;
+          border-radius: 8px !important;
+          border: 2px solid #d1d5db !important;
+          background-color: white !important;
         }
       `;
       document.head.appendChild(style);
@@ -60,10 +186,55 @@ export default function PagoPage() {
 
   const handleMethodSelect = (method: PaymentMethod) => {
     setIsTransitioning(true);
-    // Pequeño delay para suavizar la transición
+    // Pequeño delay para suavizar la transición y asegurar layout correcto
     setTimeout(() => {
       setSelectedMethod(method);
       setIsTransitioning(false);
+      
+      // Forzar re-layout después de la transición
+      setTimeout(() => {
+        const paymentWrapper = document.querySelector('.payment-component-wrapper') as HTMLElement;
+        if (paymentWrapper) {
+          // Forzar recalculo de layout
+          paymentWrapper.style.display = 'none';
+          paymentWrapper.offsetHeight; // Trigger reflow
+          paymentWrapper.style.display = 'block';
+          
+          // Aplicar estilos forzados a elementos específicos
+          const inputs = paymentWrapper.querySelectorAll('input, textarea, select');
+          inputs.forEach((input) => {
+            const inputElement = input as HTMLElement;
+            inputElement.style.width = '100%';
+            inputElement.style.display = 'block';
+            inputElement.style.minHeight = '48px';
+            inputElement.style.padding = '12px 16px';
+            inputElement.style.boxSizing = 'border-box';
+          });
+          
+          const titles = paymentWrapper.querySelectorAll('h1, h2, h3, h4');
+          titles.forEach((title) => {
+            const titleElement = title as HTMLElement;
+            titleElement.style.textAlign = 'center';
+            titleElement.style.width = '100%';
+            titleElement.style.display = 'block';
+          });
+          
+          const labels = paymentWrapper.querySelectorAll('label');
+          labels.forEach((label) => {
+            const labelElement = label as HTMLElement;
+            labelElement.style.display = 'block';
+            labelElement.style.width = '100%';
+            labelElement.style.marginBottom = '8px';
+            labelElement.style.textAlign = 'left';
+            
+            // Si el label tiene clase flex, aplicar flex
+            if (labelElement.classList.contains('flex')) {
+              labelElement.style.display = 'flex';
+              labelElement.style.alignItems = 'center';
+            }
+          });
+        }
+      }, 50);
     }, 150);
   };
 

@@ -278,7 +278,14 @@ export default function PayoneerPayment() {
           <div style={{ width: '100%', display: 'block' }}>
             <label className={`block text-sm font-semibold mb-3 flex items-center ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`} style={{ display: 'block', width: '100%', marginBottom: '0.75rem', fontWeight: '600' }}>
+            }`} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              width: '100%', 
+              marginBottom: '0.75rem', 
+              fontWeight: '600',
+              minHeight: '24px'
+            }}>
               <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
                 <FontAwesomeIcon icon={faEnvelope} className="text-white text-xs" />
               </div>
@@ -293,6 +300,16 @@ export default function PayoneerPayment() {
                   ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
+              style={{ 
+                width: '100%', 
+                display: 'block', 
+                padding: '12px 16px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db', 
+                fontSize: '16px',
+                minHeight: '48px',
+                boxSizing: 'border-box'
+              }}
               placeholder="tu@email.com"
               required
             />
@@ -302,10 +319,17 @@ export default function PayoneerPayment() {
           </div>
 
           {/* WhatsApp */}
-          <div>
+          <div style={{ width: '100%', display: 'block' }}>
             <label className={`block text-sm font-semibold mb-3 flex items-center ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`}>
+            }`} style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              width: '100%', 
+              marginBottom: '0.75rem', 
+              fontWeight: '600',
+              minHeight: '24px'
+            }}>
               <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mr-3">
                 <FontAwesomeIcon icon={faCommentDots} className="text-white text-xs" />
               </div>
@@ -320,6 +344,16 @@ export default function PayoneerPayment() {
                   ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
+              style={{ 
+                width: '100%', 
+                display: 'block', 
+                padding: '12px 16px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db', 
+                fontSize: '16px',
+                minHeight: '48px',
+                boxSizing: 'border-box'
+              }}
               placeholder="5491123456789 (sin +)"
               required
             />
@@ -329,10 +363,10 @@ export default function PayoneerPayment() {
           </div>
 
           {/* Descripción */}
-          <div>
+          <div style={{ width: '100%', display: 'block' }}>
             <label className={`block text-sm font-semibold mb-3 ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`}>
+            }`} style={{ display: 'block', width: '100%', marginBottom: '0.75rem', fontWeight: '600' }}>
               Servicio
             </label>
             <input
@@ -344,15 +378,25 @@ export default function PayoneerPayment() {
                   ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
+              style={{ 
+                width: '100%', 
+                display: 'block', 
+                padding: '12px 16px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db', 
+                fontSize: '16px',
+                minHeight: '48px',
+                boxSizing: 'border-box'
+              }}
               placeholder="Servicio de Análisis de Datos"
             />
           </div>
 
           {/* Monto */}
-          <div>
+          <div style={{ width: '100%', display: 'block' }}>
             <label className={`block text-sm font-semibold mb-3 ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`}>
+            }`} style={{ display: 'block', width: '100%', marginBottom: '0.75rem', fontWeight: '600' }}>
               Monto en USD
             </label>
             <input
@@ -364,6 +408,18 @@ export default function PayoneerPayment() {
                   ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
+              style={{ 
+                width: '100%', 
+                display: 'block', 
+                padding: '16px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db', 
+                fontSize: '1.875rem',
+                fontWeight: 'bold',
+                textAlign: 'center',
+                minHeight: '64px',
+                boxSizing: 'border-box'
+              }}
               placeholder="100.00"
               min="1"
               step="0.01"
