@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -16,6 +16,7 @@ export default function PayoneerPayment() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [isComponentReady, setIsComponentReady] = useState(false);
   
   // Datos del formulario
   const [amount, setAmount] = useState('');
@@ -23,6 +24,14 @@ export default function PayoneerPayment() {
   const [email, setEmail] = useState('');
   const [whatsapp, setWhatsapp] = useState('');
   const [customerName, setCustomerName] = useState('');
+
+  // Asegurar que el componente se inicialice correctamente
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsComponentReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +99,14 @@ export default function PayoneerPayment() {
     setCustomerName('');
     setError('');
   };
+
+  if (!isComponentReady) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

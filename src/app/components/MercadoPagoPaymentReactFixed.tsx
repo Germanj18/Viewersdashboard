@@ -16,6 +16,15 @@ export default function MercadoPagoPaymentReact() {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('ServicioAnalisisDatos');
   const [showPayment, setShowPayment] = useState(false);
+  const [isComponentReady, setIsComponentReady] = useState(false);
+
+  // Asegurar que el componente se inicialice correctamente
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsComponentReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const createPayment = async () => {
     if (!amount || parseFloat(amount) <= 0) {
@@ -55,6 +64,14 @@ export default function MercadoPagoPaymentReact() {
       setIsLoading(false);
     }
   };
+
+  if (!isComponentReady) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

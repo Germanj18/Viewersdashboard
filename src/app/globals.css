@@ -282,3 +282,62 @@ body {
   box-shadow: 0 0 0 1px #3b82f6;
 }
 
+/* Estilos para mejorar la carga de componentes de pago */
+.payment-component-wrapper {
+  min-height: 400px;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.payment-component-wrapper * {
+  box-sizing: border-box;
+}
+
+/* Asegurar que los elementos de Stripe se rendericen correctamente */
+.StripeElement {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 #e6ebf1;
+  -webkit-transition: box-shadow 150ms ease;
+  transition: box-shadow 150ms ease;
+}
+
+.StripeElement--focus {
+  box-shadow: 0 1px 3px 0 #cfd7df;
+}
+
+.StripeElement--invalid {
+  border-color: #fa755a;
+}
+
+.StripeElement--webkit-autofill {
+  background-color: #fefde5 !important;
+}
+
+/* Estilos para componentes MercadoPago */
+.cho-container {
+  min-height: 300px;
+}
+
+/* Preloader para transiciones */
+.transition-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+/* Forzar re-renderizado correcto */
+.payment-method-container {
+  contain: layout style;
+}
+
+.payment-form {
+  transform: translateZ(0);
+  will-change: transform;
+}
+

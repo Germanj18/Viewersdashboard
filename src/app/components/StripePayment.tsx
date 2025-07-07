@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../ThemeContext';
 import { loadStripe } from '@stripe/stripe-js';
 import {
@@ -345,6 +345,15 @@ export default function StripePayment() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [paymentIntentId, setPaymentIntentId] = useState('');
+  const [isComponentReady, setIsComponentReady] = useState(false);
+
+  // Asegurar que el componente se inicialice correctamente
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsComponentReady(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSuccess = (id: string) => {
     setPaymentIntentId(id);
@@ -355,6 +364,14 @@ export default function StripePayment() {
   const handleError = (errorMessage: string) => {
     setError(errorMessage);
   };
+
+  if (!isComponentReady) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

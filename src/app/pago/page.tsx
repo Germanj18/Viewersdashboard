@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '../ThemeContext';
@@ -17,6 +17,28 @@ export default function PagoPage() {
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Pre-cargar estilos cuando se monta el componente
+  useEffect(() => {
+    // Forzar la carga de todos los CSS modules
+    if (typeof window !== 'undefined') {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'style';
+      link.href = '/';
+      document.head.appendChild(link);
+    }
+  }, []);
+
+  const handleMethodSelect = (method: PaymentMethod) => {
+    setIsTransitioning(true);
+    // Pequeño delay para suavizar la transición
+    setTimeout(() => {
+      setSelectedMethod(method);
+      setIsTransitioning(false);
+    }, 150);
+  };
 
   if (status === 'loading') {
     return <Preloader />;
@@ -99,7 +121,7 @@ export default function PagoPage() {
                       ? 'bg-slate-800/80 border-blue-500/30 hover:border-blue-400 hover:bg-slate-700/80 hover:shadow-xl hover:shadow-blue-500/10' 
                       : 'bg-white/90 border-blue-200 hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-xl hover:shadow-blue-500/10'
                   }`}
-                  onClick={() => setSelectedMethod('mercadopago')}
+                  onClick={() => handleMethodSelect('mercadopago')}
                 >
                   <div className="text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -135,7 +157,7 @@ export default function PagoPage() {
                       ? 'bg-slate-800/80 border-indigo-500/30 hover:border-indigo-400 hover:bg-slate-700/80 hover:shadow-xl hover:shadow-indigo-500/10' 
                       : 'bg-white/90 border-indigo-200 hover:border-indigo-400 hover:bg-indigo-50/50 hover:shadow-xl hover:shadow-indigo-500/10'
                   }`}
-                  onClick={() => setSelectedMethod('stripe')}
+                  onClick={() => handleMethodSelect('stripe')}
                 >
                   <div className="text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -171,7 +193,7 @@ export default function PagoPage() {
                       ? 'bg-slate-800/80 border-emerald-500/30 hover:border-emerald-400 hover:bg-slate-700/80 hover:shadow-xl hover:shadow-emerald-500/10' 
                       : 'bg-white/90 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 hover:shadow-xl hover:shadow-emerald-500/10'
                   }`}
-                  onClick={() => setSelectedMethod('payoneer')}
+                  onClick={() => handleMethodSelect('payoneer')}
                 >
                   <div className="text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -268,12 +290,20 @@ export default function PagoPage() {
               </div>
 
               {/* Componente de pago correspondiente */}
-              {selectedMethod === 'mercadopago' ? (
-                <MercadoPagoPaymentReactFixed />
-              ) : selectedMethod === 'stripe' ? (
-                <StripePayment />
+              {isTransitioning ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+                </div>
               ) : (
-                <PayoneerPayment />
+                <div className="payment-component-wrapper">
+                  {selectedMethod === 'mercadopago' ? (
+                    <MercadoPagoPaymentReactFixed key="mercadopago" />
+                  ) : selectedMethod === 'stripe' ? (
+                    <StripePayment key="stripe" />
+                  ) : selectedMethod === 'payoneer' ? (
+                    <PayoneerPayment key="payoneer" />
+                  ) : null}
+                </div>
               )}
             </div>
           )}
