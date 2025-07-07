@@ -67,9 +67,11 @@ export default function PagoPage() {
           text-align: left !important;
           min-height: 20px !important;
         }
-        .payment-component-wrapper label.flex {
+        .payment-component-wrapper label.flex,
+        .payment-component-wrapper label[style*="display: flex"] {
           display: flex !important;
           align-items: center !important;
+          text-align: left !important;
           min-height: 24px !important;
         }
         .payment-component-wrapper label .fa,
@@ -118,6 +120,27 @@ export default function PagoPage() {
         }
         .payment-component-wrapper .block {
           display: block !important;
+        }
+        /* Proteger el grid de métodos de pago */
+        .payment-methods-grid {
+          display: grid !important;
+        }
+        .payment-methods-grid.lg\\:grid-cols-3 {
+          grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        }
+        .payment-methods-grid.md\\:grid-cols-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        @media (max-width: 1023px) {
+          .payment-methods-grid.lg\\:grid-cols-3 {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+        @media (max-width: 767px) {
+          .payment-methods-grid.lg\\:grid-cols-3,
+          .payment-methods-grid.md\\:grid-cols-2 {
+            grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+          }
         }
         .payment-component-wrapper .w-20 {
           width: 5rem !important;
@@ -191,50 +214,67 @@ export default function PagoPage() {
       setSelectedMethod(method);
       setIsTransitioning(false);
       
-      // Forzar re-layout después de la transición
-      setTimeout(() => {
-        const paymentWrapper = document.querySelector('.payment-component-wrapper') as HTMLElement;
-        if (paymentWrapper) {
-          // Forzar recalculo de layout
-          paymentWrapper.style.display = 'none';
-          paymentWrapper.offsetHeight; // Trigger reflow
-          paymentWrapper.style.display = 'block';
-          
-          // Aplicar estilos forzados a elementos específicos
-          const inputs = paymentWrapper.querySelectorAll('input, textarea, select');
-          inputs.forEach((input) => {
-            const inputElement = input as HTMLElement;
-            inputElement.style.width = '100%';
-            inputElement.style.display = 'block';
-            inputElement.style.minHeight = '48px';
-            inputElement.style.padding = '12px 16px';
-            inputElement.style.boxSizing = 'border-box';
-          });
-          
-          const titles = paymentWrapper.querySelectorAll('h1, h2, h3, h4');
-          titles.forEach((title) => {
-            const titleElement = title as HTMLElement;
-            titleElement.style.textAlign = 'center';
-            titleElement.style.width = '100%';
-            titleElement.style.display = 'block';
-          });
-          
-          const labels = paymentWrapper.querySelectorAll('label');
-          labels.forEach((label) => {
-            const labelElement = label as HTMLElement;
-            labelElement.style.display = 'block';
-            labelElement.style.width = '100%';
-            labelElement.style.marginBottom = '8px';
-            labelElement.style.textAlign = 'left';
+      // Forzar re-layout después de la transición SOLO si hay un método seleccionado
+      if (method) {
+        setTimeout(() => {
+          const paymentWrapper = document.querySelector('.payment-component-wrapper') as HTMLElement;
+          if (paymentWrapper) {
+            // Forzar recalculo de layout
+            paymentWrapper.style.display = 'none';
+            paymentWrapper.offsetHeight; // Trigger reflow
+            paymentWrapper.style.display = 'block';
             
-            // Si el label tiene clase flex, aplicar flex
-            if (labelElement.classList.contains('flex')) {
-              labelElement.style.display = 'flex';
-              labelElement.style.alignItems = 'center';
-            }
-          });
-        }
-      }, 50);
+            // Aplicar estilos forzados a elementos específicos del formulario
+            const inputs = paymentWrapper.querySelectorAll('input, textarea, select');
+            inputs.forEach((input) => {
+              const inputElement = input as HTMLElement;
+              inputElement.style.width = '100%';
+              inputElement.style.display = 'block';
+              inputElement.style.minHeight = '48px';
+              inputElement.style.padding = '12px 16px';
+              inputElement.style.boxSizing = 'border-box';
+            });
+            
+            const titles = paymentWrapper.querySelectorAll('h1, h2, h3, h4');
+            titles.forEach((title) => {
+              const titleElement = title as HTMLElement;
+              titleElement.style.textAlign = 'center';
+              titleElement.style.width = '100%';
+              titleElement.style.display = 'block';
+            });
+            
+            // Manejar labels específicamente
+            const labels = paymentWrapper.querySelectorAll('label');
+            labels.forEach((label) => {
+              const labelElement = label as HTMLElement;
+              const hasFlexClass = labelElement.classList.contains('flex') || 
+                                   labelElement.style.display === 'flex' ||
+                                   labelElement.hasAttribute('style') && labelElement.getAttribute('style')!.includes('display: flex');
+              
+              if (hasFlexClass) {
+                labelElement.style.display = 'flex';
+                labelElement.style.alignItems = 'center';
+                labelElement.style.textAlign = 'left';
+              } else {
+                labelElement.style.display = 'block';
+                labelElement.style.textAlign = 'left';
+              }
+              labelElement.style.width = '100%';
+              labelElement.style.marginBottom = '8px';
+            });
+          }
+        }, 100);
+      } else {
+        // Cuando se regresa al grid, restablecer el grid layout
+        setTimeout(() => {
+          const grid = document.querySelector('.payment-methods-grid') as HTMLElement;
+          if (grid) {
+            grid.style.display = 'grid';
+            // Forzar recalculo del grid
+            grid.offsetHeight;
+          }
+        }, 50);
+      }
     }, 150);
   };
 
@@ -311,7 +351,7 @@ export default function PagoPage() {
                 </p>
               </div>
 
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
+              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 payment-methods-grid">
                 {/* Mercado Pago - ARS */}
                 <div 
                   className={`group p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${

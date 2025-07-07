@@ -279,12 +279,14 @@ export default function PayoneerPayment() {
             <label className={`block text-sm font-semibold mb-3 flex items-center ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
             }`} style={{ 
-              display: 'flex', 
+              display: 'flex !important', 
               alignItems: 'center', 
+              justifyContent: 'flex-start',
               width: '100%', 
               marginBottom: '0.75rem', 
               fontWeight: '600',
-              minHeight: '24px'
+              minHeight: '24px',
+              textAlign: 'left'
             }}>
               <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
                 <FontAwesomeIcon icon={faEnvelope} className="text-white text-xs" />
@@ -323,12 +325,14 @@ export default function PayoneerPayment() {
             <label className={`block text-sm font-semibold mb-3 flex items-center ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
             }`} style={{ 
-              display: 'flex', 
+              display: 'flex !important', 
               alignItems: 'center', 
+              justifyContent: 'flex-start',
               width: '100%', 
               marginBottom: '0.75rem', 
               fontWeight: '600',
-              minHeight: '24px'
+              minHeight: '24px',
+              textAlign: 'left'
             }}>
               <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mr-3">
                 <FontAwesomeIcon icon={faCommentDots} className="text-white text-xs" />
