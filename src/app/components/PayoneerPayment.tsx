@@ -36,44 +36,72 @@ export default function PayoneerPayment() {
   // Aplicar estilos forzados a todos los inputs después del renderizado
   useEffect(() => {
     if (isComponentReady) {
-      const inputs = document.querySelectorAll('.payoneer-form input, .payoneer-form textarea, .payoneer-form select');
-      inputs.forEach((input) => {
-        const inputElement = input as HTMLInputElement;
-        inputElement.style.width = '100%';
-        inputElement.style.display = 'block';
-        inputElement.style.padding = '12px 16px';
-        inputElement.style.borderRadius = '8px';
-        inputElement.style.fontSize = '16px';
-        inputElement.style.minHeight = '48px';
-        inputElement.style.boxSizing = 'border-box';
-      });
+      // Forzar estilos críticos en un timer para asegurar que se apliquen
+      const applyStyles = () => {
+        const inputs = document.querySelectorAll('.payoneer-form input, .payoneer-form textarea, .payoneer-form select');
+        inputs.forEach((input) => {
+          const inputElement = input as HTMLInputElement;
+          inputElement.style.width = '100%';
+          inputElement.style.display = 'block';
+          inputElement.style.padding = '12px 16px';
+          inputElement.style.borderRadius = '8px';
+          inputElement.style.fontSize = '16px';
+          inputElement.style.minHeight = '48px';
+          inputElement.style.boxSizing = 'border-box';
+        });
 
-      const titles = document.querySelectorAll('.payoneer-form h1, .payoneer-form h2, .payoneer-form h3, .payoneer-form h4');
-      titles.forEach((title) => {
-        const titleElement = title as HTMLElement;
-        titleElement.style.textAlign = 'center';
-        titleElement.style.width = '100%';
-        titleElement.style.display = 'block';
-      });
+        const titles = document.querySelectorAll('.payoneer-form h1, .payoneer-form h2, .payoneer-form h3, .payoneer-form h4');
+        titles.forEach((title) => {
+          const titleElement = title as HTMLElement;
+          titleElement.style.textAlign = 'center';
+          titleElement.style.width = '100%';
+          titleElement.style.display = 'block';
+        });
 
-      // Forzar layout correcto para labels con iconos
-      const labelsWithIcons = document.querySelectorAll('.payoneer-form .label-with-icon');
-      labelsWithIcons.forEach((label) => {
-        const labelElement = label as HTMLElement;
-        labelElement.style.display = 'flex';
-        labelElement.style.alignItems = 'center';
-        labelElement.style.justifyContent = 'flex-start';
-        labelElement.style.textAlign = 'left';
-        
-        const iconContainer = labelElement.querySelector('.w-5');
-        if (iconContainer) {
-          const iconElement = iconContainer as HTMLElement;
-          iconElement.style.flexShrink = '0';
-          iconElement.style.marginRight = '12px';
-          iconElement.style.width = '20px';
-          iconElement.style.height = '20px';
-        }
-      });
+        // Forzar layout correcto para labels con iconos de manera más agresiva
+        const labelsWithIcons = document.querySelectorAll('.payoneer-form .label-with-icon');
+        labelsWithIcons.forEach((label, index) => {
+          const labelElement = label as HTMLElement;
+          
+          // Estilos forzados con !important mediante CSS
+          labelElement.style.cssText = `
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            text-align: left !important;
+            width: 100% !important;
+            margin-bottom: 12px !important;
+            height: auto !important;
+            min-height: 24px !important;
+            max-height: 40px !important;
+          `;
+          
+          const iconContainer = labelElement.querySelector('.w-5');
+          if (iconContainer) {
+            const iconElement = iconContainer as HTMLElement;
+            iconElement.style.cssText = `
+              flex-shrink: 0 !important;
+              margin-right: 12px !important;
+              width: 20px !important;
+              height: 20px !important;
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+            `;
+          }
+        });
+      };
+
+      // Aplicar inmediatamente y después de un pequeño delay
+      applyStyles();
+      const timer = setTimeout(applyStyles, 50);
+      const timer2 = setTimeout(applyStyles, 200);
+
+      return () => {
+        clearTimeout(timer);
+        clearTimeout(timer2);
+      };
     }
   }, [isComponentReady]);
 
@@ -295,19 +323,10 @@ export default function PayoneerPayment() {
 
           {/* Email */}
           <div style={{ width: '100%', display: 'block' }}>
-            <label className={`block text-sm font-semibold mb-3 label-with-icon ${
+            <label className={`label-with-icon text-sm font-semibold mb-3 ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`} style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'flex-start',
-              width: '100%', 
-              marginBottom: '0.75rem', 
-              fontWeight: '600',
-              minHeight: '24px',
-              textAlign: 'left'
-            }}>
-              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3" style={{ flexShrink: 0, marginRight: '12px' }}>
+            }`}>
+              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                 <FontAwesomeIcon icon={faEnvelope} className="text-white text-xs" />
               </div>
               Email
@@ -341,19 +360,10 @@ export default function PayoneerPayment() {
 
           {/* WhatsApp */}
           <div style={{ width: '100%', display: 'block' }}>
-            <label className={`block text-sm font-semibold mb-3 label-with-icon ${
+            <label className={`label-with-icon text-sm font-semibold mb-3 ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`} style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'flex-start',
-              width: '100%', 
-              marginBottom: '0.75rem', 
-              fontWeight: '600',
-              minHeight: '24px',
-              textAlign: 'left'
-            }}>
-              <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mr-3" style={{ flexShrink: 0, marginRight: '12px' }}>
+            }`}>
+              <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
                 <FontAwesomeIcon icon={faCommentDots} className="text-white text-xs" />
               </div>
               Número de WhatsApp

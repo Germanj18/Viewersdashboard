@@ -67,35 +67,58 @@ export default function PagoPage() {
           text-align: left !important;
           min-height: 20px !important;
         }
-        .payment-component-wrapper label.flex,
-        .payment-component-wrapper label[style*="display: flex"] {
-          display: flex !important;
-          align-items: center !important;
-          text-align: left !important;
-          min-height: 24px !important;
-        }
-        /* Específico para labels con iconos */
-        .payment-component-wrapper label[style*="flex"] {
-          display: flex !important;
-          align-items: center !important;
-          justify-content: flex-start !important;
-          text-align: left !important;
-        }
-        .payment-component-wrapper label .w-5 {
-          flex-shrink: 0 !important;
-          margin-right: 12px !important;
-        }
+        /* Estilos específicos y forzados para labels con iconos */
         .payment-component-wrapper .label-with-icon {
           display: flex !important;
+          flex-direction: row !important;
           align-items: center !important;
           justify-content: flex-start !important;
           text-align: left !important;
+          vertical-align: middle !important;
+          height: auto !important;
+          min-height: 24px !important;
+          max-height: 40px !important;
         }
-        .payment-component-wrapper .label-with-icon .w-5 {
+        .payment-component-wrapper .label-with-icon > * {
+          align-self: center !important;
+        }
+        .payment-component-wrapper .label-with-icon .w-5,
+        .payment-component-wrapper .label-with-icon > div:first-child {
           flex-shrink: 0 !important;
           margin-right: 12px !important;
           width: 20px !important;
           height: 20px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        /* Evitar que otros estilos interfieran con labels con iconos */
+        .payment-component-wrapper label.label-with-icon.flex {
+          display: flex !important;
+        }
+        .payment-component-wrapper label[class*="label-with-icon"] {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+        }
+        /* Forzar estilos para iconos dentro de labels */
+        .payment-component-wrapper .label-with-icon svg,
+        .payment-component-wrapper .label-with-icon .fa {
+          margin-right: 12px !important;
+          width: 16px !important;
+          height: 16px !important;
+          flex-shrink: 0 !important;
+          display: inline-block !important;
+          vertical-align: middle !important;
+        }
+        /* Resetear cualquier estilo que pueda estar causando problemas */
+        .payment-component-wrapper .label-with-icon * {
+          vertical-align: middle !important;
+        }
+        /* Prevenir text-align center en labels con iconos */
+        .payment-component-wrapper .text-center .label-with-icon {
+          text-align: left !important;
         }
         .payment-component-wrapper label .fa,
         .payment-component-wrapper label svg {
@@ -266,37 +289,61 @@ export default function PagoPage() {
               titleElement.style.display = 'block';
             });
             
-            // Manejar labels específicamente
+            // Manejar labels específicamente con mayor agresividad
             const labels = paymentWrapper.querySelectorAll('label');
             labels.forEach((label) => {
               const labelElement = label as HTMLElement;
               const hasIconClass = labelElement.classList.contains('label-with-icon');
-              const hasFlexStyle = labelElement.style.display === 'flex' ||
-                                   labelElement.hasAttribute('style') && labelElement.getAttribute('style')!.includes('display: flex');
               
-              if (hasIconClass || hasFlexStyle) {
-                // Labels con iconos
-                labelElement.style.display = 'flex';
-                labelElement.style.alignItems = 'center';
-                labelElement.style.justifyContent = 'flex-start';
-                labelElement.style.textAlign = 'left';
+              if (hasIconClass) {
+                // Labels con iconos - forzar layout con cssText para máxima prioridad
+                labelElement.style.cssText = `
+                  display: flex !important;
+                  flex-direction: row !important;
+                  align-items: center !important;
+                  justify-content: flex-start !important;
+                  text-align: left !important;
+                  width: 100% !important;
+                  margin-bottom: 8px !important;
+                  height: auto !important;
+                  min-height: 24px !important;
+                  max-height: 40px !important;
+                `;
                 
-                // Asegurar que el icono mantenga su posición
-                const iconContainer = labelElement.querySelector('.w-5');
+                // Buscar iconos tanto en divs como FontAwesome directos
+                const iconContainer = labelElement.querySelector('.w-5') || labelElement.querySelector('svg') || labelElement.querySelector('.fa');
                 if (iconContainer) {
                   const iconElement = iconContainer as HTMLElement;
-                  iconElement.style.flexShrink = '0';
-                  iconElement.style.marginRight = '12px';
-                  iconElement.style.width = '20px';
-                  iconElement.style.height = '20px';
+                  if (iconElement.tagName === 'svg' || iconElement.classList.contains('fa')) {
+                    // Es un icono directo
+                    iconElement.style.cssText = `
+                      margin-right: 12px !important;
+                      width: 16px !important;
+                      height: 16px !important;
+                      flex-shrink: 0 !important;
+                      display: inline-block !important;
+                      vertical-align: middle !important;
+                    `;
+                  } else {
+                    // Es un contenedor de icono
+                    iconElement.style.cssText = `
+                      flex-shrink: 0 !important;
+                      margin-right: 12px !important;
+                      width: 20px !important;
+                      height: 20px !important;
+                      display: flex !important;
+                      align-items: center !important;
+                      justify-content: center !important;
+                    `;
+                  }
                 }
               } else {
                 // Labels normales
                 labelElement.style.display = 'block';
                 labelElement.style.textAlign = 'left';
+                labelElement.style.width = '100%';
+                labelElement.style.marginBottom = '8px';
               }
-              labelElement.style.width = '100%';
-              labelElement.style.marginBottom = '8px';
             });
           }
         }, 100);
