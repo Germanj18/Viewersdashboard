@@ -152,8 +152,8 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
         <div className="space-y-4">
           {/* Nombre del titular */}
           <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <FontAwesomeIcon icon={faCreditCard} className="mr-2 text-gray-500" />
+            <label className="block text-sm font-medium mb-2 label-with-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left' }}>
+              <FontAwesomeIcon icon={faCreditCard} className="mr-2 text-gray-500" style={{ flexShrink: 0, marginRight: '8px' }} />
               Nombre del titular
             </label>
             <input
@@ -173,8 +173,8 @@ function CheckoutForm({ amount, description, onSuccess, onError }: {
 
           {/* Número de tarjeta */}
           <div>
-            <label className="block text-sm font-medium mb-2 flex items-center">
-              <FontAwesomeIcon icon={faCreditCard} className="mr-2 text-gray-500" />
+            <label className="block text-sm font-medium mb-2 label-with-icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'left' }}>
+              <FontAwesomeIcon icon={faCreditCard} className="mr-2 text-gray-500" style={{ flexShrink: 0, marginRight: '8px' }} />
               Número de tarjeta
             </label>
             <div className={`relative p-4 rounded-lg border transition-all ${

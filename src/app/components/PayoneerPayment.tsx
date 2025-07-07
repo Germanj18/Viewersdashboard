@@ -55,6 +55,25 @@ export default function PayoneerPayment() {
         titleElement.style.width = '100%';
         titleElement.style.display = 'block';
       });
+
+      // Forzar layout correcto para labels con iconos
+      const labelsWithIcons = document.querySelectorAll('.payoneer-form .label-with-icon');
+      labelsWithIcons.forEach((label) => {
+        const labelElement = label as HTMLElement;
+        labelElement.style.display = 'flex';
+        labelElement.style.alignItems = 'center';
+        labelElement.style.justifyContent = 'flex-start';
+        labelElement.style.textAlign = 'left';
+        
+        const iconContainer = labelElement.querySelector('.w-5');
+        if (iconContainer) {
+          const iconElement = iconContainer as HTMLElement;
+          iconElement.style.flexShrink = '0';
+          iconElement.style.marginRight = '12px';
+          iconElement.style.width = '20px';
+          iconElement.style.height = '20px';
+        }
+      });
     }
   }, [isComponentReady]);
 
@@ -276,10 +295,10 @@ export default function PayoneerPayment() {
 
           {/* Email */}
           <div style={{ width: '100%', display: 'block' }}>
-            <label className={`block text-sm font-semibold mb-3 flex items-center ${
+            <label className={`block text-sm font-semibold mb-3 label-with-icon ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
             }`} style={{ 
-              display: 'flex !important', 
+              display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'flex-start',
               width: '100%', 
@@ -288,7 +307,7 @@ export default function PayoneerPayment() {
               minHeight: '24px',
               textAlign: 'left'
             }}>
-              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
+              <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3" style={{ flexShrink: 0, marginRight: '12px' }}>
                 <FontAwesomeIcon icon={faEnvelope} className="text-white text-xs" />
               </div>
               Email
@@ -322,10 +341,10 @@ export default function PayoneerPayment() {
 
           {/* WhatsApp */}
           <div style={{ width: '100%', display: 'block' }}>
-            <label className={`block text-sm font-semibold mb-3 flex items-center ${
+            <label className={`block text-sm font-semibold mb-3 label-with-icon ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
             }`} style={{ 
-              display: 'flex !important', 
+              display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'flex-start',
               width: '100%', 
@@ -334,7 +353,7 @@ export default function PayoneerPayment() {
               minHeight: '24px',
               textAlign: 'left'
             }}>
-              <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mr-3">
+              <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mr-3" style={{ flexShrink: 0, marginRight: '12px' }}>
                 <FontAwesomeIcon icon={faCommentDots} className="text-white text-xs" />
               </div>
               Número de WhatsApp

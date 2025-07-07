@@ -74,6 +74,29 @@ export default function PagoPage() {
           text-align: left !important;
           min-height: 24px !important;
         }
+        /* Específico para labels con iconos */
+        .payment-component-wrapper label[style*="flex"] {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          text-align: left !important;
+        }
+        .payment-component-wrapper label .w-5 {
+          flex-shrink: 0 !important;
+          margin-right: 12px !important;
+        }
+        .payment-component-wrapper .label-with-icon {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          text-align: left !important;
+        }
+        .payment-component-wrapper .label-with-icon .w-5 {
+          flex-shrink: 0 !important;
+          margin-right: 12px !important;
+          width: 20px !important;
+          height: 20px !important;
+        }
         .payment-component-wrapper label .fa,
         .payment-component-wrapper label svg {
           margin-right: 8px !important;
@@ -247,15 +270,28 @@ export default function PagoPage() {
             const labels = paymentWrapper.querySelectorAll('label');
             labels.forEach((label) => {
               const labelElement = label as HTMLElement;
-              const hasFlexClass = labelElement.classList.contains('flex') || 
-                                   labelElement.style.display === 'flex' ||
+              const hasIconClass = labelElement.classList.contains('label-with-icon');
+              const hasFlexStyle = labelElement.style.display === 'flex' ||
                                    labelElement.hasAttribute('style') && labelElement.getAttribute('style')!.includes('display: flex');
               
-              if (hasFlexClass) {
+              if (hasIconClass || hasFlexStyle) {
+                // Labels con iconos
                 labelElement.style.display = 'flex';
                 labelElement.style.alignItems = 'center';
+                labelElement.style.justifyContent = 'flex-start';
                 labelElement.style.textAlign = 'left';
+                
+                // Asegurar que el icono mantenga su posición
+                const iconContainer = labelElement.querySelector('.w-5');
+                if (iconContainer) {
+                  const iconElement = iconContainer as HTMLElement;
+                  iconElement.style.flexShrink = '0';
+                  iconElement.style.marginRight = '12px';
+                  iconElement.style.width = '20px';
+                  iconElement.style.height = '20px';
+                }
               } else {
+                // Labels normales
                 labelElement.style.display = 'block';
                 labelElement.style.textAlign = 'left';
               }
