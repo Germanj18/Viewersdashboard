@@ -355,6 +355,31 @@ export default function StripePayment() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Aplicar estilos forzados a todos los inputs después del renderizado
+  useEffect(() => {
+    if (isComponentReady) {
+      const inputs = document.querySelectorAll('.stripe-form input, .stripe-form textarea, .stripe-form select, .stripe-form .StripeElement');
+      inputs.forEach((input) => {
+        const inputElement = input as HTMLInputElement;
+        inputElement.style.width = '100%';
+        inputElement.style.display = 'block';
+        inputElement.style.padding = '12px 16px';
+        inputElement.style.borderRadius = '8px';
+        inputElement.style.fontSize = '16px';
+        inputElement.style.minHeight = '48px';
+        inputElement.style.boxSizing = 'border-box';
+      });
+
+      const titles = document.querySelectorAll('.stripe-form h1, .stripe-form h2, .stripe-form h3, .stripe-form h4');
+      titles.forEach((title) => {
+        const titleElement = title as HTMLElement;
+        titleElement.style.textAlign = 'center';
+        titleElement.style.width = '100%';
+        titleElement.style.display = 'block';
+      });
+    }
+  }, [isComponentReady]);
+
   const handleSuccess = (id: string) => {
     setPaymentIntentId(id);
     setSuccess(true);
@@ -428,7 +453,7 @@ export default function StripePayment() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 stripe-form" style={{ width: '100%', display: 'block' }}>
       {!showPayment ? (
         // Formulario para ingresar monto
         <div className={`p-8 rounded-xl border-2 border-blue-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-blue-50'}`}>

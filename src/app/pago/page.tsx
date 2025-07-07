@@ -21,13 +21,40 @@ export default function PagoPage() {
 
   // Pre-cargar estilos cuando se monta el componente
   useEffect(() => {
-    // Forzar la carga de todos los CSS modules
+    // Forzar la carga de todos los CSS modules y aplicar estilos inline críticos
     if (typeof window !== 'undefined') {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'style';
-      link.href = '/';
-      document.head.appendChild(link);
+      // Crear estilos críticos para prevenir layout shifts
+      const style = document.createElement('style');
+      style.textContent = `
+        .payment-component-wrapper input {
+          width: 100% !important;
+          display: block !important;
+          min-height: 48px !important;
+          padding: 12px 16px !important;
+          box-sizing: border-box !important;
+        }
+        .payment-component-wrapper h1,
+        .payment-component-wrapper h2,
+        .payment-component-wrapper h3 {
+          text-align: center !important;
+          width: 100% !important;
+          display: block !important;
+          margin-bottom: 16px !important;
+        }
+        .payment-component-wrapper button {
+          min-height: 48px !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+      `;
+      document.head.appendChild(style);
+      
+      return () => {
+        if (document.head.contains(style)) {
+          document.head.removeChild(style);
+        }
+      };
     }
   }, []);
 
@@ -295,13 +322,19 @@ export default function PagoPage() {
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
                 </div>
               ) : (
-                <div className="payment-component-wrapper">
+                <div className="payment-component-wrapper payment-method-container">
                   {selectedMethod === 'mercadopago' ? (
-                    <MercadoPagoPaymentReactFixed key="mercadopago" />
+                    <div style={{ width: '100%', display: 'block' }}>
+                      <MercadoPagoPaymentReactFixed key="mercadopago" />
+                    </div>
                   ) : selectedMethod === 'stripe' ? (
-                    <StripePayment key="stripe" />
+                    <div style={{ width: '100%', display: 'block' }}>
+                      <StripePayment key="stripe" />
+                    </div>
                   ) : selectedMethod === 'payoneer' ? (
-                    <PayoneerPayment key="payoneer" />
+                    <div style={{ width: '100%', display: 'block' }}>
+                      <PayoneerPayment key="payoneer" />
+                    </div>
                   ) : null}
                 </div>
               )}

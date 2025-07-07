@@ -33,6 +33,31 @@ export default function PayoneerPayment() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Aplicar estilos forzados a todos los inputs después del renderizado
+  useEffect(() => {
+    if (isComponentReady) {
+      const inputs = document.querySelectorAll('.payoneer-form input, .payoneer-form textarea, .payoneer-form select');
+      inputs.forEach((input) => {
+        const inputElement = input as HTMLInputElement;
+        inputElement.style.width = '100%';
+        inputElement.style.display = 'block';
+        inputElement.style.padding = '12px 16px';
+        inputElement.style.borderRadius = '8px';
+        inputElement.style.fontSize = '16px';
+        inputElement.style.minHeight = '48px';
+        inputElement.style.boxSizing = 'border-box';
+      });
+
+      const titles = document.querySelectorAll('.payoneer-form h1, .payoneer-form h2, .payoneer-form h3, .payoneer-form h4');
+      titles.forEach((title) => {
+        const titleElement = title as HTMLElement;
+        titleElement.style.textAlign = 'center';
+        titleElement.style.width = '100%';
+        titleElement.style.display = 'block';
+      });
+    }
+  }, [isComponentReady]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -199,30 +224,30 @@ export default function PayoneerPayment() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 payoneer-form" style={{ width: '100%', display: 'block' }}>
       {/* Header */}
       <div className={`p-8 rounded-2xl border-2 transition-all duration-300 ${
         theme === 'dark' 
           ? 'bg-slate-800/60 border-emerald-500/30 backdrop-blur-sm' 
           : 'bg-white/90 border-emerald-300 shadow-xl'
-      }`}>
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+      }`} style={{ width: '100%', display: 'block' }}>
+        <div className="text-center mb-8" style={{ textAlign: 'center', width: '100%' }}>
+          <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6" style={{ width: '5rem', height: '5rem', margin: '0 auto 1.5rem auto' }}>
             <FontAwesomeIcon icon={faDollarSign} className="text-white text-3xl" />
           </div>
-          <h3 className="text-3xl font-bold text-emerald-600 mb-4">Pago con Payoneer</h3>
-          <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
+          <h3 className="text-3xl font-bold text-emerald-600 mb-4" style={{ textAlign: 'center', width: '100%', display: 'block', fontSize: '1.875rem', fontWeight: 'bold', marginBottom: '1rem' }}>Pago con Payoneer</h3>
+          <p className={`text-lg ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`} style={{ textAlign: 'center', width: '100%' }}>
             Te enviaremos un link personalizado para pagar en dólares con Payoneer
           </p>
         </div>
 
         {/* Formulario */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" style={{ width: '100%', display: 'block' }}>
           {/* Nombre completo */}
-          <div>
+          <div style={{ width: '100%', display: 'block' }}>
             <label className={`block text-sm font-semibold mb-3 ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`}>
+            }`} style={{ display: 'block', width: '100%', marginBottom: '0.75rem', fontWeight: '600' }}>
               Nombre Completo
             </label>
             <input
@@ -234,16 +259,26 @@ export default function PayoneerPayment() {
                   ? 'bg-slate-700/50 border-slate-600 text-slate-100 placeholder-slate-400 focus:border-emerald-500 focus:bg-slate-700' 
                   : 'bg-white border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500 focus:bg-white shadow-sm'
               }`}
+              style={{ 
+                width: '100%', 
+                display: 'block', 
+                padding: '12px 16px', 
+                borderRadius: '8px', 
+                border: '2px solid #d1d5db', 
+                fontSize: '16px',
+                minHeight: '48px',
+                boxSizing: 'border-box'
+              }}
               placeholder="Tu nombre completo"
               required
             />
           </div>
 
           {/* Email */}
-          <div>
+          <div style={{ width: '100%', display: 'block' }}>
             <label className={`block text-sm font-semibold mb-3 flex items-center ${
               theme === 'dark' ? 'text-slate-300' : 'text-gray-700'
-            }`}>
+            }`} style={{ display: 'block', width: '100%', marginBottom: '0.75rem', fontWeight: '600' }}>
               <div className="w-5 h-5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mr-3">
                 <FontAwesomeIcon icon={faEnvelope} className="text-white text-xs" />
               </div>

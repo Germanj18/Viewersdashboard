@@ -26,6 +26,31 @@ export default function MercadoPagoPaymentReact() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Aplicar estilos forzados a todos los inputs después del renderizado
+  useEffect(() => {
+    if (isComponentReady) {
+      const inputs = document.querySelectorAll('.mercadopago-form input, .mercadopago-form textarea, .mercadopago-form select');
+      inputs.forEach((input) => {
+        const inputElement = input as HTMLInputElement;
+        inputElement.style.width = '100%';
+        inputElement.style.display = 'block';
+        inputElement.style.padding = '12px 16px';
+        inputElement.style.borderRadius = '8px';
+        inputElement.style.fontSize = '16px';
+        inputElement.style.minHeight = '48px';
+        inputElement.style.boxSizing = 'border-box';
+      });
+
+      const titles = document.querySelectorAll('.mercadopago-form h1, .mercadopago-form h2, .mercadopago-form h3, .mercadopago-form h4');
+      titles.forEach((title) => {
+        const titleElement = title as HTMLElement;
+        titleElement.style.textAlign = 'center';
+        titleElement.style.width = '100%';
+        titleElement.style.display = 'block';
+      });
+    }
+  }, [isComponentReady]);
+
   const createPayment = async () => {
     if (!amount || parseFloat(amount) <= 0) {
       setError('Por favor ingresa un monto válido');
@@ -74,7 +99,7 @@ export default function MercadoPagoPaymentReact() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mercadopago-form" style={{ width: '100%', display: 'block' }}>
       {!showPayment ? (
         // Formulario para ingresar monto
         <div className={`p-6 rounded-lg border-2 border-blue-200 ${theme === 'dark' ? 'bg-gray-800' : 'bg-blue-50'}`}>
