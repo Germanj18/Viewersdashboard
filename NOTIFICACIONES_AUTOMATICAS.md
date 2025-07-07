@@ -96,18 +96,18 @@ ADMIN_EMAIL="tu-email@gmail.com"
 ## 🎉 **Mensaje que recibirás:**
 
 ```
-🚨 NUEVA SOLICITUD TAKENOS 🚨
+🚨 NUEVA SOLICITUD PAYONEER 🚨
 
 👤 Cliente: Juan Pérez
 📧 Email: juan@email.com
 📱 WhatsApp: +541123456789
 💰 Monto: $100 USD
 🛍️ Servicio: Análisis de Datos
-🆔 ID: takenos-1234567890
+🆔 ID: payoneer-1234567890
 📅 4/7/2025 15:30:00
 
 ⚡ ACCIONES:
-1. Crear link Takenos por $100 USD
+1. Crear link Payoneer por $100 USD
 2. Enviar a: juan@email.com
 3. WhatsApp: +541123456789
 ```

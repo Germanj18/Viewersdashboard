@@ -8,9 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faArrowLeft, faCreditCard, faUniversity, faDollarSign } from '@fortawesome/free-solid-svg-icons';
 import MercadoPagoPaymentReactFixed from '../components/MercadoPagoPaymentReactFixed';
 import StripePayment from '../components/StripePayment';
-import TakenosPayment from '../components/TakenosPayment';
+import PayoneerPayment from '../components/PayoneerPayment';
 
-type PaymentMethod = 'mercadopago' | 'stripe' | 'takenos' | null;
+type PaymentMethod = 'mercadopago' | 'stripe' | 'payoneer' | null;
 
 export default function PagoPage() {
   const { data: session, status } = useSession();
@@ -164,28 +164,28 @@ export default function PagoPage() {
                   </div>
                 </div>
 
-                {/* Takenos - USD */}
+                {/* Payoneer - USD */}
                 <div 
                   className={`group p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300 hover:scale-105 ${
                     theme === 'dark' 
                       ? 'bg-slate-800/80 border-emerald-500/30 hover:border-emerald-400 hover:bg-slate-700/80 hover:shadow-xl hover:shadow-emerald-500/10' 
                       : 'bg-white/90 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/50 hover:shadow-xl hover:shadow-emerald-500/10'
                   }`}
-                  onClick={() => setSelectedMethod('takenos')}
+                  onClick={() => setSelectedMethod('payoneer')}
                 >
                   <div className="text-center">
                     <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
                       <FontAwesomeIcon icon={faDollarSign} className="text-3xl text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold mb-3 text-emerald-600">Takenos</h3>
+                    <h3 className="text-2xl font-bold mb-3 text-emerald-600">Payoneer</h3>
                     <p className={`mb-6 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
-                      Pago en dólares con link personalizado
+                      Pago en dólares con link personalizado - Acepta tarjetas argentinas
                     </p>
                     <div className={`p-4 rounded-xl mb-6 ${
                       theme === 'dark' ? 'bg-emerald-900/30' : 'bg-emerald-50'
                     }`}>
                       <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2">
-                        ✓ Link de pago personalizado
+                        ✓ Acepta tarjetas argentinas
                       </p>
                       <p className="text-sm text-emerald-600 dark:text-emerald-400">
                         ✓ Proceso asistido
@@ -195,7 +195,7 @@ export default function PagoPage() {
                       </p>
                     </div>
                     <button className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl">
-                      Solicitar Link
+                      Solicitar Link Payoneer
                     </button>
                   </div>
                 </div>
@@ -257,7 +257,7 @@ export default function PagoPage() {
                       'text-emerald-600'
                     }`}>
                       {selectedMethod === 'mercadopago' ? 'Mercado Pago' :
-                       selectedMethod === 'stripe' ? 'Stripe' : 'Takenos'}
+                       selectedMethod === 'stripe' ? 'Stripe' : 'Payoneer'}
                     </span>
                     <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
                       {selectedMethod === 'mercadopago' ? 'Pago en ARS' :
@@ -273,7 +273,7 @@ export default function PagoPage() {
               ) : selectedMethod === 'stripe' ? (
                 <StripePayment />
               ) : (
-                <TakenosPayment />
+                <PayoneerPayment />
               )}
             </div>
           )}
