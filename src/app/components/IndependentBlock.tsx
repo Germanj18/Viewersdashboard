@@ -14,19 +14,31 @@ export interface BlockStatus {
   serviceId?: number;
 }
 
+export interface BlockConfig {
+  totalOperations: number;
+  serviceId: number;
+  count: number;
+  decrement: number;
+  operationType: 'add' | 'subtract';
+  autoStart: boolean;
+  startTime: string;
+}
+
+export interface PersistedBlockState {
+  config: BlockConfig;
+  lastEditedConfig: BlockConfig;
+  status: BlockStatus[];
+  currentOperation: number;
+  state: 'idle' | 'running' | 'paused' | 'completed';
+  totalViewers: number;
+  isPaused: boolean;
+}
+
 export interface IndependentBlockProps {
   title: string;
   link: string;
   onTotalViewersChange?: (title: string, viewers: number) => void;
-  initialConfig?: {
-    totalOperations?: number;
-    serviceId?: number;
-    count?: number;
-    decrement?: number;
-    operationType?: 'add' | 'subtract';
-    autoStart?: boolean;
-    startTime?: string;
-  };
+  initialConfig?: Partial<BlockConfig>;
 }
 
 const IndependentBlock: React.FC<IndependentBlockProps> = ({
@@ -37,18 +49,55 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
 }) => {
   const { theme } = useTheme();
   
-  // Estados del bloque independiente
-  const [status, setStatus] = useState<BlockStatus[]>([]);
+  // Función para obtener el localStorage key único por bloque
+  const getStorageKey = () => `block_${title}_${link}`;
+  
+  // Función para cargar estado persistente
+  const loadPersistedState = (): PersistedBlockState | null => {
+    try {
+      const saved = localStorage.getItem(getStorageKey());
+      return saved ? JSON.parse(saved) : null;
+    } catch (error) {
+      console.error(`Error loading persisted state for ${title}:`, error);
+      return null;
+    }
+  };
+  
+  // Función para guardar estado persistente
+  const savePersistedState = (state: PersistedBlockState) => {
+    try {
+      localStorage.setItem(getStorageKey(), JSON.stringify(state));
+    } catch (error) {
+      console.error(`Error saving persisted state for ${title}:`, error);
+    }
+  };
+  
+  // Configuración por defecto
+  const defaultConfig: BlockConfig = {
+    totalOperations: initialConfig.totalOperations || 35,
+    serviceId: initialConfig.serviceId || 335,
+    count: initialConfig.count || 100,
+    decrement: initialConfig.decrement || 50,
+    operationType: initialConfig.operationType || 'subtract',
+    autoStart: initialConfig.autoStart || false,
+    startTime: initialConfig.startTime || ''
+  };
+  
+  // Cargar estado persistente al inicializar
+  const persistedState = loadPersistedState();
+  
+  // Estados del bloque independiente (inicializados con datos persistentes si existen)
+  const [status, setStatus] = useState<BlockStatus[]>(persistedState?.status || []);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [currentOperation, setCurrentOperation] = useState<number>(0);
-  const [state, setState] = useState<'idle' | 'running' | 'paused' | 'completed'>('idle');
-  const [totalViewers, setTotalViewers] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(persistedState?.isPaused || false);
+  const [currentOperation, setCurrentOperation] = useState<number>(persistedState?.currentOperation || 0);
+  const [state, setState] = useState<'idle' | 'running' | 'paused' | 'completed'>(persistedState?.state || 'idle');
+  const [totalViewers, setTotalViewers] = useState<number>(persistedState?.totalViewers || 0);
   
   // Refs para valores actuales
-  const stateRef = useRef<'idle' | 'running' | 'paused' | 'completed'>('idle');
-  const currentOperationRef = useRef<number>(0);
-  const totalViewersRef = useRef<number>(0);
+  const stateRef = useRef<'idle' | 'running' | 'paused' | 'completed'>(persistedState?.state || 'idle');
+  const currentOperationRef = useRef<number>(persistedState?.currentOperation || 0);
+  const totalViewersRef = useRef<number>(persistedState?.totalViewers || 0);
   
   // Actualizar refs cuando cambian los estados
   useEffect(() => {
@@ -63,14 +112,20 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
     totalViewersRef.current = totalViewers;
   }, [totalViewers]);
   
-  // Configuración del bloque
-  const [totalOperations, setTotalOperations] = useState(initialConfig.totalOperations || 35);
-  const [serviceId, setServiceId] = useState(initialConfig.serviceId || 335);
-  const [count, setCount] = useState(initialConfig.count || 100);
-  const [decrement, setDecrement] = useState(initialConfig.decrement || 50);
-  const [operationType, setOperationType] = useState<'add' | 'subtract'>(initialConfig.operationType || 'subtract');
-  const [autoStart, setAutoStart] = useState(initialConfig.autoStart || false);
-  const [startTime, setStartTime] = useState(initialConfig.startTime || '');
+  // Configuración del bloque (inicializada con datos persistentes si existen)
+  const savedConfig = persistedState?.config || defaultConfig;
+  const [totalOperations, setTotalOperations] = useState(savedConfig.totalOperations);
+  const [serviceId, setServiceId] = useState(savedConfig.serviceId);
+  const [count, setCount] = useState(savedConfig.count);
+  const [decrement, setDecrement] = useState(savedConfig.decrement);
+  const [operationType, setOperationType] = useState<'add' | 'subtract'>(savedConfig.operationType);
+  const [autoStart, setAutoStart] = useState(savedConfig.autoStart);
+  const [startTime, setStartTime] = useState(savedConfig.startTime);
+  
+  // Última configuración editada (separada de la configuración actual)
+  const [lastEditedConfig, setLastEditedConfig] = useState<BlockConfig>(
+    persistedState?.lastEditedConfig || defaultConfig
+  );
   
   // Estados de UI
   const [showWarning, setShowWarning] = useState<{ type: string } | null>(null);
@@ -87,6 +142,36 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
 
   // Referencia para auto-start timeout
   const autoStartTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Efecto para guardar estado cuando cambie
+  useEffect(() => {
+    const currentState: PersistedBlockState = {
+      config: {
+        totalOperations,
+        serviceId,
+        count,
+        decrement,
+        operationType,
+        autoStart,
+        startTime
+      },
+      lastEditedConfig,
+      status,
+      currentOperation,
+      state,
+      totalViewers,
+      isPaused
+    };
+    
+    savePersistedState(currentState);
+  }, [status, currentOperation, state, totalViewers, isPaused, totalOperations, serviceId, count, decrement, operationType, autoStart, startTime, lastEditedConfig]);
+  
+  // Notificar cambio de total viewers al cargar estado persistente
+  useEffect(() => {
+    if (persistedState?.totalViewers) {
+      onTotalViewersChange?.(title, persistedState.totalViewers);
+    }
+  }, []);
 
   // Función para obtener duración del servicio
   const getServiceDuration = (serviceId: number) => {
@@ -330,15 +415,25 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
       autoStartTimeoutRef.current = null;
     }
     
+    // Restaurar a la última configuración editada, no a los valores por defecto
+    setTotalOperations(lastEditedConfig.totalOperations);
+    setServiceId(lastEditedConfig.serviceId);
+    setCount(lastEditedConfig.count);
+    setDecrement(lastEditedConfig.decrement);
+    setOperationType(lastEditedConfig.operationType);
+    setAutoStart(lastEditedConfig.autoStart);
+    setStartTime(lastEditedConfig.startTime);
+    
+    // Resetear el estado de ejecución
     setStatus([]);
     setCurrentOperation(0);
     setState('idle');
     setTotalViewers(0);
     setIsPaused(false);
-    setAutoStart(false);
-    setStartTime('');
     
     onTotalViewersChange?.(title, 0);
+    
+    console.log(`${title}: Block reset to last edited configuration`);
   };
 
   // Manejo del modal de edición
@@ -363,7 +458,22 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
     setOperationType(editValues.operationType);
     setAutoStart(editValues.autoStart);
     setStartTime(editValues.autoStart ? editValues.startTime : '');
+    
+    // Guardar como última configuración editada
+    const newConfig: BlockConfig = {
+      totalOperations: editValues.operations,
+      serviceId: editValues.serviceId,
+      count: editValues.count,
+      decrement: editValues.decrement,
+      operationType: editValues.operationType,
+      autoStart: editValues.autoStart,
+      startTime: editValues.autoStart ? editValues.startTime : ''
+    };
+    setLastEditedConfig(newConfig);
+    
     setEditMode(false);
+    
+    console.log(`${title}: Configuration saved and stored as last edited config`);
   };
 
   // Auto-start effect
@@ -401,6 +511,16 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
     };
   }, []);
 
+  // Función para limpiar estado persistente (útil para debugging o reset completo)
+  const clearPersistedState = () => {
+    try {
+      localStorage.removeItem(getStorageKey());
+      console.log(`${title}: Persistent state cleared`);
+    } catch (error) {
+      console.error(`Error clearing persisted state for ${title}:`, error);
+    }
+  };
+  
   return (
     <>
       <div className={`block ${theme}`}>
@@ -437,152 +557,154 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
             </div>
           ))}
         </div>
-        <div className="block-controls">
-          {state === 'idle' && (
-            <button 
-              onClick={startBlock} 
-              className="start-button"
-              disabled={!link}
-              title={!link ? 'Ingresa un link de YouTube para iniciar' : ''}
-            >
-              ▶️ Iniciar
-            </button>
-          )}
-          {state === 'running' && (
-            <button onClick={pauseBlock} className="pause-button">
-              ⏸️ Pausar
-            </button>
-          )}
-          {state === 'paused' && (
-            <>
-              <button onClick={resumeBlock} className="resume-button">
-                ▶️ Reanudar
-              </button>
-              <button onClick={() => setShowWarning({ type: 'finalizar' })} className="finalize-button">
-                🏁 Finalizar
-              </button>
-              <button onClick={() => setShowWarning({ type: 'reiniciar' })} className="reset-button">
-                🔄 Reiniciar
-              </button>
-            </>
-          )}
-          {state === 'completed' && (
-            <>
-              <div className="completed-message">✅ Bloque finalizado</div>
-              <button onClick={() => setShowWarning({ type: 'reiniciar' })} className="reset-button">
-                🔄 Reiniciar
-              </button>
-            </>
-          )}
-          <button onClick={handleEditBlock} className="edit-button">
-            ✏️ Editar
+        <div className="controls">
+          <button 
+            onClick={startBlock} 
+            disabled={state === 'running' || !link}
+            className="start-button"
+          >
+            ▶️ Iniciar
+          </button>
+          <button 
+            onClick={pauseBlock} 
+            disabled={state !== 'running'}
+            className="pause-button"
+          >
+            ⏸️ Pausar
+          </button>
+          <button 
+            onClick={resumeBlock} 
+            disabled={state !== 'paused'}
+            className="resume-button"
+          >
+            ▶️ Reanudar
+          </button>
+          <button 
+            onClick={finalizeBlock} 
+            disabled={state === 'idle' || state === 'completed'}
+            className="finalize-button"
+          >
+            ⏹️ Finalizar
+          </button>
+          <button 
+            onClick={() => setShowWarning({ type: 'reset' })} 
+            className="reset-button"
+          >
+            🔄 Reiniciar
+          </button>
+          <button 
+            onClick={handleEditBlock} 
+            className="edit-button"
+          >
+            ⚙️ Editar
           </button>
         </div>
-        <div className="total-viewers">👥 {totalViewers}</div>
+        <div className="viewers-info">
+          Total espectadores: {totalViewers}
+        </div>
+        <div className="progress-info">
+          Progreso: {currentOperation}/{totalOperations} operaciones
+        </div>
       </div>
 
-      {/* Modal de confirmación */}
-      {showWarning && (
-        <div className="warning-modal">
-          <div className={`warning-content ${theme}`}>
-            <div className="text-center">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h3 className="text-xl font-bold mb-4">
-                {showWarning.type === 'finalizar' ? '🏁 Finalizar Bloque' : '🔄 Reiniciar Bloque'}
-              </h3>
-              <p className="mb-6">
-                Estás por {showWarning.type === 'finalizar' ? 'finalizar' : 'reiniciar'} este bloque de operaciones.
-                <br />
-                <strong>Esta acción no se puede deshacer.</strong>
-              </p>
-              <div className="flex justify-center gap-4">
-                <button onClick={() => {
-                  if (showWarning.type === 'finalizar') {
-                    finalizeBlock();
-                  } else {
-                    resetBlock();
-                  }
+      {showWarning?.type === 'reset' && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>⚠️ Confirmar Reinicio</h3>
+            <p>¿Estás seguro de que quieres reiniciar este bloque? Esto detendrá todas las operaciones en curso y restaurará la configuración a la última versión editada.</p>
+            <div className="modal-buttons">
+              <button 
+                onClick={() => {
+                  resetBlock();
                   setShowWarning(null);
-                }} className="continue-button">
-                  ✅ Continuar
-                </button>
-                <button onClick={() => setShowWarning(null)} className="cancel-button">
-                  ❌ Cancelar
-                </button>
-              </div>
+                }} 
+                className="confirm-button"
+              >
+                Sí, reiniciar
+              </button>
+              <button 
+                onClick={() => {
+                  clearPersistedState();
+                  // Recargar la página para aplicar el reset completo
+                  window.location.reload();
+                }} 
+                className="confirm-button"
+                style={{ backgroundColor: '#dc3545' }}
+              >
+                Reset completo (limpiar todo)
+              </button>
+              <button 
+                onClick={() => setShowWarning(null)} 
+                className="cancel-button"
+              >
+                Cancelar
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal de edición */}
       {editMode && (
-        <div className="modal">
-          <div className={`modal-content ${theme}`}>
-            <h2>✏️ Editar Bloque</h2>
-            <div className="grid grid-cols-1 gap-4">
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>⚙️ Editar Configuración del Bloque</h3>
+            <div className="form-grid">
               <label>
-                🔢 Cantidad de Operaciones:
+                🔢 Total de Operaciones:
                 <input
                   type="number"
                   value={editValues.operations}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, operations: Number(e.target.value) }))}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, operations: parseInt(e.target.value) || 0 }))}
                   className={`input-${theme}`}
+                  min="1"
                 />
               </label>
               <label>
-                ⏱️ Duración:
+                🛠️ Service ID:
                 <select
                   value={editValues.serviceId}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, serviceId: Number(e.target.value) }))}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, serviceId: parseInt(e.target.value) }))}
                   className={`input-${theme}`}
                 >
-                  <option value={334}>1h</option>
-                  <option value={335}>1.30h</option>
-                  <option value={336}>2h</option>
-                  <option value={337}>2.30h</option>
-                  <option value={338}>3h</option>
-                  <option value={459}>4h</option>
-                  <option value={460}>6h</option>
-                  <option value={657}>8h</option>
+                  <option value={334}>334 (60 min)</option>
+                  <option value={335}>335 (90 min)</option>
+                  <option value={336}>336 (120 min)</option>
+                  <option value={337}>337 (150 min)</option>
+                  <option value={338}>338 (180 min)</option>
+                  <option value={459}>459 (240 min)</option>
+                  <option value={460}>460 (360 min)</option>
+                  <option value={657}>657 (480 min)</option>
                 </select>
               </label>
-              <div className="p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800">
-                <p className="text-sm text-green-700 dark:text-green-300 font-medium">
-                  💡 Solo múltiplos de 10 (ej: 30, 40, 100, 150...)
-                </p>
-              </div>
               <label>
-                👥 Cantidad:
+                👥 Cantidad Inicial:
                 <input
                   type="number"
-                  min={0}
-                  step={10}
                   value={editValues.count}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, count: Number(e.target.value) }))}
-                  className={`input-${theme} ${editValues.count % 10 !== 0 ? 'input-error' : ''}`}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, count: parseInt(e.target.value) || 0 }))}
+                  className={`input-${theme}`}
+                  min="1"
                 />
               </label>
               <label>
-                ➕➖ Cantidad a Modificar:
+                📊 Decremento:
                 <input
                   type="number"
-                  min={0}
-                  step={10}
                   value={editValues.decrement}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, decrement: Number(e.target.value) }))}
-                  className={`input-${theme} ${editValues.decrement % 10 !== 0 ? 'input-error' : ''}`}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, decrement: parseInt(e.target.value) || 0 }))}
+                  className={`input-${theme}`}
+                  min="0"
                 />
               </label>
               <label>
-                🔄 Operación:
+                🔄 Tipo de Operación:
                 <select
                   value={editValues.operationType}
                   onChange={(e) => setEditValues(prev => ({ ...prev, operationType: e.target.value as 'add' | 'subtract' }))}
                   className={`input-${theme}`}
                 >
-                  <option value="add">➕ Sumar</option>
-                  <option value="subtract">➖ Restar</option>
+                  <option value="subtract">Restar (Descendente)</option>
+                  <option value="add">Sumar (Ascendente)</option>
                 </select>
               </label>
               <label className="flex items-center space-x-3">
