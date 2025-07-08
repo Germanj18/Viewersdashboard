@@ -1,12 +1,11 @@
 "use client";
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { BlocksProvider } from '../admin/BlocksContext';
 import { useTheme } from '../ThemeContext';
 import Preloader from '../components/Preloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
-import Viewers from '../components/Viewers';
+import IndependentViewers from '../components/IndependentViewers';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -23,12 +22,11 @@ export default function AdminDashboard() {
   }
 
   return (
-    <BlocksProvider>
-      <div className={`flex flex-col min-h-screen transition-all duration-300 ${
-        theme === 'dark' 
-          ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100' 
-          : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900'
-      }`}>
+    <div className={`flex flex-col min-h-screen transition-all duration-300 ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100' 
+        : 'bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900'
+    }`}>
         <header className={`w-full flex justify-between items-center p-6 backdrop-blur-sm ${
           theme === 'dark' 
             ? 'bg-slate-900/80 border-b border-slate-700/50' 
@@ -124,7 +122,7 @@ export default function AdminDashboard() {
                 ? 'bg-slate-800/60 border border-slate-700/50 shadow-2xl' 
                 : 'bg-white/80 border border-gray-200/50 shadow-xl'
             }`}>
-              <Viewers />
+              <IndependentViewers />
             </div>
           </main>
         </div>
@@ -138,7 +136,6 @@ export default function AdminDashboard() {
             © 2025 ServiceDG. Todos los derechos reservados.
           </p>
         </footer>
-      </div>
-    </BlocksProvider>
+    </div>
   );
 }
