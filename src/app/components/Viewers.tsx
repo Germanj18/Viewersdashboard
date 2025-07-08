@@ -79,10 +79,10 @@ const Viewers = () => {
     }
   };
 
-  // Configuración de los 8 bloques con nombres únicos
+  // Configuración de los 10 bloques con nombres únicos
   const initialBlocksData: BlockData[] = [
     {
-      title: 'Bloque Alfa',
+      title: 'Bloque 1',
       totalOperations: 5,
       serviceId: 336,
       count: 50,
@@ -92,7 +92,7 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Beta',
+      title: 'Bloque 2',
       totalOperations: 4,
       serviceId: 337,
       count: 60,
@@ -102,7 +102,7 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Gamma',
+      title: 'Bloque 3',
       totalOperations: 6,
       serviceId: 334,
       count: 40,
@@ -112,7 +112,7 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Delta',
+      title: 'Bloque 4',
       totalOperations: 3,
       serviceId: 335,
       count: 70,
@@ -122,7 +122,7 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Épsilon',
+      title: 'Bloque 5',
       totalOperations: 4,
       serviceId: 338,
       count: 80,
@@ -132,7 +132,7 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Zeta',
+      title: 'Bloque 6',
       totalOperations: 5,
       serviceId: 459,
       count: 90,
@@ -142,7 +142,7 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Eta',
+      title: 'Bloque 7',
       totalOperations: 3,
       serviceId: 460,
       count: 100,
@@ -152,11 +152,31 @@ const Viewers = () => {
       startTime: ''
     },
     {
-      title: 'Bloque Theta',
+      title: 'Bloque 8',
       totalOperations: 6,
       serviceId: 657,
       count: 120,
       decrement: 40,
+      operationType: 'subtract',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque 9',
+      totalOperations: 4,
+      serviceId: 335,
+      count: 110,
+      decrement: 20,
+      operationType: 'add',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque 10',
+      totalOperations: 5,
+      serviceId: 336,
+      count: 130,
+      decrement: 35,
       operationType: 'subtract',
       autoStart: false,
       startTime: ''
@@ -180,7 +200,7 @@ const Viewers = () => {
   const handleResetAllBlocks = () => {
     if (confirm('¿Estás seguro de que quieres resetear TODOS los bloques? Esta acción eliminará todo el progreso guardado.')) {
       // Limpiar localStorage de todos los bloques
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 10; i++) {
         localStorage.removeItem(`blockState_block-${i}`);
         (window as any)[`resetBlock_block-${i}`]?.();
       }
