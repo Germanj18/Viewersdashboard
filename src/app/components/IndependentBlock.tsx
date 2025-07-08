@@ -45,6 +45,24 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   const [state, setState] = useState<'idle' | 'running' | 'paused' | 'completed'>('idle');
   const [totalViewers, setTotalViewers] = useState<number>(0);
   
+  // Refs para valores actuales
+  const stateRef = useRef<'idle' | 'running' | 'paused' | 'completed'>('idle');
+  const currentOperationRef = useRef<number>(0);
+  const totalViewersRef = useRef<number>(0);
+  
+  // Actualizar refs cuando cambian los estados
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+  
+  useEffect(() => {
+    currentOperationRef.current = currentOperation;
+  }, [currentOperation]);
+  
+  useEffect(() => {
+    totalViewersRef.current = totalViewers;
+  }, [totalViewers]);
+  
   // Configuración del bloque
   const [totalOperations, setTotalOperations] = useState(initialConfig.totalOperations || 35);
   const [serviceId, setServiceId] = useState(initialConfig.serviceId || 335);
@@ -169,20 +187,25 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
 
   // Función para hacer llamada a la API
   const handleApiCall = async () => {
-    if (!link || state !== 'running') return;
+    if (!link || stateRef.current !== 'running') {
+      console.log(`${title}: Skipping API call - link: ${link}, state: ${stateRef.current}`);
+      return;
+    }
 
     try {
       // Calcular la cantidad para la operación actual
       const operationCount = operationType === 'add'
-        ? count + decrement * currentOperation
-        : count - decrement * currentOperation;
+        ? count + decrement * currentOperationRef.current
+        : count - decrement * currentOperationRef.current;
 
-      const response = await fetch(`/api/proxy?service_id=${serviceId}&count=${operationCount}&link=${link}`);
+      console.log(`${title}: Starting operation ${currentOperationRef.current + 1} with count: ${operationCount}`);
+
+      const response = await fetch(`/api/proxy?service_id=${serviceId}&count=${operationCount}&link=${encodeURIComponent(link)}`);
       const data = await response.json();
       const timestamp = new Date().toLocaleTimeString();
       const duration = getServiceDuration(serviceId);
 
-      console.log(`${title}, Operation ${currentOperation + 1}:`, data);
+      console.log(`${title}, Operation ${currentOperationRef.current + 1}:`, data);
 
       const newStatus: BlockStatus = {
         status: data.error ? 'error' : 'success',
@@ -199,12 +222,12 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
 
       // Actualizar total de espectadores
       if (newStatus.status === 'success') {
-        const newTotal = totalViewers + operationCount;
+        const newTotal = totalViewersRef.current + operationCount;
         setTotalViewers(newTotal);
         onTotalViewersChange?.(title, newTotal);
       }
 
-      const nextOperation = currentOperation + 1;
+      const nextOperation = currentOperationRef.current + 1;
       setCurrentOperation(nextOperation);
 
       // Verificar si completamos todas las operaciones
@@ -245,16 +268,24 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
 
   // Funciones de control
   const startBlock = () => {
-    if (state === 'running') return;
+    if (stateRef.current === 'running') {
+      console.log(`${title}: Already running, skipping start`);
+      return;
+    }
     
+    console.log(`${title}: Starting block`);
     setState('running');
     setIsPaused(false);
     
     // Ejecutar primera operación inmediatamente
-    handleApiCall();
+    setTimeout(() => {
+      handleApiCall();
+    }, 100); // Pequeño delay para asegurar que el estado se actualice
     
     // Configurar intervalo para las siguientes operaciones
-    const newIntervalId = setInterval(handleApiCall, 120000);
+    const newIntervalId = setInterval(() => {
+      handleApiCall();
+    }, 120000); // 2 minutos
     setIntervalId(newIntervalId);
   };
 
@@ -408,7 +439,12 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
         </div>
         <div className="block-controls">
           {state === 'idle' && (
-            <button onClick={startBlock} className="start-button">
+            <button 
+              onClick={startBlock} 
+              className="start-button"
+              disabled={!link}
+              title={!link ? 'Ingresa un link de YouTube para iniciar' : ''}
+            >
               ▶️ Iniciar
             </button>
           )}
