@@ -98,6 +98,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   const stateRef = useRef<'idle' | 'running' | 'paused' | 'completed'>(persistedState?.state || 'idle');
   const currentOperationRef = useRef<number>(persistedState?.currentOperation || 0);
   const totalViewersRef = useRef<number>(persistedState?.totalViewers || 0);
+  const intervalIdRef = useRef<NodeJS.Timeout | null>(null);
   
   // Actualizar refs cuando cambian los estados
   useEffect(() => {
@@ -111,6 +112,10 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   useEffect(() => {
     totalViewersRef.current = totalViewers;
   }, [totalViewers]);
+  
+  useEffect(() => {
+    intervalIdRef.current = intervalId;
+  }, [intervalId]);
   
   // Configuración del bloque (inicializada con datos persistentes si existen)
   const savedConfig = persistedState?.config || defaultConfig;
@@ -317,8 +322,8 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
 
       // Verificar si completamos todas las operaciones
       if (nextOperation >= totalOperations) {
-        if (intervalId) {
-          clearInterval(intervalId);
+        if (intervalIdRef.current) {
+          clearInterval(intervalIdRef.current);
           setIntervalId(null);
         }
         setState('completed');
@@ -326,7 +331,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
       }
 
     } catch (error) {
-      console.error(`${title}, Operation ${currentOperation + 1}:`, error);
+      console.error(`${title}, Operation ${currentOperationRef.current + 1}:`, error);
 
       const newStatus: BlockStatus = {
         status: 'error',
@@ -337,19 +342,19 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
       };
 
       setStatus(prev => [...prev, newStatus]);
-      const nextOperation = currentOperation + 1;
+      const nextOperation = currentOperationRef.current + 1;
       setCurrentOperation(nextOperation);
 
       if (nextOperation >= totalOperations) {
-        if (intervalId) {
-          clearInterval(intervalId);
+        if (intervalIdRef.current) {
+          clearInterval(intervalIdRef.current);
           setIntervalId(null);
         }
         setState('completed');
         generateExcel();
       }
     }
-  }, [link, title, operationType, count, decrement, serviceId, totalOperations, intervalId, currentOperation, onTotalViewersChange, generateExcel]);
+  }, [link, title, operationType, count, decrement, serviceId, totalOperations, onTotalViewersChange, generateExcel]);
 
   // Funciones de control
   const startBlock = useCallback(() => {
@@ -375,8 +380,8 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   }, [title, handleApiCall]);
 
   const pauseBlock = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
       setIntervalId(null);
     }
     setIsPaused(true);
@@ -394,8 +399,8 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   };
 
   const finalizeBlock = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
       setIntervalId(null);
     }
     if (state !== 'completed') {
@@ -406,8 +411,8 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   };
 
   const resetBlock = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
+    if (intervalIdRef.current) {
+      clearInterval(intervalIdRef.current);
       setIntervalId(null);
     }
     if (autoStartTimeoutRef.current) {
@@ -502,14 +507,14 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   // Cleanup en unmount
   useEffect(() => {
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
+      if (intervalIdRef.current) {
+        clearInterval(intervalIdRef.current);
       }
       if (autoStartTimeoutRef.current) {
         clearTimeout(autoStartTimeoutRef.current);
       }
     };
-  }, [intervalId]);
+  }, []);
 
   // Función para limpiar estado persistente (útil para debugging o reset completo)
   const clearPersistedState = () => {
