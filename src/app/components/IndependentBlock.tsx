@@ -557,154 +557,168 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
             </div>
           ))}
         </div>
-        <div className="controls">
-          <button 
-            onClick={startBlock} 
-            disabled={state === 'running' || !link}
-            className="start-button"
-          >
-            ▶️ Iniciar
-          </button>
-          <button 
-            onClick={pauseBlock} 
-            disabled={state !== 'running'}
-            className="pause-button"
-          >
-            ⏸️ Pausar
-          </button>
-          <button 
-            onClick={resumeBlock} 
-            disabled={state !== 'paused'}
-            className="resume-button"
-          >
-            ▶️ Reanudar
-          </button>
-          <button 
-            onClick={finalizeBlock} 
-            disabled={state === 'idle' || state === 'completed'}
-            className="finalize-button"
-          >
-            ⏹️ Finalizar
-          </button>
-          <button 
-            onClick={() => setShowWarning({ type: 'reset' })} 
-            className="reset-button"
-          >
-            🔄 Reiniciar
-          </button>
-          <button 
-            onClick={handleEditBlock} 
-            className="edit-button"
-          >
-            ⚙️ Editar
-          </button>
+        <div className="block-controls">
+          {state === 'idle' && (
+            <>
+              <button 
+                onClick={startBlock} 
+                className="start-button"
+                disabled={!link}
+                title={!link ? 'Ingresa un link de YouTube para iniciar' : ''}
+              >
+                ▶️ Iniciar
+              </button>
+              <button onClick={handleEditBlock} className="edit-button">
+                ✏️ Editar
+              </button>
+            </>
+          )}
+          
+          {state === 'running' && (
+            <button onClick={pauseBlock} className="pause-button">
+              ⏸️ Pausar
+            </button>
+          )}
+          
+          {state === 'paused' && (
+            <>
+              <button onClick={resumeBlock} className="resume-button">
+                ▶️ Reanudar
+              </button>
+              <button onClick={() => setShowWarning({ type: 'finalizar' })} className="finalize-button">
+                🏁 Finalizar
+              </button>
+              <button onClick={() => setShowWarning({ type: 'reiniciar' })} className="reset-button">
+                🔄 Reiniciar
+              </button>
+            </>
+          )}
+          
+          {state === 'completed' && (
+            <>
+              <div className="completed-message">✅ Bloque finalizado</div>
+              <button onClick={() => setShowWarning({ type: 'reiniciar' })} className="reset-button">
+                🔄 Reiniciar
+              </button>
+            </>
+          )}
         </div>
-        <div className="viewers-info">
-          Total espectadores: {totalViewers}
-        </div>
-        <div className="progress-info">
-          Progreso: {currentOperation}/{totalOperations} operaciones
-        </div>
+        <div className="total-viewers">👥 {totalViewers}</div>
       </div>
 
-      {showWarning?.type === 'reset' && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>⚠️ Confirmar Reinicio</h3>
-            <p>¿Estás seguro de que quieres reiniciar este bloque? Esto detendrá todas las operaciones en curso y restaurará la configuración a la última versión editada.</p>
-            <div className="modal-buttons">
-              <button 
-                onClick={() => {
-                  resetBlock();
+      {/* Modal de confirmación */}
+      {showWarning && (
+        <div className="warning-modal">
+          <div className={`warning-content ${theme}`}>
+            <div className="text-center">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h3 className="text-xl font-bold mb-4">
+                {showWarning.type === 'finalizar' ? '🏁 Finalizar Bloque' : '🔄 Reiniciar Bloque'}
+              </h3>
+              <p className="mb-6">
+                Estás por {showWarning.type === 'finalizar' ? 'finalizar' : 'reiniciar'} este bloque de operaciones.
+                <br />
+                <strong>Esta acción no se puede deshacer.</strong>
+              </p>
+              <div className="flex justify-center gap-4">
+                <button onClick={() => {
+                  if (showWarning.type === 'finalizar') {
+                    finalizeBlock();
+                  } else {
+                    resetBlock();
+                  }
                   setShowWarning(null);
-                }} 
-                className="confirm-button"
-              >
-                Sí, reiniciar
-              </button>
-              <button 
-                onClick={() => {
-                  clearPersistedState();
-                  // Recargar la página para aplicar el reset completo
-                  window.location.reload();
-                }} 
-                className="confirm-button"
-                style={{ backgroundColor: '#dc3545' }}
-              >
-                Reset completo (limpiar todo)
-              </button>
-              <button 
-                onClick={() => setShowWarning(null)} 
-                className="cancel-button"
-              >
-                Cancelar
-              </button>
+                }} className="continue-button">
+                  ✅ Continuar
+                </button>
+                <button 
+                  onClick={() => {
+                    clearPersistedState();
+                    // Recargar la página para aplicar el reset completo
+                    window.location.reload();
+                  }} 
+                  className="continue-button"
+                  style={{ backgroundColor: '#dc3545' }}
+                >
+                  Reset completo (limpiar todo)
+                </button>
+                <button onClick={() => setShowWarning(null)} className="cancel-button">
+                  ❌ Cancelar
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Modal de edición */}
       {editMode && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>⚙️ Editar Configuración del Bloque</h3>
-            <div className="form-grid">
+        <div className="modal">
+          <div className={`modal-content ${theme}`}>
+            <h2>✏️ Editar Bloque</h2>
+            <div className="grid grid-cols-1 gap-4">
               <label>
-                🔢 Total de Operaciones:
+                🔢 Cantidad de Operaciones:
                 <input
                   type="number"
                   value={editValues.operations}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, operations: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, operations: Number(e.target.value) }))}
                   className={`input-${theme}`}
-                  min="1"
                 />
               </label>
               <label>
-                🛠️ Service ID:
+                ⏱️ Duración:
                 <select
                   value={editValues.serviceId}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, serviceId: parseInt(e.target.value) }))}
+                  onChange={(e) => setEditValues(prev => ({ ...prev, serviceId: Number(e.target.value) }))}
                   className={`input-${theme}`}
                 >
-                  <option value={334}>334 (60 min)</option>
-                  <option value={335}>335 (90 min)</option>
-                  <option value={336}>336 (120 min)</option>
-                  <option value={337}>337 (150 min)</option>
-                  <option value={338}>338 (180 min)</option>
-                  <option value={459}>459 (240 min)</option>
-                  <option value={460}>460 (360 min)</option>
-                  <option value={657}>657 (480 min)</option>
+                  <option value={334}>1h</option>
+                  <option value={335}>1.30h</option>
+                  <option value={336}>2h</option>
+                  <option value={337}>2.30h</option>
+                  <option value={338}>3h</option>
+                  <option value={459}>4h</option>
+                  <option value={460}>6h</option>
+                  <option value={657}>8h</option>
                 </select>
               </label>
+              <div className="p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800">
+                <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+                  � Solo múltiplos de 10 (ej: 30, 40, 100, 150...)
+                </p>
+              </div>
               <label>
-                👥 Cantidad Inicial:
+                👥 Cantidad:
                 <input
                   type="number"
+                  min={0}
+                  step={10}
                   value={editValues.count}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, count: parseInt(e.target.value) || 0 }))}
-                  className={`input-${theme}`}
-                  min="1"
+                  onChange={(e) => setEditValues(prev => ({ ...prev, count: Number(e.target.value) }))}
+                  className={`input-${theme} ${editValues.count % 10 !== 0 ? 'input-error' : ''}`}
                 />
               </label>
               <label>
-                📊 Decremento:
+                ➕➖ Cantidad a Modificar:
                 <input
                   type="number"
+                  min={0}
+                  step={10}
                   value={editValues.decrement}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, decrement: parseInt(e.target.value) || 0 }))}
-                  className={`input-${theme}`}
-                  min="0"
+                  onChange={(e) => setEditValues(prev => ({ ...prev, decrement: Number(e.target.value) }))}
+                  className={`input-${theme} ${editValues.decrement % 10 !== 0 ? 'input-error' : ''}`}
                 />
               </label>
               <label>
-                🔄 Tipo de Operación:
+                🔄 Operación:
                 <select
                   value={editValues.operationType}
                   onChange={(e) => setEditValues(prev => ({ ...prev, operationType: e.target.value as 'add' | 'subtract' }))}
                   className={`input-${theme}`}
                 >
-                  <option value="subtract">Restar (Descendente)</option>
-                  <option value="add">Sumar (Ascendente)</option>
+                  <option value="add">➕ Sumar</option>
+                  <option value="subtract">➖ Restar</option>
                 </select>
               </label>
               <label className="flex items-center space-x-3">
