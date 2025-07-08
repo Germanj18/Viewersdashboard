@@ -509,7 +509,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
         clearTimeout(autoStartTimeoutRef.current);
       }
     };
-  }, []);
+  }, [intervalId]);
 
   // Función para limpiar estado persistente (útil para debugging o reset completo)
   const clearPersistedState = () => {
