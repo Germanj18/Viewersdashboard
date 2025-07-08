@@ -1,56 +1,195 @@
-import React, { useState } from 'react';
-import { useBlocks } from '../admin/BlocksContext';
+import React, { useState, useEffect } from 'react';
+import { useGlobal } from './GlobalContext';
 import { useTheme } from '../ThemeContext';
+import Block, { BlockData } from './Block';
 import './Viewers.css';
-import { Block } from '../admin/BlocksContext';
 
 const Viewers = () => {
-  const { blocks, link, setLink, startBlock, pauseBlock, resumeBlock, finalizeBlock, resetBlock, generateExcel, editBlock } = useBlocks();
+  const { link, setLink, totalViewers, updateBlockViewers } = useGlobal();
   const { theme } = useTheme();
-  const [showWarning, setShowWarning] = useState<{ type: string, index: number } | null>(null);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [editOperations, setEditOperations] = useState<number>(0);
-  const [editServiceId, setEditServiceId] = useState<number>(0);
-  const [editCount, setEditCount] = useState<number>(0);
-  const [editAutoStart, setEditAutoStart] = useState<boolean>(false);
-  const [editStartTime, setEditStartTime] = useState<string>('');
-  const [editDecrement, setEditDecrement] = useState<number>(0); // Nuevo estado para el decremento
-  const [editOperationType, setEditOperationType] = useState<'add' | 'subtract'>('subtract'); // Por defecto, resta
-  const handleLinkChange = (link: string) => {
-    setLink(link);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  
+  // Estado para modales globales
+  const [showWarning, setShowWarning] = useState<{ blockId: string; type: string } | null>(null);
+  const [showEditModal, setShowEditModal] = useState<{ blockId: string; blockData: BlockData } | null>(null);
+  const [editData, setEditData] = useState<BlockData | null>(null);
+
+  // Función para limpiar localStorage de bloques antiguos al inicializar
+  useEffect(() => {
+    const cleanupOldBlockStates = () => {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('blockState_')) {
+          try {
+            const data = JSON.parse(localStorage.getItem(key) || '');
+            if (data.lastSaved) {
+              const lastSavedDate = new Date(data.lastSaved);
+              const now = new Date();
+              const daysDiff = (now.getTime() - lastSavedDate.getTime()) / (1000 * 3600 * 24);
+              if (daysDiff > 7) {
+                keysToRemove.push(key);
+              }
+            }
+          } catch (error) {
+            keysToRemove.push(key);
+          }
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+    };
+
+    cleanupOldBlockStates();
+  }, []);
+
+  // Callbacks para manejar modales
+  const handleShowWarning = (blockId: string, type: string) => {
+    setShowWarning({ blockId, type });
   };
 
-  const handleEditBlock = (index: number) => {
-    const block = blocks[index];
-    setEditIndex(index);
-    setEditOperations(block.totalOperations || 0);
-    setEditServiceId(block.serviceId || 0);
-    setEditCount(block.count || 0);
-    setEditDecrement(block.decrement || 0);
-    setEditOperationType(block.operationType || 'subtract'); // Cargar el tipo de operación
-    setEditAutoStart(block.autoStart || false);
-    setEditStartTime(block.startTime || '');
+  const handleShowEditModal = (blockId: string, blockData: BlockData) => {
+    setShowEditModal({ blockId, blockData });
+    setEditData({ ...blockData });
   };
-  
-  const handleSaveEdit = () => {
-    if (editIndex !== null) {
-      const updates: Partial<Block> = {
-        totalOperations: editOperations,
-        serviceId: editServiceId,
-        count: editCount,
-        decrement: editDecrement,
-        operationType: editOperationType, // Guardar el tipo de operación
-        autoStart: editAutoStart,
-        startTime: editAutoStart ? editStartTime : '',
-      };
-      editBlock(editIndex, updates);
-      setEditIndex(null);
+
+  const handleWarningConfirm = () => {
+    if (showWarning) {
+      const { blockId, type } = showWarning;
+      if (type === 'finalizar') {
+        (window as any)[`finalizeBlock_${blockId}`]?.();
+      } else if (type === 'reiniciar') {
+        (window as any)[`resetBlock_${blockId}`]?.();
+      }
+      setShowWarning(null);
     }
   };
-  const totalViewers = blocks.reduce((acc, block) => acc + block.totalViewers, 0);
+
+  const handleEditSave = () => {
+    if (showEditModal && editData) {
+      // Validar múltiplos de 10
+      if (editData.count % 10 !== 0 || editData.decrement % 10 !== 0) {
+        alert('La cantidad y el decremento deben ser múltiplos de 10');
+        return;
+      }
+      
+      const { blockId } = showEditModal;
+      (window as any)[`updateBlockData_${blockId}`]?.(editData);
+      setShowEditModal(null);
+      setEditData(null);
+    }
+  };
+
+  // Configuración de los 8 bloques con nombres únicos
+  const initialBlocksData: BlockData[] = [
+    {
+      title: 'Bloque Alfa',
+      totalOperations: 5,
+      serviceId: 336,
+      count: 50,
+      decrement: 10,
+      operationType: 'subtract',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Beta',
+      totalOperations: 4,
+      serviceId: 337,
+      count: 60,
+      decrement: 15,
+      operationType: 'subtract',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Gamma',
+      totalOperations: 6,
+      serviceId: 334,
+      count: 40,
+      decrement: 5,
+      operationType: 'add',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Delta',
+      totalOperations: 3,
+      serviceId: 335,
+      count: 70,
+      decrement: 20,
+      operationType: 'subtract',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Épsilon',
+      totalOperations: 4,
+      serviceId: 338,
+      count: 80,
+      decrement: 10,
+      operationType: 'add',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Zeta',
+      totalOperations: 5,
+      serviceId: 459,
+      count: 90,
+      decrement: 25,
+      operationType: 'subtract',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Eta',
+      totalOperations: 3,
+      serviceId: 460,
+      count: 100,
+      decrement: 30,
+      operationType: 'add',
+      autoStart: false,
+      startTime: ''
+    },
+    {
+      title: 'Bloque Theta',
+      totalOperations: 6,
+      serviceId: 657,
+      count: 120,
+      decrement: 40,
+      operationType: 'subtract',
+      autoStart: false,
+      startTime: ''
+    }
+  ];
+
+  const handleLinkChange = (newLink: string) => {
+    setLink(newLink);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log('Archivo seleccionado:', file.name);
+      // Aquí puedes implementar la lógica de subida de archivo si es necesaria
+      setShowUploadModal(false);
+    }
+  };
+
+  // Función para resetear todos los bloques
+  const handleResetAllBlocks = () => {
+    if (confirm('¿Estás seguro de que quieres resetear TODOS los bloques? Esta acción eliminará todo el progreso guardado.')) {
+      // Limpiar localStorage de todos los bloques
+      for (let i = 0; i < 8; i++) {
+        localStorage.removeItem(`blockState_block-${i}`);
+        (window as any)[`resetBlock_block-${i}`]?.();
+      }
+    }
+  };
 
   return (
     <div className="viewers-container">
+      {/* Input para el link de YouTube usando tus estilos originales */}
       <input
         type="text"
         value={link}
@@ -58,109 +197,90 @@ const Viewers = () => {
         placeholder="Ingrese el enlace de YouTube"
         className={`input-link ${theme}`}
       />
+      
+      {/* Header con total de viewers y botón de reset usando tu estilo original */}
       <div className="total-viewers-header">
-        💫 Total cargado: {totalViewers}
+        💫 Total cargado: {totalViewers.toLocaleString()}
       </div>
+      
+      {/* Botón para resetear todos los bloques */}
+      <button
+        onClick={handleResetAllBlocks}
+        className="reset-button"
+        style={{
+          position: 'absolute',
+          top: '1.5rem',
+          right: '12rem',
+          padding: '0.75rem 1rem',
+          fontSize: '0.875rem',
+          zIndex: 10
+        }}
+        title="Resetear todos los bloques"
+      >
+        🗑️ Reset All
+      </button>
+
+      {/* Grid de bloques usando tu estructura CSS original */}
       <div className="blocks-container">
-        {blocks.map((block, index) => (
-          <div key={index} className={`block ${theme}`}>
-            <h2 className="block-title">{block.title}</h2>
-            {block.autoStart && block.startTime && (
-              <div className="auto-start-info">
-                ⏰ Inicio automático: {block.startTime}
-              </div>
-            )}
-            {(block.state === 'paused' || block.state === 'completed') && (
-              <button onClick={() => generateExcel(block)} className="download-icon">
-                <span className="icon-download"></span>
-              </button>
-            )}
-            <div className="status">
-              {Array.from({ length: block.totalOperations }).map((_, statusIndex) => (
-                <div key={statusIndex} className="status-item">
-                  {`Operación ${statusIndex + 1}: `}
-                  {block.status[statusIndex] ? (
-                    <>
-                      {block.status[statusIndex].status === 'success' ? (
-                        <span className="status-success">✅</span>
-                      ) : (
-                        <span className="status-error">❌</span>
-                      )}
-                      <span className="timestamp">{block.status[statusIndex].timestamp}</span>
-                      {block.status[statusIndex].orderStatus && (
-                        <span className="order-status">{block.status[statusIndex].orderStatus}</span>
-                      )}
-                    </>
-                  ) : (
-                    <span className="status-pending">⏳</span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="block-controls">
-              {block.state === 'idle' && (
-                <>
-                  <button onClick={() => startBlock(index)} className="start-button" disabled={!link} title={!link ? 'Ingresa un link de YouTube para iniciar' : ''}>
-                    ▶️ Iniciar
-                  </button>
-                  <button onClick={() => handleEditBlock(index)} className="edit-button">
-                    ✏️ Editar
-                  </button>
-                </>
-              )}
-              {block.state === 'running' && (
-                <button onClick={() => pauseBlock(index)} className="pause-button">
-                  ⏸️ Pausar
-                </button>
-              )}
-              {block.state === 'paused' && (
-                <>
-                  <button onClick={() => resumeBlock(index)} className="resume-button">
-                    ▶️ Reanudar
-                  </button>
-                  <button onClick={() => setShowWarning({ type: 'finalizar', index })} className="finalize-button">
-                    🏁 Finalizar
-                  </button>
-                  <button onClick={() => setShowWarning({ type: 'reiniciar', index })} className="reset-button">
-                    🔄 Reiniciar
-                  </button>
-                </>
-              )}
-              {block.state === 'completed' && (
-                <>
-                  <div className="completed-message">✅ Bloque finalizado</div>
-                  <button onClick={() => setShowWarning({ type: 'reiniciar', index })} className="reset-button">
-                    🔄 Reiniciar
-                  </button>
-                </>
-              )}
-            </div>
-            <div className="total-viewers">👥 {block.totalViewers}</div>
-          </div>
+        {initialBlocksData.map((blockData, index) => (
+          <Block
+            key={`block-${index}`}
+            blockId={`block-${index}`}
+            initialData={blockData}
+            link={link}
+            onTotalViewersChange={updateBlockViewers}
+            onShowWarning={handleShowWarning}
+            onShowEditModal={handleShowEditModal}
+          />
         ))}
       </div>
+
+      {/* Modal de upload de Excel manteniendo el estilo que tenías */}
+      {showUploadModal && (
+        <div className="modal">
+          <div className={`modal-content ${theme}`}>
+            <h2>📁 Subir Archivo Excel</h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div style={{ 
+                padding: '1rem', 
+                borderRadius: '0.5rem', 
+                border: '2px dashed rgba(156, 163, 175, 0.5)' 
+              }}>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileUpload}
+                  style={{ width: '100%', fontSize: '0.875rem' }}
+                />
+              </div>
+            </div>
+            
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button onClick={() => setShowUploadModal(false)} className="cancel-button">
+                ❌ Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de advertencia global */}
       {showWarning && (
         <div className="warning-modal">
           <div className={`warning-content ${theme}`}>
-            <div className="text-center">
-              <div className="text-6xl mb-4">⚠️</div>
-              <h3 className="text-xl font-bold mb-4">
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>⚠️</div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>
                 {showWarning.type === 'finalizar' ? '🏁 Finalizar Bloque' : '🔄 Reiniciar Bloque'}
               </h3>
-              <p className="mb-6">
+              <p style={{ marginBottom: '1.5rem' }}>
                 Estás por {showWarning.type === 'finalizar' ? 'finalizar' : 'reiniciar'} este bloque de operaciones.
                 <br />
                 <strong>Esta acción no se puede deshacer.</strong>
               </p>
-              <div className="flex justify-center gap-4">
-                <button onClick={() => {
-                  if (showWarning.type === 'finalizar') {
-                    finalizeBlock(showWarning.index);
-                  } else {
-                    resetBlock(showWarning.index);
-                  }
-                  setShowWarning(null);
-                }} className="continue-button">
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                <button onClick={handleWarningConfirm} className="continue-button">
                   ✅ Continuar
                 </button>
                 <button onClick={() => setShowWarning(null)} className="cancel-button">
@@ -171,25 +291,30 @@ const Viewers = () => {
           </div>
         </div>
       )}
-      {editIndex !== null && (
+
+      {/* Modal de edición global */}
+      {showEditModal && editData && (
         <div className="modal">
           <div className={`modal-content ${theme}`}>
             <h2>✏️ Editar Bloque</h2>
-            <div className="grid grid-cols-1 gap-4">
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <label>
                 🔢 Cantidad de Operaciones:
                 <input
                   type="number"
-                  value={editOperations}
-                  onChange={(e) => setEditOperations(Number(e.target.value))}
+                  min={0}
+                  value={editData.totalOperations}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, totalOperations: Number(e.target.value) }) : null)}
                   className={`input-${theme}`}
                 />
               </label>
+
               <label>
                 ⏱️ Duración:
                 <select
-                  value={editServiceId}
-                  onChange={(e) => setEditServiceId(Number(e.target.value))}
+                  value={editData.serviceId}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, serviceId: Number(e.target.value) }) : null)}
                   className={`input-${theme}`}
                 >
                   <option value={334}>1h</option>
@@ -202,70 +327,83 @@ const Viewers = () => {
                   <option value={657}>8h</option>
                 </select>
               </label>
-              <div className="p-3 rounded-lg bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800">
-                <p className="text-sm text-green-700 dark:text-green-300 font-medium">
+
+              <div style={{ 
+                padding: '0.75rem', 
+                borderRadius: '0.5rem', 
+                background: 'rgba(34, 197, 94, 0.1)', 
+                border: '1px solid rgba(34, 197, 94, 0.2)',
+                color: '#16a34a'
+              }}>
+                <p style={{ fontSize: '0.875rem', fontWeight: '500' }}>
                   💡 Solo múltiplos de 10 (ej: 30, 40, 100, 150...)
                 </p>
               </div>
+
               <label>
                 👥 Cantidad:
                 <input
                   type="number"
                   min={0}
                   step={10}
-                  value={editCount}
-                  onChange={(e) => setEditCount(Number(e.target.value))}
-                  className={`input-${theme} ${editCount % 10 !== 0 ? 'input-error' : ''}`}
+                  value={editData.count}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, count: Number(e.target.value) }) : null)}
+                  className={`input-${theme} ${editData.count % 10 !== 0 ? 'input-error' : ''}`}
                 />
               </label>
+
               <label>
-                ➕➖ Cantidad a Modificar:
+                ➕➖ Cantidad a Restar/Sumar:
                 <input
                   type="number"
                   min={0}
                   step={10}
-                  value={editDecrement}
-                  onChange={(e) => setEditDecrement(Number(e.target.value))}
-                  className={`input-${theme} ${editDecrement % 10 !== 0 ? 'input-error' : ''}`}
+                  value={editData.decrement}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, decrement: Number(e.target.value) }) : null)}
+                  className={`input-${theme} ${editData.decrement % 10 !== 0 ? 'input-error' : ''}`}
                 />
               </label>
+
               <label>
                 🔄 Operación:
                 <select
-                  value={editOperationType}
-                  onChange={(e) => setEditOperationType(e.target.value as 'add' | 'subtract')}
+                  value={editData.operationType}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, operationType: e.target.value as 'add' | 'subtract' }) : null)}
                   className={`input-${theme}`}
                 >
                   <option value="add">➕ Sumar</option>
                   <option value="subtract">➖ Restar</option>
                 </select>
               </label>
-              <label className="flex items-center space-x-3">
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <input
                   type="checkbox"
-                  checked={editAutoStart}
-                  onChange={(e) => setEditAutoStart(e.target.checked)}
-                  className="w-5 h-5"
+                  checked={editData.autoStart}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, autoStart: e.target.checked }) : null)}
+                  style={{ width: '1.25rem', height: '1.25rem' }}
                 />
                 <span>🕐 Inicio Automático</span>
               </label>
-              {editAutoStart && (
+
+              {editData.autoStart && (
                 <label>
                   ⏰ Hora de Inicio:
                   <input
                     type="time"
-                    value={editStartTime}
-                    onChange={(e) => setEditStartTime(e.target.value)}
+                    value={editData.startTime}
+                    onChange={(e) => setEditData(prev => prev ? ({ ...prev, startTime: e.target.value }) : null)}
                     className={`input-${theme}`}
                   />
                 </label>
               )}
             </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={handleSaveEdit} className="save-button">
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+              <button onClick={handleEditSave} className="save-button">
                 💾 Guardar
               </button>
-              <button onClick={() => setEditIndex(null)} className="cancel-button">
+              <button onClick={() => { setShowEditModal(null); setEditData(null); }} className="cancel-button">
                 ❌ Cancelar
               </button>
             </div>
