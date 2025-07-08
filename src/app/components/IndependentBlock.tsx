@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../ThemeContext';
 import * as XLSX from 'xlsx';
 
@@ -50,7 +50,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   const { theme } = useTheme();
   
   // Función para obtener el localStorage key único por bloque
-  const getStorageKey = () => `block_${title}_${link}`;
+  const getStorageKey = useCallback(() => `block_${title}_${link}`, [title, link]);
   
   // Función para cargar estado persistente
   const loadPersistedState = (): PersistedBlockState | null => {
@@ -64,13 +64,13 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   };
   
   // Función para guardar estado persistente
-  const savePersistedState = (state: PersistedBlockState) => {
+  const savePersistedState = useCallback((state: PersistedBlockState) => {
     try {
       localStorage.setItem(getStorageKey(), JSON.stringify(state));
     } catch (error) {
       console.error(`Error saving persisted state for ${title}:`, error);
     }
-  };
+  }, [getStorageKey, title]);
   
   // Configuración por defecto
   const defaultConfig: BlockConfig = {
@@ -164,14 +164,14 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
     };
     
     savePersistedState(currentState);
-  }, [status, currentOperation, state, totalViewers, isPaused, totalOperations, serviceId, count, decrement, operationType, autoStart, startTime, lastEditedConfig]);
+  }, [status, currentOperation, state, totalViewers, isPaused, totalOperations, serviceId, count, decrement, operationType, autoStart, startTime, lastEditedConfig, savePersistedState]);
   
   // Notificar cambio de total viewers al cargar estado persistente
   useEffect(() => {
-    if (persistedState?.totalViewers) {
-      onTotalViewersChange?.(title, persistedState.totalViewers);
+    if (persistedState?.totalViewers && onTotalViewersChange) {
+      onTotalViewersChange(title, persistedState.totalViewers);
     }
-  }, []);
+  }, [onTotalViewersChange, title, persistedState?.totalViewers]);
 
   // Función para obtener duración del servicio
   const getServiceDuration = (serviceId: number) => {
@@ -189,7 +189,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
   };
 
   // Función para generar Excel
-  const generateExcel = () => {
+  const generateExcel = useCallback(() => {
     try {
       console.log(`Generando Excel para el bloque: ${title}`);
 
@@ -268,10 +268,10 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
     } catch (error) {
       console.error('Error al generar el archivo Excel:', error);
     }
-  };
+  }, [title, status]);
 
   // Función para hacer llamada a la API
-  const handleApiCall = async () => {
+  const handleApiCall = useCallback(async () => {
     if (!link || stateRef.current !== 'running') {
       console.log(`${title}: Skipping API call - link: ${link}, state: ${stateRef.current}`);
       return;
@@ -349,10 +349,10 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
         generateExcel();
       }
     }
-  };
+  }, [link, title, operationType, count, decrement, serviceId, totalOperations, intervalId, currentOperation, onTotalViewersChange, generateExcel]);
 
   // Funciones de control
-  const startBlock = () => {
+  const startBlock = useCallback(() => {
     if (stateRef.current === 'running') {
       console.log(`${title}: Already running, skipping start`);
       return;
@@ -372,7 +372,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
       handleApiCall();
     }, 120000); // 2 minutos
     setIntervalId(newIntervalId);
-  };
+  }, [title, handleApiCall]);
 
   const pauseBlock = () => {
     if (intervalId) {
@@ -497,7 +497,7 @@ const IndependentBlock: React.FC<IndependentBlockProps> = ({
         autoStartTimeoutRef.current = null;
       }
     };
-  }, [autoStart, startTime, state]);
+  }, [autoStart, startTime, state, startBlock]);
 
   // Cleanup en unmount
   useEffect(() => {

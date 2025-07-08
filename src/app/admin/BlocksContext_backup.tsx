@@ -104,6 +104,7 @@ export const BlocksProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [blocks]);
 
   const checkOrderStatus = async (orderId: number) => {
