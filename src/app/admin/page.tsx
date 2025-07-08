@@ -5,7 +5,8 @@ import { useTheme } from '../ThemeContext';
 import Preloader from '../components/Preloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon } from '@fortawesome/free-solid-svg-icons';
-import IndependentViewers from '../components/IndependentViewers';
+import { BlocksProvider } from './BlocksContext';
+import Viewers from '../components/Viewers';
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
@@ -122,7 +123,9 @@ export default function AdminDashboard() {
                 ? 'bg-slate-800/60 border border-slate-700/50 shadow-2xl' 
                 : 'bg-white/80 border border-gray-200/50 shadow-xl'
             }`}>
-              <IndependentViewers />
+              <BlocksProvider>
+                <Viewers />
+              </BlocksProvider>
             </div>
           </main>
         </div>
