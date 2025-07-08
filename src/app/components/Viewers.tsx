@@ -198,27 +198,27 @@ const Viewers = () => {
         className={`input-link ${theme}`}
       />
       
-      {/* Header con total de viewers y botón de reset usando tu estilo original */}
+      {/* Header con total de viewers usando tu estilo original */}
       <div className="total-viewers-header">
         💫 Total cargado: {totalViewers.toLocaleString()}
       </div>
       
-      {/* Botón para resetear todos los bloques */}
-      <button
-        onClick={handleResetAllBlocks}
-        className="reset-button"
-        style={{
-          position: 'absolute',
-          top: '1.5rem',
-          right: '12rem',
-          padding: '0.75rem 1rem',
-          fontSize: '0.875rem',
-          zIndex: 10
-        }}
-        title="Resetear todos los bloques"
-      >
-        🗑️ Reset All
-      </button>
+      {/* Botón para resetear todos los bloques debajo del total */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+        <button
+          onClick={handleResetAllBlocks}
+          className="reset-button"
+          style={{
+            padding: '0.75rem 1.5rem',
+            fontSize: '0.875rem',
+            borderRadius: '0.5rem',
+            fontWeight: '500'
+          }}
+          title="Resetear todos los bloques"
+        >
+          🗑️ Reset All
+        </button>
+      </div>
 
       {/* Grid de bloques usando tu estructura CSS original */}
       <div className="blocks-container">
