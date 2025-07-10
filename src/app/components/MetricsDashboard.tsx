@@ -14,6 +14,7 @@ interface OperationMetrics {
   totalResetViewers: number;
   operationsPerBlock: { [blockId: string]: number };
   viewersPerHour: { [hour: string]: number };
+  viewersByServiceDuration: { [duration: string]: number };
   lastUpdated: string;
 }
 
@@ -40,6 +41,7 @@ const MetricsDashboard: React.FC = () => {
     totalResetViewers: 0,
     operationsPerBlock: {},
     viewersPerHour: {},
+    viewersByServiceDuration: {},
     lastUpdated: new Date().toISOString()
   });
 
@@ -94,6 +96,21 @@ const MetricsDashboard: React.FC = () => {
     return [];
   }, []);
 
+  // Función para obtener duración de servicio en horas
+  const getServiceDurationHours = (serviceId: number) => {
+    switch (serviceId) {
+      case 334: return 1;    // 1h
+      case 335: return 1.5;  // 1.5h
+      case 336: return 2;    // 2h
+      case 337: return 2.5;  // 2.5h
+      case 338: return 3;    // 3h
+      case 459: return 4;    // 4h
+      case 460: return 6;    // 6h
+      case 657: return 8;    // 8h
+      default: return 0;
+    }
+  };
+
   const getSuccessRate = () => {
     if (metrics.totalOperations === 0) return 0;
     return ((metrics.successfulOperations / metrics.totalOperations) * 100);
@@ -125,6 +142,7 @@ const MetricsDashboard: React.FC = () => {
       },
       operationsPerBlock: metrics.operationsPerBlock,
       viewersPerHour: metrics.viewersPerHour,
+      viewersByServiceDuration: metrics.viewersByServiceDuration,
       allOperations: allOperations, // Todas las operaciones, no solo recientes
       blockResetHistory: resetHistory,
       alerts: alerts
@@ -285,6 +303,28 @@ const MetricsDashboard: React.FC = () => {
         </tbody>
     </table>
 
+    <h2>⏱️ Viewers por Duración de Servicio</h2>
+    <table class="operations-table">
+        <thead>
+            <tr>
+                <th>Duración</th>
+                <th>Viewers</th>
+                <th>Porcentaje del Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${Object.entries(metrics.viewersByServiceDuration)
+              .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
+              .map(([duration, viewers]) => `
+                <tr>
+                    <td>${duration}</td>
+                    <td>${viewers.toLocaleString()}</td>
+                    <td>${metrics.totalViewers > 0 ? ((viewers / metrics.totalViewers) * 100).toFixed(1) : 0}%</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+
     ${resetHistory.length > 0 ? `
     <div class="reset-section">
         <h2>� Historial de Reinicializaciones</h2>
@@ -371,6 +411,7 @@ const MetricsDashboard: React.FC = () => {
       totalResetViewers: 0,
       operationsPerBlock: {},
       viewersPerHour: {},
+      viewersByServiceDuration: {},
       lastUpdated: new Date().toISOString()
     };
 
@@ -402,6 +443,13 @@ const MetricsDashboard: React.FC = () => {
         if (operation.timestamp && operation.count) {
           const hour = operation.timestamp.split(':')[0] + ':00';
           newMetrics.viewersPerHour[hour] = (newMetrics.viewersPerHour[hour] || 0) + operation.count;
+        }
+
+        // Agrupar viewers por duración de servicio
+        if (operation.serviceId && operation.count) {
+          const durationHours = getServiceDurationHours(operation.serviceId);
+          const durationKey = `${durationHours}h`;
+          newMetrics.viewersByServiceDuration[durationKey] = (newMetrics.viewersByServiceDuration[durationKey] || 0) + operation.count;
         }
       } else {
         newMetrics.failedOperations++;
@@ -680,6 +728,28 @@ const MetricsDashboard: React.FC = () => {
                   ></div>
                 </div>
                 <div className="bar-value">{viewers}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="chart-card">
+          <h3>⏱️ Viewers por Duración de Servicio</h3>
+          <div className="simple-chart">
+            {Object.entries(metrics.viewersByServiceDuration)
+              .sort(([a], [b]) => parseFloat(a) - parseFloat(b)) // Ordenar por duración
+              .map(([duration, viewers]) => (
+              <div key={duration} className="chart-bar">
+                <div className="bar-label">{duration}</div>
+                <div className="bar-container">
+                  <div 
+                    className="bar-fill duration-bar" 
+                    style={{ 
+                      width: `${Math.max(10, (viewers / Math.max(...Object.values(metrics.viewersByServiceDuration), 1)) * 100)}%` 
+                    }}
+                  ></div>
+                </div>
+                <div className="bar-value">{viewers.toLocaleString()}</div>
               </div>
             ))}
           </div>
