@@ -10,7 +10,8 @@ interface OperationMetrics {
   failedOperations: number;
   totalCost: number;
   totalViewers: number;
-  averageOperationTime: number;
+  totalResetOperations: number;
+  totalResetViewers: number;
   operationsPerBlock: { [blockId: string]: number };
   viewersPerHour: { [hour: string]: number };
   lastUpdated: string;
@@ -35,7 +36,8 @@ const MetricsDashboard: React.FC = () => {
     failedOperations: 0,
     totalCost: 0,
     totalViewers: 0,
-    averageOperationTime: 0,
+    totalResetOperations: 0,
+    totalResetViewers: 0,
     operationsPerBlock: {},
     viewersPerHour: {},
     lastUpdated: new Date().toISOString()
@@ -117,7 +119,8 @@ const MetricsDashboard: React.FC = () => {
         successRate: getSuccessRate(),
         totalCost: metrics.totalCost,
         totalViewers: metrics.totalViewers,
-        averageOperationTime: metrics.averageOperationTime,
+        totalResetOperations: metrics.totalResetOperations,
+        totalResetViewers: metrics.totalResetViewers,
         costPerViewer: metrics.totalViewers > 0 ? metrics.totalCost / metrics.totalViewers : 0
       },
       operationsPerBlock: metrics.operationsPerBlock,
@@ -245,12 +248,16 @@ const MetricsDashboard: React.FC = () => {
             <div class="metric-label">Costo Total</div>
         </div>
         <div class="metric-card">
-            <div class="metric-value">${metrics.averageOperationTime.toFixed(0)} min</div>
-            <div class="metric-label">Tiempo Promedio</div>
+            <div class="metric-value">${metrics.totalResetOperations}</div>
+            <div class="metric-label">Operaciones Reseteadas</div>
         </div>
         <div class="metric-card">
             <div class="metric-value">$${metrics.totalViewers > 0 ? (metrics.totalCost / metrics.totalViewers).toFixed(4) : '0.0000'}</div>
             <div class="metric-label">Costo por Viewer</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-value">${metrics.totalResetViewers.toLocaleString()}</div>
+            <div class="metric-label">Viewers Reseteados</div>
         </div>
         <div class="metric-card">
             <div class="metric-value">${resetHistory.length}</div>
@@ -360,7 +367,8 @@ const MetricsDashboard: React.FC = () => {
       failedOperations: 0,
       totalCost: 0,
       totalViewers: totalViewers,
-      averageOperationTime: 0,
+      totalResetOperations: 0,
+      totalResetViewers: 0,
       operationsPerBlock: {},
       viewersPerHour: {},
       lastUpdated: new Date().toISOString()
@@ -400,9 +408,12 @@ const MetricsDashboard: React.FC = () => {
       }
     });
 
-    if (operationCount > 0) {
-      newMetrics.averageOperationTime = totalDuration / operationCount;
-    }
+    // Calcular métricas de resets
+    const resetHistory = getResetHistory();
+    resetHistory.forEach((reset: any) => {
+      newMetrics.totalResetOperations += reset.operationsLost || 0;
+      newMetrics.totalResetViewers += reset.viewersLost || 0;
+    });
 
     setMetrics(newMetrics);
   }, [totalViewers, getAllOperationsData]);
@@ -600,11 +611,11 @@ const MetricsDashboard: React.FC = () => {
         </div>
 
         <div className="metric-card">
-          <div className="metric-icon">⏱️</div>
+          <div className="metric-icon">🔄</div>
           <div className="metric-content">
-            <h3>Tiempo Promedio</h3>
-            <div className="metric-value">{metrics.averageOperationTime.toFixed(0)}min</div>
-            <div className="metric-subtitle">Por operación</div>
+            <h3>Operaciones Reseteadas</h3>
+            <div className="metric-value">{metrics.totalResetOperations}</div>
+            <div className="metric-subtitle">Total acumulado</div>
           </div>
         </div>
 
@@ -616,6 +627,15 @@ const MetricsDashboard: React.FC = () => {
               ${metrics.totalViewers > 0 ? (metrics.totalCost / metrics.totalViewers).toFixed(4) : '0.0000'}
             </div>
             <div className="metric-subtitle">Eficiencia</div>
+          </div>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-icon">👥</div>
+          <div className="metric-content">
+            <h3>Viewers Reseteados</h3>
+            <div className="metric-value">{metrics.totalResetViewers.toLocaleString()}</div>
+            <div className="metric-subtitle">Total acumulado</div>
           </div>
         </div>
       </div>
