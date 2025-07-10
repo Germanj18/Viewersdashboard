@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useGlobal } from './GlobalContext';
 import { useTheme } from '../ThemeContext';
 import Block, { BlockData } from './Block';
+import MetricsDashboard from './MetricsDashboard';
 import './Viewers.css';
 
 const Viewers = () => {
   const { link, setLink, totalViewers, updateBlockViewers } = useGlobal();
   const { theme } = useTheme();
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showMetrics, setShowMetrics] = useState(false);
   
   // Estado para modales globales
   const [showWarning, setShowWarning] = useState<{ blockId: string; type: string } | null>(null);
@@ -223,8 +225,22 @@ const Viewers = () => {
         💫 Total cargado: {totalViewers.toLocaleString()}
       </div>
       
-      {/* Botón para resetear todos los bloques debajo del total */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+      {/* Botones de control debajo del total */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
+        <button
+          onClick={() => setShowMetrics(!showMetrics)}
+          className="edit-button"
+          style={{
+            padding: '0.75rem 1.5rem',
+            fontSize: '0.875rem',
+            borderRadius: '0.5rem',
+            fontWeight: '500'
+          }}
+          title="Ver dashboard de métricas"
+        >
+          📊 {showMetrics ? 'Ocultar Métricas' : 'Ver Métricas'}
+        </button>
+        
         <button
           onClick={handleResetAllBlocks}
           className="reset-button"
@@ -239,6 +255,9 @@ const Viewers = () => {
           🗑️ Reset All
         </button>
       </div>
+
+      {/* Dashboard de Métricas */}
+      {showMetrics && <MetricsDashboard />}
 
       {/* Grid de bloques usando tu estructura CSS original */}
       <div className="blocks-container">
