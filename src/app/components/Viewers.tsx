@@ -3,6 +3,7 @@ import { useGlobal } from './GlobalContext';
 import { useTheme } from '../ThemeContext';
 import Block, { BlockData } from './Block';
 import MetricsDashboard from './MetricsDashboard';
+import ResetWarningModal from './ResetWarningModal';
 import './Viewers.css';
 
 const Viewers = () => {
@@ -10,6 +11,7 @@ const Viewers = () => {
   const { theme } = useTheme();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
+  const [showResetWarning, setShowResetWarning] = useState(false);
   
   // Estado para modales globales
   const [showWarning, setShowWarning] = useState<{ blockId: string; type: string } | null>(null);
@@ -200,13 +202,96 @@ const Viewers = () => {
 
   // Función para resetear todos los bloques
   const handleResetAllBlocks = () => {
-    if (confirm('¿Estás seguro de que quieres resetear TODOS los bloques? Esta acción eliminará todo el progreso guardado.')) {
-      // Limpiar localStorage de todos los bloques
-      for (let i = 0; i < 10; i++) {
-        localStorage.removeItem(`blockState_block-${i}`);
-        (window as any)[`resetBlock_block-${i}`]?.();
-      }
+    // Verificar si hay datos para resetear
+    const hasBlockData = initialBlocksData.some((_, index) => {
+      const blockState = localStorage.getItem(`blockState_block-${index}`);
+      return blockState && JSON.parse(blockState).operations?.length > 0;
+    });
+
+    const hasGlobalHistory = localStorage.getItem('globalOperationsHistory') || localStorage.getItem('blockResetHistory');
+    const hasAnyData = hasBlockData || hasGlobalHistory;
+
+    if (!hasAnyData) {
+      alert('No hay datos para resetear.');
+      return;
     }
+
+    // Mostrar modal de advertencia
+    setShowResetWarning(true);
+  };
+
+  // Manejar la opción de descargar reportes primero
+  const handleDownloadFirst = () => {
+    setShowResetWarning(false);
+    setShowMetrics(true);
+    alert('💡 Dashboard de métricas abierto. Descarga los reportes y luego usa "Reset All" nuevamente.');
+  };
+
+  // Manejar proceder sin descargar
+  const handleProceedWithoutDownload = () => {
+    setShowResetWarning(false);
+    
+    // Confirmación final para el reset completo
+    const finalConfirm = confirm(
+      '🚨 CONFIRMACIÓN FINAL\n\n' +
+      'Esto eliminará PERMANENTEMENTE:\n' +
+      '• Todos los estados de bloques actuales\n' +
+      '• Todo el historial de operaciones\n' +
+      '• Todo el historial de resets\n' +
+      '• Todas las métricas acumuladas\n\n' +
+      '⚠️ Esta acción NO se puede deshacer.\n\n' +
+      '¿Estás absolutamente seguro de continuar?'
+    );
+
+    if (finalConfirm) {
+      executeCompleteReset();
+    }
+  };
+
+  // Ejecutar el reset completo
+  const executeCompleteReset = () => {
+    try {
+      // 1. Resetear cada bloque (esto guarda las operaciones actuales al historial)
+      for (let i = 0; i < 10; i++) {
+        const blockId = `block-${i}`;
+        const resetFunction = (window as any)[`resetBlock_${blockId}`];
+        if (resetFunction) {
+          resetFunction();
+        } else {
+          // Si no hay función de reset, limpiar manualmente
+          localStorage.removeItem(`blockState_${blockId}`);
+        }
+      }
+
+      // 2. Limpiar completamente el historial global y de resets
+      localStorage.removeItem('globalOperationsHistory');
+      localStorage.removeItem('blockResetHistory');
+
+      // 3. Limpiar cualquier otro dato relacionado
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('blockState_') || key.includes('metrics') || key.includes('dashboard'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+
+      // 4. Ocultar el dashboard de métricas si estaba abierto
+      setShowMetrics(false);
+
+      // 5. Mostrar confirmación de éxito
+      alert('✅ Reset completo realizado con éxito.\n\nTodos los datos han sido eliminados permanentemente.\nLos bloques están listos para usar desde cero.');
+
+    } catch (error) {
+      console.error('Error durante el reset completo:', error);
+      alert('❌ Error durante el reset completo. Algunos datos pueden no haberse eliminado correctamente.');
+    }
+  };
+
+  // Manejar cancelar reset
+  const handleCancelReset = () => {
+    setShowResetWarning(false);
   };
 
   return (
@@ -449,6 +534,15 @@ const Viewers = () => {
           </div>
         </div>
       )}
+
+      {/* Modal de Advertencia de Reset */}
+      <ResetWarningModal
+        isOpen={showResetWarning}
+        onDownloadFirst={handleDownloadFirst}
+        onProceedAnyway={handleProceedWithoutDownload}
+        onCancel={handleCancelReset}
+        hasData={true} // Ya verificamos que hay datos antes de mostrar el modal
+      />
     </div>
   );
 };

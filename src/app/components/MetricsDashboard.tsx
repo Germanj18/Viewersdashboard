@@ -44,41 +44,52 @@ const MetricsDashboard: React.FC = () => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showAlerts, setShowAlerts] = useState(false);
 
-  // Función para obtener todos los datos de operaciones
+  // Función para obtener todos los datos de operaciones (actuales + historial)
   const getAllOperationsData = useCallback(() => {
     const allOperations: any[] = [];
     
-    for (let i = 0; i < 10; i++) {
-      const blockId = `block-${i}`;
-      const blockState = localStorage.getItem(`blockState_${blockId}`);
-      
-      if (blockState) {
-        try {
-          const parsed = JSON.parse(blockState);
-          const status = parsed.status || [];
-          
-          status.forEach((operation: any) => {
-            allOperations.push({
-              blockId,
-              timestamp: operation.timestamp,
-              status: operation.status,
-              message: operation.message,
-              duration: operation.duration,
-              count: operation.count,
-              serviceId: operation.serviceId,
-              cost: operation.details?.res?.sum || 0,
-              orderId: operation.orderId,
-              orderStatus: operation.orderStatus,
-              details: operation.details
-            });
+    // Obtener historial global primero
+    const globalHistoryKey = 'globalOperationsHistory';
+    const globalHistory = localStorage.getItem(globalHistoryKey);
+    if (globalHistory) {
+      try {
+        const parsedHistory = JSON.parse(globalHistory);
+        parsedHistory.forEach((operation: any) => {
+          allOperations.push({
+            ...operation,
+            isHistorical: true
           });
-        } catch (error) {
-          console.error('Error parsing block state:', error);
-        }
+        });
+      } catch (error) {
+        console.error('Error parsing global history:', error);
       }
     }
     
-    return allOperations.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    // CORRIGIDO: No agregar operaciones actuales porque ya están en el historial global
+    // Cada operación se guarda inmediatamente al historial global cuando se ejecuta
+    // Solo agregar operaciones actuales que NO estén ya en el historial sería complejo
+    // y podría causar inconsistencias. El historial global es la fuente única de verdad.
+    
+    return allOperations.sort((a, b) => {
+      const dateA = new Date(a.savedAt || a.timestamp);
+      const dateB = new Date(b.savedAt || b.timestamp);
+      return dateB.getTime() - dateA.getTime();
+    });
+  }, []);
+
+  // Función para obtener historial de resets
+  const getResetHistory = useCallback(() => {
+    const resetHistoryKey = 'blockResetHistory';
+    const resetHistory = localStorage.getItem(resetHistoryKey);
+    if (resetHistory) {
+      try {
+        return JSON.parse(resetHistory);
+      } catch (error) {
+        console.error('Error parsing reset history:', error);
+        return [];
+      }
+    }
+    return [];
   }, []);
 
   const getSuccessRate = () => {
@@ -88,11 +99,16 @@ const MetricsDashboard: React.FC = () => {
 
   // Función para exportar datos como JSON
   const exportToJSON = useCallback(() => {
+    const allOperations = getAllOperationsData();
+    const resetHistory = getResetHistory();
+    
     const exportData = {
       reportInfo: {
         generatedAt: new Date().toISOString(),
         generatedBy: 'Dashboard La Casa',
-        reportType: 'Complete Operations Report'
+        reportType: 'Complete Operations Report',
+        totalOperationsIncludingHistory: allOperations.length,
+        blocksResetCount: resetHistory.length
       },
       summary: {
         totalOperations: metrics.totalOperations,
@@ -106,7 +122,8 @@ const MetricsDashboard: React.FC = () => {
       },
       operationsPerBlock: metrics.operationsPerBlock,
       viewersPerHour: metrics.viewersPerHour,
-      detailedOperations: getAllOperationsData(),
+      allOperations: allOperations, // Todas las operaciones, no solo recientes
+      blockResetHistory: resetHistory,
       alerts: alerts
     };
 
@@ -121,7 +138,7 @@ const MetricsDashboard: React.FC = () => {
     URL.revokeObjectURL(url);
     
     showToast('📄 Reporte JSON descargado exitosamente', 'success');
-  }, [metrics, alerts, getAllOperationsData]);
+  }, [metrics, alerts, getAllOperationsData, getResetHistory]);
 
   // Función para exportar como CSV
   const exportToCSV = useCallback(() => {
@@ -137,12 +154,13 @@ const MetricsDashboard: React.FC = () => {
       'Service ID',
       'Costo',
       'Order ID',
-      'Order Status'
+      'Order Status',
+      'Es Histórico'
     ];
 
     const csvRows = operations.map(op => [
       op.timestamp,
-      `Bloque ${parseInt(op.blockId.replace('block-', '')) + 1}`,
+      `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
       op.status,
       op.message.replace(/,/g, ';'), // Escapar comas
       op.duration || 0,
@@ -150,7 +168,8 @@ const MetricsDashboard: React.FC = () => {
       op.serviceId || '',
       op.cost || 0,
       op.orderId || '',
-      op.orderStatus || ''
+      op.orderStatus || '',
+      op.isHistorical ? 'Sí' : 'No'
     ]);
 
     const csvContent = [csvHeaders, ...csvRows]
@@ -173,6 +192,7 @@ const MetricsDashboard: React.FC = () => {
   // Función para exportar reporte ejecutivo en HTML
   const exportExecutiveReport = useCallback(() => {
     const operations = getAllOperationsData();
+    const resetHistory = getResetHistory();
     const successRate = getSuccessRate();
     
     const htmlContent = `<!DOCTYPE html>
@@ -195,13 +215,16 @@ const MetricsDashboard: React.FC = () => {
         .operations-table tr:nth-child(even) { background-color: #f2f2f2; }
         .status-success { color: #4CAF50; font-weight: bold; }
         .status-error { color: #f44336; font-weight: bold; }
+        .historical { background-color: #fff3cd; }
         .footer { margin-top: 40px; text-align: center; color: #666; font-size: 12px; }
+        .reset-section { margin: 30px 0; padding: 20px; background: #fff3cd; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">📊 REPORTE EJECUTIVO - DASHBOARD LA CASA</div>
         <p>Generado el: ${new Date().toLocaleString('es-ES')}</p>
+        <p><strong>Total de operaciones (incluyendo historial): ${operations.length}</strong></p>
     </div>
 
     <div class="summary-grid">
@@ -229,6 +252,10 @@ const MetricsDashboard: React.FC = () => {
             <div class="metric-value">$${metrics.totalViewers > 0 ? (metrics.totalCost / metrics.totalViewers).toFixed(4) : '0.0000'}</div>
             <div class="metric-label">Costo por Viewer</div>
         </div>
+        <div class="metric-card">
+            <div class="metric-value">${resetHistory.length}</div>
+            <div class="metric-label">Bloques Reiniciados</div>
+        </div>
     </div>
 
     <h2>📈 Operaciones por Bloque</h2>
@@ -251,7 +278,34 @@ const MetricsDashboard: React.FC = () => {
         </tbody>
     </table>
 
-    <h2>📋 Detalle de Operaciones Recientes</h2>
+    ${resetHistory.length > 0 ? `
+    <div class="reset-section">
+        <h2>� Historial de Reinicializaciones</h2>
+        <table class="operations-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Bloque</th>
+                    <th>Operaciones Perdidas</th>
+                    <th>Viewers Perdidos</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${resetHistory.slice(-10).map((reset: any) => `
+                    <tr>
+                        <td>${new Date(reset.resetAt).toLocaleString('es-ES')}</td>
+                        <td>${reset.blockTitle}</td>
+                        <td>${reset.operationsLost}</td>
+                        <td>${reset.viewersLost.toLocaleString()}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    </div>
+    ` : ''}
+
+    <h2>📋 Todas las Operaciones</h2>
+    <p><em>Nota: Las operaciones con fondo amarillo son del historial (de bloques reiniciados)</em></p>
     <table class="operations-table">
         <thead>
             <tr>
@@ -264,10 +318,10 @@ const MetricsDashboard: React.FC = () => {
             </tr>
         </thead>
         <tbody>
-            ${operations.slice(-20).reverse().map(op => `
-                <tr>
+            ${operations.map(op => `
+                <tr ${op.isHistorical ? 'class="historical"' : ''}>
                     <td>${op.timestamp}</td>
-                    <td>Bloque ${parseInt(op.blockId.replace('block-', '')) + 1}</td>
+                    <td>Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
                     <td class="status-${op.status}">${op.status === 'success' ? '✅ Exitosa' : '❌ Fallida'}</td>
                     <td>${op.count || 0}</td>
                     <td>${op.duration || 0} min</td>
@@ -280,6 +334,7 @@ const MetricsDashboard: React.FC = () => {
     <div class="footer">
         <p>Reporte generado automáticamente por Dashboard La Casa</p>
         <p>© ${new Date().getFullYear()} - Todos los derechos reservados</p>
+        <p><strong>Total de operaciones procesadas: ${operations.length}</strong></p>
     </div>
 </body>
 </html>`;
@@ -295,9 +350,9 @@ const MetricsDashboard: React.FC = () => {
     URL.revokeObjectURL(url);
     
     showToast('📋 Reporte ejecutivo descargado exitosamente', 'success');
-  }, [metrics, getAllOperationsData]);
+  }, [metrics, getAllOperationsData, getResetHistory]);
 
-  // Función para calcular métricas desde localStorage
+  // Función para calcular métricas desde localStorage (incluyendo historial)
   const calculateMetrics = useCallback(() => {
     const newMetrics: OperationMetrics = {
       totalOperations: 0,
@@ -314,51 +369,43 @@ const MetricsDashboard: React.FC = () => {
     let totalDuration = 0;
     let operationCount = 0;
 
-    // Recorrer todos los bloques guardados en localStorage
-    for (let i = 0; i < 10; i++) {
-      const blockId = `block-${i}`;
-      const blockState = localStorage.getItem(`blockState_${blockId}`);
+    // Obtener todas las operaciones (históricas + actuales)
+    const allOperations = getAllOperationsData();
+    
+    // Procesar todas las operaciones
+    allOperations.forEach((operation: any) => {
+      const blockId = operation.blockId || `block-${operation.blockId}`;
       
-      if (blockState) {
-        try {
-          const parsed = JSON.parse(blockState);
-          const status = parsed.status || [];
-          
-          newMetrics.operationsPerBlock[blockId] = status.length;
-          
-          status.forEach((operation: any) => {
-            newMetrics.totalOperations++;
-            
-            if (operation.status === 'success') {
-              newMetrics.successfulOperations++;
-              newMetrics.totalCost += operation.details?.res?.sum || 0;
-              
-              if (operation.duration) {
-                totalDuration += operation.duration;
-                operationCount++;
-              }
-
-              // Agrupar viewers por hora
-              if (operation.timestamp && operation.count) {
-                const hour = operation.timestamp.split(':')[0] + ':00';
-                newMetrics.viewersPerHour[hour] = (newMetrics.viewersPerHour[hour] || 0) + operation.count;
-              }
-            } else {
-              newMetrics.failedOperations++;
-            }
-          });
-        } catch (error) {
-          console.error('Error parsing block state:', error);
+      // Contar operaciones por bloque
+      newMetrics.operationsPerBlock[blockId] = (newMetrics.operationsPerBlock[blockId] || 0) + 1;
+      
+      newMetrics.totalOperations++;
+      
+      if (operation.status === 'success') {
+        newMetrics.successfulOperations++;
+        newMetrics.totalCost += operation.cost || 0;
+        
+        if (operation.duration) {
+          totalDuration += operation.duration;
+          operationCount++;
         }
+
+        // Agrupar viewers por hora
+        if (operation.timestamp && operation.count) {
+          const hour = operation.timestamp.split(':')[0] + ':00';
+          newMetrics.viewersPerHour[hour] = (newMetrics.viewersPerHour[hour] || 0) + operation.count;
+        }
+      } else {
+        newMetrics.failedOperations++;
       }
-    }
+    });
 
     if (operationCount > 0) {
       newMetrics.averageOperationTime = totalDuration / operationCount;
     }
 
     setMetrics(newMetrics);
-  }, [totalViewers]);
+  }, [totalViewers, getAllOperationsData]);
 
   // Función para generar alertas
   const generateAlerts = useCallback(() => {

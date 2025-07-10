@@ -336,6 +336,9 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       };
 
       setStatus(prev => [...prev, newStatus]);
+      
+      // Guardar en historial global inmediatamente
+      saveToGlobalHistory(newStatus);
 
       // Actualizar el total de espectadores
       if (newStatus.status === 'success') {
@@ -369,6 +372,10 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       };
 
       setStatus(prev => [...prev, newStatus]);
+      
+      // Guardar en historial global inmediatamente
+      saveToGlobalHistory(newStatus);
+      
       const nextOperation = currentOperationRef.current + 1;
       setCurrentOperation(nextOperation);
 
@@ -447,6 +454,12 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
   };
 
   const resetBlock = () => {
+    // CORRIGIDO: No guardamos las operaciones nuevamente porque ya fueron guardadas
+    // cuando se ejecutaron originalmente en handleApiCall (líneas 341 y 377)
+    
+    // Registrar el reset del bloque con las operaciones que se van a perder
+    saveBlockReset();
+    
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -484,6 +497,71 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       delete (window as any)[`resetBlock_${blockId}`];
     };
   }, [blockId]);
+
+  // Función para guardar operación en historial permanente
+  const saveToGlobalHistory = useCallback((operation: BlockStatus) => {
+    const globalHistoryKey = 'globalOperationsHistory';
+    const existingHistory = localStorage.getItem(globalHistoryKey);
+    let history = [];
+    
+    if (existingHistory) {
+      try {
+        history = JSON.parse(existingHistory);
+      } catch (error) {
+        console.error('Error parsing global history:', error);
+        history = [];
+      }
+    }
+    
+    const historicalOperation = {
+      ...operation,
+      blockId,
+      blockTitle: blockData.title,
+      savedAt: new Date().toISOString()
+    };
+    
+    history.push(historicalOperation);
+    
+    // Mantener solo las últimas 1000 operaciones para evitar problemas de memoria
+    if (history.length > 1000) {
+      history = history.slice(-1000);
+    }
+    
+    localStorage.setItem(globalHistoryKey, JSON.stringify(history));
+  }, [blockId, blockData.title]);
+
+  // Función para registrar reset del bloque
+  const saveBlockReset = useCallback(() => {
+    const resetHistoryKey = 'blockResetHistory';
+    const existingResets = localStorage.getItem(resetHistoryKey);
+    let resets = [];
+    
+    if (existingResets) {
+      try {
+        resets = JSON.parse(existingResets);
+      } catch (error) {
+        console.error('Error parsing reset history:', error);
+        resets = [];
+      }
+    }
+    
+    const resetRecord = {
+      blockId,
+      blockTitle: blockData.title,
+      resetAt: new Date().toISOString(),
+      operationsLost: status.length,
+      viewersLost: totalViewers
+    };
+    
+    resets.push(resetRecord);
+    
+    // Mantener solo los últimos 100 resets
+    if (resets.length > 100) {
+      resets = resets.slice(-100);
+    }
+    
+    localStorage.setItem(resetHistoryKey, JSON.stringify(resets));
+  }, [blockId, blockData.title, status.length, totalViewers]);
 
   return (
     <div className={`block ${theme}`}>
