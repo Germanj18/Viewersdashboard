@@ -262,7 +262,7 @@ const MetricsDashboard: React.FC = () => {
             <div class="metric-label">Total Viewers</div>
         </div>
         <div class="metric-card">
-            <div class="metric-value">$${metrics.totalCost.toFixed(2)}</div>
+            <div class="metric-value">\$${metrics.totalCost.toFixed(2)}</div>
             <div class="metric-label">Costo Total</div>
         </div>
         <div class="metric-card">
@@ -270,7 +270,7 @@ const MetricsDashboard: React.FC = () => {
             <div class="metric-label">Operaciones Reseteadas</div>
         </div>
         <div class="metric-card">
-            <div class="metric-value">$${metrics.totalViewers > 0 ? (metrics.totalCost / metrics.totalViewers).toFixed(4) : '0.0000'}</div>
+            <div class="metric-value">\$${metrics.totalViewers > 0 ? (metrics.totalCost / metrics.totalViewers).toFixed(4) : '0.0000'}</div>
             <div class="metric-label">Costo por Viewer</div>
         </div>
         <div class="metric-card">
@@ -432,7 +432,8 @@ const MetricsDashboard: React.FC = () => {
       
       if (operation.status === 'success') {
         newMetrics.successfulOperations++;
-        newMetrics.totalCost += operation.cost || 0;
+        const operationCost = operation.cost || 0;
+        newMetrics.totalCost += operationCost;
         
         if (operation.duration) {
           totalDuration += operation.duration;
@@ -501,7 +502,7 @@ const MetricsDashboard: React.FC = () => {
         id: 'high-cost',
         type: 'warning' as const,
         title: '💰 Costo Elevado',
-        message: `Costo total: $${metrics.totalCost.toFixed(2)}`,
+        message: `Costo total: \$${metrics.totalCost.toFixed(2)}`,
         timestamp: new Date().toLocaleTimeString()
       };
       newAlerts.push(alert);

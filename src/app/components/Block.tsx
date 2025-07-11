@@ -12,6 +12,7 @@ export interface BlockStatus {
   duration?: number;
   count?: number;
   serviceId?: number;
+  cost?: number;
 }
 
 export interface BlockData {
@@ -333,6 +334,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         duration,
         count: operationCount,
         serviceId,
+        cost: data.res?.sum || 0,
       };
 
       setStatus(prev => [...prev, newStatus]);
@@ -369,6 +371,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         details: error,
         timestamp: new Date().toTimeString().split(' ')[0], // Formato consistente HH:MM:SS
         duration: 0,
+        cost: 0,
       };
 
       setStatus(prev => [...prev, newStatus]);
