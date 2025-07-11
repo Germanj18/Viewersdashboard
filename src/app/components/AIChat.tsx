@@ -16,7 +16,7 @@ const AIChat: React.FC = () => {
     {
       id: '1',
       type: 'ai',
-      content: '¡Hola! 👋 Soy tu asistente IA para el Dashboard de Métricas. Puedo ayudarte con:\n\n• Cálculos de viewers necesarios\n• Optimización de costos\n• Configuración de bloques\n• Análisis de métricas\n• Estrategias de crecimiento\n\n¿En qué puedo ayudarte hoy?',
+      content: '¡Hola! 👋 Soy tu asistente IA para el Dashboard de Métricas. ¿En qué puedo ayudarte?',
       timestamp: new Date()
     }
   ]);
@@ -192,17 +192,15 @@ const AIChat: React.FC = () => {
 ¿Quieres que analicemos tu estrategia actual?`;
     }
     
-    return `🤔 Entiendo tu consulta. Te puedo ayudar con:
+    return `🤔 No estoy seguro de entender exactamente lo que necesitas. ¿Podrías ser más específico sobre tu consulta? 
 
-• **Cálculos de viewers** y optimización de costos
-• **Configuración de bloques** y mejores prácticas  
-• **Análisis de métricas** y patrones de éxito
-• **Estrategias de crecimiento** para YouTube
+Por ejemplo, puedes preguntarme:
+- "¿Cuántos viewers necesito?"
+- "¿Cómo optimizo costos?"
+- "¿Cuál servicio es mejor?"
+- "¿Cómo configuro un bloque?"
 
-¿Podrías ser más específico sobre lo que necesitas? Por ejemplo:
-- "¿Cuántos viewers necesito para llegar a X?"
-- "¿Cómo optimizo mis costos?"
-- "¿Cuál es la mejor estrategia para mi canal?"`;
+¿Qué te gustaría saber?`;
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
