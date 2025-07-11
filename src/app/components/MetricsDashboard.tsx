@@ -467,95 +467,132 @@ const MetricsDashboard: React.FC = () => {
     setMetrics(newMetrics);
   }, [totalViewers, getAllOperationsData]);
 
-  // Función para generar alertas
+  // Función para generar alertas con mejor detección de cambios
   const generateAlerts = useCallback(() => {
     const newAlerts: Alert[] = [];
+    const currentTime = new Date().toLocaleTimeString();
 
     // Alerta de tasa de fallo alta
     const failureRate = metrics.totalOperations > 0 ? (metrics.failedOperations / metrics.totalOperations) * 100 : 0;
     if (failureRate > 20 && metrics.totalOperations > 5) {
+      const alertId = `high-failure-rate-${Math.floor(failureRate)}`;
       const alert = {
-        id: 'high-failure-rate',
+        id: alertId,
         type: 'error' as const,
         title: '⚠️ Alta Tasa de Fallo',
         message: `${failureRate.toFixed(1)}% de operaciones están fallando`,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: currentTime
       };
       newAlerts.push(alert);
     }
 
-    // Alerta de objetivo alcanzado
-    if (metrics.totalViewers >= 1000 && metrics.totalViewers % 1000 < 100) {
-      const alert = {
-        id: 'milestone-reached',
-        type: 'success' as const,
-        title: '🎯 Objetivo Alcanzado',
-        message: `¡Has alcanzado ${metrics.totalViewers.toLocaleString()} viewers!`,
-        timestamp: new Date().toLocaleTimeString()
-      };
-      newAlerts.push(alert);
+    // Alerta de objetivo alcanzado - Mejorar detección
+    const lastKnownViewers = parseInt(localStorage.getItem('lastKnownViewers') || '0');
+    if (metrics.totalViewers > lastKnownViewers) {
+      // Detectar múltiplos de 1000
+      const newThousands = Math.floor(metrics.totalViewers / 1000);
+      const oldThousands = Math.floor(lastKnownViewers / 1000);
+      
+      if (newThousands > oldThousands && metrics.totalViewers >= 1000) {
+        const alert = {
+          id: `milestone-${newThousands}k-${Date.now()}`,
+          type: 'success' as const,
+          title: '🎯 Objetivo Alcanzado',
+          message: `¡Has alcanzado ${metrics.totalViewers.toLocaleString()} viewers! (+${metrics.totalViewers - lastKnownViewers} nuevos)`,
+          timestamp: currentTime
+        };
+        newAlerts.push(alert);
+      }
+      
+      // Actualizar el último valor conocido
+      localStorage.setItem('lastKnownViewers', metrics.totalViewers.toString());
     }
 
-    // Alerta de costo alto
-    if (metrics.totalCost > 500) {
+    // Alerta de costo alto - Mejorar detección
+    const lastKnownCost = parseFloat(localStorage.getItem('lastKnownCost') || '0');
+    if (metrics.totalCost > lastKnownCost && metrics.totalCost > 500) {
       const alert = {
-        id: 'high-cost',
+        id: `high-cost-${Math.floor(metrics.totalCost)}-${Date.now()}`,
         type: 'warning' as const,
         title: '💰 Costo Elevado',
-        message: `Costo total: \$${metrics.totalCost.toFixed(2)}`,
-        timestamp: new Date().toLocaleTimeString()
+        message: `Costo total: \$${metrics.totalCost.toFixed(2)} (+\$${(metrics.totalCost - lastKnownCost).toFixed(2)})`,
+        timestamp: currentTime
       };
       newAlerts.push(alert);
+      localStorage.setItem('lastKnownCost', metrics.totalCost.toString());
+    } else if (metrics.totalCost > lastKnownCost) {
+      localStorage.setItem('lastKnownCost', metrics.totalCost.toString());
     }
 
-    // Alerta de operaciones completadas recientemente
-    const recentOperations = metrics.totalOperations - (localStorage.getItem('lastKnownOperations') ? parseInt(localStorage.getItem('lastKnownOperations')!) : 0);
+    // Alerta de operaciones completadas recientemente - Mejorar detección
+    const lastKnownOperations = parseInt(localStorage.getItem('lastKnownOperations') || '0');
+    const recentOperations = metrics.totalOperations - lastKnownOperations;
     if (recentOperations > 0) {
-      localStorage.setItem('lastKnownOperations', metrics.totalOperations.toString());
-      
       if (recentOperations >= 5) {
         const alert = {
           id: `batch-completed-${Date.now()}`,
           type: 'info' as const,
           title: '📊 Lote Completado',
-          message: `Se completaron ${recentOperations} operaciones`,
-          timestamp: new Date().toLocaleTimeString()
+          message: `Se completaron ${recentOperations} operaciones nuevas`,
+          timestamp: currentTime
         };
         newAlerts.push(alert);
       }
+      localStorage.setItem('lastKnownOperations', metrics.totalOperations.toString());
     }
 
-    setAlerts(prev => {
-      // Solo agregar alertas nuevas y mostrar notificaciones
-      const existingIds = prev.map(alert => alert.id);
-      const uniqueNewAlerts = newAlerts.filter(alert => !existingIds.includes(alert.id));
-      
-      // Mostrar notificaciones para alertas nuevas
-      uniqueNewAlerts.forEach(alert => {
-        NotificationService.showNotification(alert.title, {
-          body: alert.message,
-          tag: alert.id,
-          silent: alert.type === 'info'
-        });
-        
-        NotificationService.playSound(alert.type);
-        showToast(alert.message, alert.type);
-      });
-      
-      return [...prev, ...uniqueNewAlerts].slice(-10); // Mantener solo las últimas 10
-    });
+    // Alerta de operaciones exitosas recientes
+    const lastKnownSuccessful = parseInt(localStorage.getItem('lastKnownSuccessful') || '0');
+    const recentSuccessful = metrics.successfulOperations - lastKnownSuccessful;
+    if (recentSuccessful > 0) {
+      if (recentSuccessful >= 3) {
+        const alert = {
+          id: `success-streak-${Date.now()}`,
+          type: 'success' as const,
+          title: '✅ Racha de Éxito',
+          message: `${recentSuccessful} operaciones exitosas completadas`,
+          timestamp: currentTime
+        };
+        newAlerts.push(alert);
+      }
+      localStorage.setItem('lastKnownSuccessful', metrics.successfulOperations.toString());
+    }
+
+    return newAlerts;
   }, [metrics]);
 
-  // Actualizar métricas cada 5 segundos
+  // Actualizar métricas cada 2 segundos para mejor detección de cambios
   useEffect(() => {
     calculateMetrics();
-    const interval = setInterval(calculateMetrics, 5000);
+    const interval = setInterval(calculateMetrics, 2000);
     return () => clearInterval(interval);
   }, [calculateMetrics]);
 
   // Generar alertas cuando cambien las métricas
   useEffect(() => {
-    generateAlerts();
+    const newAlerts = generateAlerts();
+    
+    if (newAlerts.length > 0) {
+      setAlerts(prev => {
+        // Solo agregar alertas nuevas y mostrar notificaciones
+        const existingIds = prev.map(alert => alert.id);
+        const uniqueNewAlerts = newAlerts.filter(alert => !existingIds.includes(alert.id));
+        
+        // Mostrar notificaciones para alertas nuevas
+        uniqueNewAlerts.forEach(alert => {
+          NotificationService.showNotification(alert.title, {
+            body: alert.message,
+            tag: alert.id,
+            silent: alert.type === 'info'
+          });
+          
+          NotificationService.playSound(alert.type);
+          showToast(alert.message, alert.type);
+        });
+        
+        return [...prev, ...uniqueNewAlerts].slice(-10); // Mantener solo las últimas 10
+      });
+    }
   }, [generateAlerts]);
 
   const removeAlert = (alertId: string) => {

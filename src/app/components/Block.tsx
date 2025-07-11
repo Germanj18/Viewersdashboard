@@ -358,6 +358,15 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         }
         setState('completed');
         stateRef.current = 'completed';
+        
+        // Notificación de bloque completado
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          new Notification(`🎉 ${currentBlockData.title} Completado`, {
+            body: `El bloque se ha completado exitosamente con ${totalViewersRef.current} viewers totales`,
+            icon: '/favicon.ico'
+          });
+        }
+        
         // Auto-generar Excel al completar
         setTimeout(() => generateExcel(), 1000);
       }
@@ -390,6 +399,15 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         }
         setState('completed');
         stateRef.current = 'completed';
+        
+        // Notificación de bloque completado (para casos de error también)
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+          new Notification(`🏁 ${blockDataRef.current.title} Finalizado`, {
+            body: `El bloque ha finalizado (con errores) - Total viewers: ${totalViewersRef.current}`,
+            icon: '/favicon.ico'
+          });
+        }
+        
         setTimeout(() => generateExcel(), 1000);
       }
     }
@@ -451,6 +469,15 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     if (state !== 'completed') {
       setState('completed');
       stateRef.current = 'completed';
+      
+      // Notificación de finalización manual
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+        new Notification(`🏁 ${blockData.title} Finalizado Manualmente`, {
+          body: `El bloque fue finalizado manualmente con ${totalViewers} viewers totales`,
+          icon: '/favicon.ico'
+        });
+      }
+      
       generateExcel();
     }
     setBlockData(prev => ({ ...prev, autoStart: false }));
