@@ -10,7 +10,7 @@ async function callGemini(userMessage: string) {
     body: JSON.stringify({
       contents: [{
         parts: [{
-          text: `Eres un asistente especializado en el Dashboard La Casa para YouTube viewers. Tienes conocimiento completo de cómo funciona la aplicación.
+          text: `Eres un asistente especializado en el Dashboard de Métricas para YouTube viewers. Tienes conocimiento completo de cómo funciona la aplicación.
 
 === ARQUITECTURA DE LA APLICACIÓN ===
 
@@ -220,7 +220,7 @@ function generateLocalResponse(userInput: string): string {
   const responses = {
     viewers: {
       keywords: ['viewer', 'cuanto', 'cantidad', 'necesito', 'meta', 'objetivo'],
-      response: `📊 **Calculadora de Viewers - Dashboard La Casa**:
+      response: `📊 **Calculadora de Viewers - Dashboard de Métricas**:
 
 **🎯 Para planificar tus viewers:**
 
@@ -248,7 +248,7 @@ Para 2000 viewers en TU VIDEO ACTUAL:
     
     costos: {
       keywords: ['costo', 'precio', 'dinero', 'pagar', 'barato', 'economico', 'ahorro'],
-      response: `💰 **Optimización de Costos - Dashboard La Casa**:
+      response: `💰 **Optimización de Costos - Dashboard de Métricas**:
 
 **🥇 Servicios más eficientes** (menor costo por viewer):
 1. **Service ID 657 (8h)** - Máxima eficiencia económica
@@ -276,7 +276,7 @@ Para 2000 viewers en TU VIDEO ACTUAL:
     
     estrategia: {
       keywords: ['estrategia', 'crecer', 'canal', 'youtube', 'consejos', 'plan', 'campana'],
-      response: `🚀 **Estrategias Avanzadas - Dashboard La Casa**:
+      response: `🚀 **Estrategias Avanzadas - Dashboard de Métricas**:
 
 **🎯 Estrategia Multi-Bloque (Recomendada):**
 • **Semana 1**: Configurar 2-3 bloques para tu video actual (200-300 viewers c/u)
@@ -316,7 +316,7 @@ Para 2000 viewers en TU VIDEO ACTUAL:
     
     bloques: {
       keywords: ['bloque', 'configurar', 'setup', 'como', 'operacion', 'ejecutar'],
-      response: `⚙️ **Guía Completa de Bloques - Dashboard La Casa**:
+      response: `⚙️ **Guía Completa de Bloques - Dashboard de Métricas**:
 
 **🏗️ Sistema de Bloques (1-10 disponibles):**
 • Cada bloque = 1 operación independiente para la URL global
@@ -372,7 +372,7 @@ Para 2000 viewers en TU VIDEO ACTUAL:
     
     automatico: {
       keywords: ['automatico', 'patron', 'creciente', 'decreciente', 'progresivo', 'escalon'],
-      response: `🔄 **Patrones Automáticos Avanzados - Dashboard La Casa**:
+      response: `🔄 **Patrones Automáticos Avanzados - Dashboard de Métricas**:
 
 **🤖 SISTEMA DE OPERACIONES AUTOMÁTICAS:**
 Los bloques pueden ejecutar secuencias automáticas sin intervención manual.
@@ -430,7 +430,7 @@ Bloque 6: 500 > 500 > 500 > 500 > 500 viewers
     
     metricas: {
       keywords: ['métrica', 'dashboard', 'análisis', 'datos', 'estadística', 'tasa', 'exito'],
-      response: `📊 **Análisis Completo de Métricas - Dashboard La Casa**:
+      response: `📊 **Análisis Completo de Métricas - Dashboard de Métricas**:
 
 **🎯 Métricas Críticas del Dashboard:**
 
@@ -483,7 +483,7 @@ Si tu tasa de éxito baja:
     
     problemas: {
       keywords: ['error', 'fallo', 'problema', 'no funciona', 'ayuda', 'arreglar'],
-      response: `🚨 **Solución de Problemas - Dashboard La Casa**:
+      response: `🚨 **Solución de Problemas - Dashboard de Métricas**:
 
 **❌ Operaciones Fallidas - Causas Comunes:**
 
@@ -542,7 +542,7 @@ Si tu tasa de éxito baja:
   }
 
   // Respuesta general
-  return `🤖 **¡Hola! Soy tu Asistente Especializado en Dashboard La Casa**
+  return `🤖 **¡Hola! Soy tu Asistente Especializado en Dashboard de Métricas**
 
 **🏗️ Sistema de Bloques:** Tienes 10 bloques disponibles que trabajan con la URL global del video
 
@@ -583,7 +583,7 @@ Si tu tasa de éxito baja:
 • "Mi Service ID 336 tiene 80% éxito pero Service ID 459 tiene 95%, ¿cambio?"
 • "¿Es mejor 1 bloque con 1000 viewers o 3 bloques con 333 cada uno?"
 
-¿En qué aspecto específico del Dashboard La Casa necesitas ayuda? 😊`;
+¿En qué aspecto específico del Dashboard de Métricas necesitas ayuda? 😊`;
 }
 
 export async function POST(request: NextRequest) {

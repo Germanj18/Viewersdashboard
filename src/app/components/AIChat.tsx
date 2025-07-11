@@ -16,7 +16,7 @@ const AIChat: React.FC = () => {
     {
       id: '1',
       type: 'ai',
-      content: '¡Hola! 👋 Soy tu asistente IA para el Dashboard La Casa. Puedo ayudarte con:\n\n• Cálculos de viewers necesarios\n• Optimización de costos\n• Configuración de bloques\n• Análisis de métricas\n• Estrategias de crecimiento\n\n¿En qué puedo ayudarte hoy?',
+      content: '¡Hola! 👋 Soy tu asistente IA para el Dashboard de Métricas. Puedo ayudarte con:\n\n• Cálculos de viewers necesarios\n• Optimización de costos\n• Configuración de bloques\n• Análisis de métricas\n• Estrategias de crecimiento\n\n¿En qué puedo ayudarte hoy?',
       timestamp: new Date()
     }
   ]);
@@ -84,7 +84,7 @@ const AIChat: React.FC = () => {
   const callAIAPI = async (userInput: string): Promise<string> => {
     // Contexto específico del dashboard para la IA
     const systemContext = `
-    Eres un asistente especializado en el Dashboard La Casa para YouTube viewers. 
+    Eres un asistente especializado en el Dashboard de Métricas para YouTube viewers. 
     
     INFORMACIÓN DEL SISTEMA:
     - Es un dashboard para comprar viewers de YouTube

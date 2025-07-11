@@ -124,7 +124,7 @@ const MetricsDashboard: React.FC = () => {
     const exportData = {
       reportInfo: {
         generatedAt: new Date().toISOString(),
-        generatedBy: 'Dashboard La Casa',
+        generatedBy: 'Dashboard de Métricas',
         reportType: 'Complete Operations Report',
         totalOperationsIncludingHistory: allOperations.length,
         blocksResetCount: resetHistory.length
@@ -255,7 +255,7 @@ const MetricsDashboard: React.FC = () => {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte Ejecutivo - Dashboard La Casa</title>
+    <title>Reporte Ejecutivo - Dashboard de Métricas</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
         .header { text-align: center; margin-bottom: 40px; }
@@ -277,7 +277,7 @@ const MetricsDashboard: React.FC = () => {
 </head>
 <body>
     <div class="header">
-        <div class="logo">📊 REPORTE EJECUTIVO - DASHBOARD LA CASA</div>
+        <div class="logo">📊 REPORTE EJECUTIVO - DASHBOARD DE MÉTRICAS</div>
         <p>Generado el: ${new Date().toLocaleString('es-ES')}</p>
         <p><strong>Total de operaciones (incluyendo historial): ${operations.length}</strong></p>
     </div>
@@ -447,7 +447,7 @@ const MetricsDashboard: React.FC = () => {
     </table>
 
     <div class="footer">
-        <p>Reporte generado automáticamente por Dashboard La Casa</p>
+        <p>Reporte generado automáticamente por Dashboard de Métricas</p>
         <p>© ${new Date().getFullYear()} - Todos los derechos reservados</p>
         <p><strong>Total de operaciones procesadas: ${operations.length}</strong></p>
     </div>
