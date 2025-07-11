@@ -1,3 +1,27 @@
 {
-  "/page": "app/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auth/signin/page": "app/api/auth/signin/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/fetchData/route": "app/api/fetchData/route.js",
+  "/api/mercadopago/create-order/route": "app/api/mercadopago/create-order/route.js",
+  "/admin/page": "app/admin/page.js",
+  "/api/mercadopago/create-payment/route": "app/api/mercadopago/create-payment/route.js",
+  "/api/mercadopago/create-simple/route": "app/api/mercadopago/create-simple/route.js",
+  "/api/query/route": "app/api/query/route.js",
+  "/api/payoneer/request-payment/route": "app/api/payoneer/request-payment/route.js",
+  "/api/proxystatus/route": "app/api/proxystatus/route.js",
+  "/api/queryMaxViewers/route": "app/api/queryMaxViewers/route.js",
+  "/api/stripe/webhook/route": "app/api/stripe/webhook/route.js",
+  "/api/stripe/create-payment-intent/route": "app/api/stripe/create-payment-intent/route.js",
+  "/api/stripe/debug/route": "app/api/stripe/debug/route.js",
+  "/api/proxy/route": "app/api/proxy/route.js",
+  "/api/uploadExcel/route": "app/api/uploadExcel/route.js",
+  "/api/upload/route": "app/api/upload/route.js",
+  "/pago/pending/page": "app/pago/pending/page.js",
+  "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/pago/success/page": "app/pago/success/page.js",
+  "/pago/failure/page": "app/pago/failure/page.js",
+  "/api/mercadopago/webhook/route": "app/api/mercadopago/webhook/route.js",
+  "/pago/page": "app/pago/page.js"
 }

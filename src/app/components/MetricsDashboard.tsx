@@ -902,36 +902,46 @@ const MetricsDashboard: React.FC = () => {
               <tbody>
                 {getAllOperationsData()
                   .map((op, index) => {
-                    // Calcular hora de finalización estimada si no existe
-                    let estimatedEndTime = op.estimatedEndTime;
-                    let startTimeDisplay = op.startTime;
+                    // Debug: Log para ver qué operaciones tenemos
+                    if (index === 0) {
+                      console.log('📋 Total operaciones encontradas:', getAllOperationsData().length);
+                      console.log('📝 Muestra de operación:', op);
+                    }
+
+                    // Simplificar el cálculo de hora de finalización
+                    let estimatedEndTime = 'N/A';
+                    let startTimeDisplay = op.timestamp;
                     
-                    if (!estimatedEndTime && op.duration && op.timestamp) {
+                    if (op.duration && op.timestamp) {
                       try {
-                        // Usar el timestamp como hora de inicio ya que está en el formato correcto
-                        startTimeDisplay = op.timestamp;
-                        
                         // Parsear el timestamp para calcular la hora de finalización
-                        // El timestamp puede estar en formato "DD/MM/YYYY HH:MM:SS" o similar
                         let startDate;
                         
-                        // Intentar diferentes formatos de fecha
+                        // Si el timestamp incluye "/", asumimos formato DD/MM/YYYY HH:MM:SS
                         if (op.timestamp.includes('/')) {
-                          // Formato DD/MM/YYYY HH:MM:SS
                           const [datePart, timePart] = op.timestamp.split(' ');
-                          const [day, month, year] = datePart.split('/');
-                          const [hours, minutes, seconds] = (timePart || '00:00:00').split(':');
-                          startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
-                                             parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
+                          if (datePart && timePart) {
+                            const [day, month, year] = datePart.split('/');
+                            const [hours, minutes, seconds] = timePart.split(':');
+                            startDate = new Date(
+                              parseInt(year), 
+                              parseInt(month) - 1, 
+                              parseInt(day), 
+                              parseInt(hours), 
+                              parseInt(minutes), 
+                              parseInt(seconds || '0')
+                            );
+                          }
                         } else {
                           // Intentar parsear directamente
                           startDate = new Date(op.timestamp);
                         }
                         
-                        if (!isNaN(startDate.getTime())) {
+                        // Verificar que la fecha es válida y calcular finalización
+                        if (startDate && !isNaN(startDate.getTime())) {
                           const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
                           if (!isNaN(endTime.getTime())) {
-                            // Formatear la hora de finalización en el mismo formato que el timestamp
+                            // Formatear en el mismo formato que el timestamp
                             const day = endTime.getDate().toString().padStart(2, '0');
                             const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
                             const year = endTime.getFullYear();
@@ -942,8 +952,7 @@ const MetricsDashboard: React.FC = () => {
                           }
                         }
                       } catch (error) {
-                        console.warn('Error calculando tiempo de finalización:', error);
-                        estimatedEndTime = 'N/A';
+                        console.warn('Error calculando tiempo de finalización:', error, 'Operación:', op);
                       }
                     }
 
@@ -963,8 +972,8 @@ const MetricsDashboard: React.FC = () => {
                         {op.status === 'success' ? '✅' : '❌'} {op.status}
                       </span>
                     </td>
-                    <td>{startTimeDisplay || op.timestamp || 'N/A'}</td>
-                    <td>{estimatedEndTime || 'N/A'}</td>
+                    <td>{startTimeDisplay || 'N/A'}</td>
+                    <td>{estimatedEndTime}</td>
                     <td>{op.duration || 0} min</td>
                     <td>{(op.count || 0).toLocaleString()}</td>
                     <td>${(op.cost || 0).toFixed(2)}</td>
