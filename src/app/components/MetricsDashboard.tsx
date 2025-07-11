@@ -184,36 +184,46 @@ const MetricsDashboard: React.FC = () => {
     const csvRows = operations.map(op => {
       // Calcular hora de finalización estimada si no existe
       let estimatedEndTime = op.estimatedEndTime;
+      let startTimeDisplay = op.startTime || op.timestamp;
+      
       if (!estimatedEndTime && op.duration && op.timestamp) {
         try {
-          const startTime = new Date(op.startTime || op.timestamp);
-          if (!isNaN(startTime.getTime())) {
-            const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+          // Parsear el timestamp para calcular la hora de finalización
+          let startDate;
+          
+          if (op.timestamp.includes('/')) {
+            // Formato DD/MM/YYYY HH:MM:SS
+            const [datePart, timePart] = op.timestamp.split(' ');
+            const [day, month, year] = datePart.split('/');
+            const [hours, minutes, seconds] = (timePart || '00:00:00').split(':');
+            startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
+                               parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
+          } else {
+            startDate = new Date(op.timestamp);
+          }
+          
+          if (!isNaN(startDate.getTime())) {
+            const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
             if (!isNaN(endTime.getTime())) {
-              estimatedEndTime = endTime.toISOString();
+              const day = endTime.getDate().toString().padStart(2, '0');
+              const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
+              const year = endTime.getFullYear();
+              const hours = endTime.getHours().toString().padStart(2, '0');
+              const minutes = endTime.getMinutes().toString().padStart(2, '0');
+              const seconds = endTime.getSeconds().toString().padStart(2, '0');
+              estimatedEndTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
             }
           }
         } catch (error) {
           console.warn('Error calculando tiempo de finalización en CSV:', error);
-          estimatedEndTime = null;
+          estimatedEndTime = 'N/A';
         }
       }
 
-      // Función helper para formatear fechas de forma segura
-      const safeFormatDate = (dateValue: any) => {
-        try {
-          if (!dateValue) return 'N/A';
-          const date = new Date(dateValue);
-          return !isNaN(date.getTime()) ? date.toLocaleString('es-ES') : 'N/A';
-        } catch {
-          return 'N/A';
-        }
-      };
-
       return [
         op.timestamp,
-        safeFormatDate(op.startTime || op.timestamp),
-        safeFormatDate(estimatedEndTime),
+        startTimeDisplay || 'N/A',
+        estimatedEndTime || 'N/A',
         `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
         op.status,
         op.message.replace(/,/g, ';'), // Escapar comas
@@ -404,37 +414,47 @@ const MetricsDashboard: React.FC = () => {
             ${operations.map(op => {
               // Calcular hora de finalización estimada si no existe
               let estimatedEndTime = op.estimatedEndTime;
+              let startTimeDisplay = op.startTime || op.timestamp;
+              
               if (!estimatedEndTime && op.duration && op.timestamp) {
                 try {
-                  const startTime = new Date(op.startTime || op.timestamp);
-                  if (!isNaN(startTime.getTime())) {
-                    const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+                  // Parsear el timestamp para calcular la hora de finalización
+                  let startDate;
+                  
+                  if (op.timestamp.includes('/')) {
+                    // Formato DD/MM/YYYY HH:MM:SS
+                    const [datePart, timePart] = op.timestamp.split(' ');
+                    const [day, month, year] = datePart.split('/');
+                    const [hours, minutes, seconds] = (timePart || '00:00:00').split(':');
+                    startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
+                                       parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
+                  } else {
+                    startDate = new Date(op.timestamp);
+                  }
+                  
+                  if (!isNaN(startDate.getTime())) {
+                    const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
                     if (!isNaN(endTime.getTime())) {
-                      estimatedEndTime = endTime.toISOString();
+                      const day = endTime.getDate().toString().padStart(2, '0');
+                      const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
+                      const year = endTime.getFullYear();
+                      const hours = endTime.getHours().toString().padStart(2, '0');
+                      const minutes = endTime.getMinutes().toString().padStart(2, '0');
+                      const seconds = endTime.getSeconds().toString().padStart(2, '0');
+                      estimatedEndTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
                     }
                   }
                 } catch (error) {
                   console.warn('Error calculando tiempo de finalización en HTML:', error);
-                  estimatedEndTime = null;
+                  estimatedEndTime = 'N/A';
                 }
               }
-
-              // Función helper para formatear fechas de forma segura
-              const safeFormatDate = (dateValue: any) => {
-                try {
-                  if (!dateValue) return 'N/A';
-                  const date = new Date(dateValue);
-                  return !isNaN(date.getTime()) ? date.toLocaleString('es-ES') : 'N/A';
-                } catch {
-                  return 'N/A';
-                }
-              };
 
               return `
                 <tr ${op.isHistorical ? 'class="historical"' : ''}>
                     <td>${op.timestamp}</td>
-                    <td>${safeFormatDate(op.startTime || op.timestamp)}</td>
-                    <td>${safeFormatDate(estimatedEndTime)}</td>
+                    <td>${startTimeDisplay || 'N/A'}</td>
+                    <td>${estimatedEndTime || 'N/A'}</td>
                     <td>Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
                     <td class="status-${op.status}">${op.status === 'success' ? '✅ Exitosa' : '❌ Fallida'}</td>
                     <td>${op.count || 0}</td>
@@ -884,18 +904,46 @@ const MetricsDashboard: React.FC = () => {
                   .map((op, index) => {
                     // Calcular hora de finalización estimada si no existe
                     let estimatedEndTime = op.estimatedEndTime;
+                    let startTimeDisplay = op.startTime;
+                    
                     if (!estimatedEndTime && op.duration && op.timestamp) {
                       try {
-                        const startTime = new Date(op.startTime || op.timestamp);
-                        if (!isNaN(startTime.getTime())) {
-                          const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+                        // Usar el timestamp como hora de inicio ya que está en el formato correcto
+                        startTimeDisplay = op.timestamp;
+                        
+                        // Parsear el timestamp para calcular la hora de finalización
+                        // El timestamp puede estar en formato "DD/MM/YYYY HH:MM:SS" o similar
+                        let startDate;
+                        
+                        // Intentar diferentes formatos de fecha
+                        if (op.timestamp.includes('/')) {
+                          // Formato DD/MM/YYYY HH:MM:SS
+                          const [datePart, timePart] = op.timestamp.split(' ');
+                          const [day, month, year] = datePart.split('/');
+                          const [hours, minutes, seconds] = (timePart || '00:00:00').split(':');
+                          startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
+                                             parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
+                        } else {
+                          // Intentar parsear directamente
+                          startDate = new Date(op.timestamp);
+                        }
+                        
+                        if (!isNaN(startDate.getTime())) {
+                          const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
                           if (!isNaN(endTime.getTime())) {
-                            estimatedEndTime = endTime.toISOString();
+                            // Formatear la hora de finalización en el mismo formato que el timestamp
+                            const day = endTime.getDate().toString().padStart(2, '0');
+                            const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
+                            const year = endTime.getFullYear();
+                            const hours = endTime.getHours().toString().padStart(2, '0');
+                            const minutes = endTime.getMinutes().toString().padStart(2, '0');
+                            const seconds = endTime.getSeconds().toString().padStart(2, '0');
+                            estimatedEndTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
                           }
                         }
                       } catch (error) {
                         console.warn('Error calculando tiempo de finalización:', error);
-                        estimatedEndTime = null;
+                        estimatedEndTime = 'N/A';
                       }
                     }
 
@@ -915,41 +963,8 @@ const MetricsDashboard: React.FC = () => {
                         {op.status === 'success' ? '✅' : '❌'} {op.status}
                       </span>
                     </td>
-                    <td>{op.startTime ? (() => {
-                      try {
-                        const date = new Date(op.startTime);
-                        return !isNaN(date.getTime()) ? date.toLocaleString('es-ES', { 
-                          hour: '2-digit', 
-                          minute: '2-digit',
-                          second: '2-digit'
-                        }) : 'N/A';
-                      } catch {
-                        return 'N/A';
-                      }
-                    })() : (() => {
-                      try {
-                        const date = new Date(op.timestamp);
-                        return !isNaN(date.getTime()) ? date.toLocaleString('es-ES', { 
-                          hour: '2-digit', 
-                          minute: '2-digit',
-                          second: '2-digit'
-                        }) : 'N/A';
-                      } catch {
-                        return 'N/A';
-                      }
-                    })()}</td>
-                    <td>{estimatedEndTime ? (() => {
-                      try {
-                        const date = new Date(estimatedEndTime);
-                        return !isNaN(date.getTime()) ? date.toLocaleString('es-ES', { 
-                          hour: '2-digit', 
-                          minute: '2-digit',
-                          second: '2-digit'
-                        }) : 'N/A';
-                      } catch {
-                        return 'N/A';
-                      }
-                    })() : 'N/A'}</td>
+                    <td>{startTimeDisplay || op.timestamp || 'N/A'}</td>
+                    <td>{estimatedEndTime || 'N/A'}</td>
                     <td>{op.duration || 0} min</td>
                     <td>{(op.count || 0).toLocaleString()}</td>
                     <td>${(op.cost || 0).toFixed(2)}</td>
