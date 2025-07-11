@@ -182,36 +182,26 @@ const MetricsDashboard: React.FC = () => {
     ];
 
     const csvRows = operations.map(op => {
-      // Calcular hora de finalización estimada si no existe
-      let estimatedEndTime = op.estimatedEndTime;
-      let startTimeDisplay = op.startTime || op.timestamp;
+      // Calcular hora de finalización usando savedAt o startTime como base
+      let estimatedEndTime = 'N/A';
+      // El timestamp ya es la hora de inicio en formato HH:MM:SS
+      const startTimeDisplay = op.timestamp;
       
-      if (!estimatedEndTime && op.duration && op.timestamp) {
+      if (op.duration && (op.savedAt || op.startTime)) {
         try {
-          // Parsear el timestamp para calcular la hora de finalización
-          let startDate;
+          // Usar savedAt o startTime como base (tienen fecha completa)
+          const baseTime = op.savedAt || op.startTime;
+          const startDate = new Date(baseTime);
           
-          if (op.timestamp.includes('/')) {
-            // Formato DD/MM/YYYY HH:MM:SS
-            const [datePart, timePart] = op.timestamp.split(' ');
-            const [day, month, year] = datePart.split('/');
-            const [hours, minutes, seconds] = (timePart || '00:00:00').split(':');
-            startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
-                               parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
-          } else {
-            startDate = new Date(op.timestamp);
-          }
-          
+          // Verificar que la fecha es válida y calcular finalización
           if (!isNaN(startDate.getTime())) {
             const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
             if (!isNaN(endTime.getTime())) {
-              const day = endTime.getDate().toString().padStart(2, '0');
-              const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
-              const year = endTime.getFullYear();
+              // Formatear solo la hora para coincidir con el formato del timestamp
               const hours = endTime.getHours().toString().padStart(2, '0');
               const minutes = endTime.getMinutes().toString().padStart(2, '0');
               const seconds = endTime.getSeconds().toString().padStart(2, '0');
-              estimatedEndTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+              estimatedEndTime = `${hours}:${minutes}:${seconds}`;
             }
           }
         } catch (error) {
@@ -412,36 +402,26 @@ const MetricsDashboard: React.FC = () => {
         </thead>
         <tbody>
             ${operations.map(op => {
-              // Calcular hora de finalización estimada si no existe
-              let estimatedEndTime = op.estimatedEndTime;
-              let startTimeDisplay = op.startTime || op.timestamp;
+              // Calcular hora de finalización usando savedAt o startTime como base
+              let estimatedEndTime = 'N/A';
+              // El timestamp ya es la hora de inicio en formato HH:MM:SS
+              const startTimeDisplay = op.timestamp;
               
-              if (!estimatedEndTime && op.duration && op.timestamp) {
+              if (op.duration && (op.savedAt || op.startTime)) {
                 try {
-                  // Parsear el timestamp para calcular la hora de finalización
-                  let startDate;
+                  // Usar savedAt o startTime como base (tienen fecha completa)
+                  const baseTime = op.savedAt || op.startTime;
+                  const startDate = new Date(baseTime);
                   
-                  if (op.timestamp.includes('/')) {
-                    // Formato DD/MM/YYYY HH:MM:SS
-                    const [datePart, timePart] = op.timestamp.split(' ');
-                    const [day, month, year] = datePart.split('/');
-                    const [hours, minutes, seconds] = (timePart || '00:00:00').split(':');
-                    startDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 
-                                       parseInt(hours), parseInt(minutes), parseInt(seconds || '0'));
-                  } else {
-                    startDate = new Date(op.timestamp);
-                  }
-                  
+                  // Verificar que la fecha es válida y calcular finalización
                   if (!isNaN(startDate.getTime())) {
                     const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
                     if (!isNaN(endTime.getTime())) {
-                      const day = endTime.getDate().toString().padStart(2, '0');
-                      const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
-                      const year = endTime.getFullYear();
+                      // Formatear solo la hora para coincidir con el formato del timestamp
                       const hours = endTime.getHours().toString().padStart(2, '0');
                       const minutes = endTime.getMinutes().toString().padStart(2, '0');
                       const seconds = endTime.getSeconds().toString().padStart(2, '0');
-                      estimatedEndTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+                      estimatedEndTime = `${hours}:${minutes}:${seconds}`;
                     }
                   }
                 } catch (error) {
@@ -886,7 +866,7 @@ const MetricsDashboard: React.FC = () => {
       <div className="recent-operations-section">
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
           <h3>📋 Todas las Operaciones (con Horarios)</h3>
-          <div className="operations-table-container" style={{ overflowX: 'auto', maxHeight: '400px' }}>
+          <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
             <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
               <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
                 <tr>
@@ -908,47 +888,26 @@ const MetricsDashboard: React.FC = () => {
                       console.log('📝 Muestra de operación:', op);
                     }
 
-                    // Simplificar el cálculo de hora de finalización
+                    // Calcular hora de finalización basándose en el savedAt/startTime y la duración
                     let estimatedEndTime = 'N/A';
-                    let startTimeDisplay = op.timestamp;
+                    // El timestamp ya es la hora de inicio en formato HH:MM:SS
+                    const startTimeDisplay = op.timestamp;
                     
-                    if (op.duration && op.timestamp) {
+                    if (op.duration && (op.savedAt || op.startTime)) {
                       try {
-                        // Parsear el timestamp para calcular la hora de finalización
-                        let startDate;
-                        
-                        // Si el timestamp incluye "/", asumimos formato DD/MM/YYYY HH:MM:SS
-                        if (op.timestamp.includes('/')) {
-                          const [datePart, timePart] = op.timestamp.split(' ');
-                          if (datePart && timePart) {
-                            const [day, month, year] = datePart.split('/');
-                            const [hours, minutes, seconds] = timePart.split(':');
-                            startDate = new Date(
-                              parseInt(year), 
-                              parseInt(month) - 1, 
-                              parseInt(day), 
-                              parseInt(hours), 
-                              parseInt(minutes), 
-                              parseInt(seconds || '0')
-                            );
-                          }
-                        } else {
-                          // Intentar parsear directamente
-                          startDate = new Date(op.timestamp);
-                        }
+                        // Usar savedAt o startTime como base (tienen fecha completa)
+                        const baseTime = op.savedAt || op.startTime;
+                        const startDate = new Date(baseTime);
                         
                         // Verificar que la fecha es válida y calcular finalización
-                        if (startDate && !isNaN(startDate.getTime())) {
+                        if (!isNaN(startDate.getTime())) {
                           const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
                           if (!isNaN(endTime.getTime())) {
-                            // Formatear en el mismo formato que el timestamp
-                            const day = endTime.getDate().toString().padStart(2, '0');
-                            const month = (endTime.getMonth() + 1).toString().padStart(2, '0');
-                            const year = endTime.getFullYear();
+                            // Formatear solo la hora para coincidir con el formato del timestamp
                             const hours = endTime.getHours().toString().padStart(2, '0');
                             const minutes = endTime.getMinutes().toString().padStart(2, '0');
                             const seconds = endTime.getSeconds().toString().padStart(2, '0');
-                            estimatedEndTime = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+                            estimatedEndTime = `${hours}:${minutes}:${seconds}`;
                           }
                         }
                       } catch (error) {
