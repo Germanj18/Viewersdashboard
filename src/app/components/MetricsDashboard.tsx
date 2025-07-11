@@ -15,6 +15,7 @@ interface OperationMetrics {
   operationsPerBlock: { [blockId: string]: number };
   viewersPerHour: { [hour: string]: number };
   viewersByServiceDuration: { [duration: string]: number };
+  costByServiceDuration: { [duration: string]: number };
   lastUpdated: string;
 }
 
@@ -42,6 +43,7 @@ const MetricsDashboard: React.FC = () => {
     operationsPerBlock: {},
     viewersPerHour: {},
     viewersByServiceDuration: {},
+    costByServiceDuration: {},
     lastUpdated: new Date().toISOString()
   });
 
@@ -230,8 +232,20 @@ const MetricsDashboard: React.FC = () => {
     const csvContent = [csvHeaders, ...csvRows]
       .map(row => row.map(field => `"${field}"`).join(','))
       .join('\n');
+    
+    // Agregar sección resumen de costo por duración de servicio
+    const summarySection = [
+      '\n\n=== RESUMEN POR DURACIÓN DE SERVICIO ===',
+      'Duración,Viewers,Costo Total',
+      ...Object.entries(metrics.viewersByServiceDuration)
+        .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
+        .map(([duration, viewers]) => {
+          const cost = metrics.costByServiceDuration[duration] || 0;
+          return `"${duration}","${viewers}","$${cost.toFixed(2)}"`;
+        })
+    ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent + summarySection], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -343,19 +357,24 @@ const MetricsDashboard: React.FC = () => {
             <tr>
                 <th>Duración</th>
                 <th>Viewers</th>
+                <th>Costo Total</th>
                 <th>Porcentaje del Total</th>
             </tr>
         </thead>
         <tbody>
             ${Object.entries(metrics.viewersByServiceDuration)
               .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
-              .map(([duration, viewers]) => `
+              .map(([duration, viewers]) => {
+                const cost = metrics.costByServiceDuration[duration] || 0;
+                return `
                 <tr>
                     <td>${duration}</td>
                     <td>${viewers.toLocaleString()}</td>
+                    <td>\$${cost.toFixed(2)}</td>
                     <td>${metrics.totalViewers > 0 ? ((viewers / metrics.totalViewers) * 100).toFixed(1) : 0}%</td>
                 </tr>
-            `).join('')}
+                `;
+              }).join('')}
         </tbody>
     </table>
 
@@ -480,6 +499,7 @@ const MetricsDashboard: React.FC = () => {
       operationsPerBlock: {},
       viewersPerHour: {},
       viewersByServiceDuration: {},
+      costByServiceDuration: {},
       lastUpdated: new Date().toISOString()
     };
 
@@ -519,6 +539,11 @@ const MetricsDashboard: React.FC = () => {
           const durationHours = getServiceDurationHours(operation.serviceId);
           const durationKey = `${durationHours}h`;
           newMetrics.viewersByServiceDuration[durationKey] = (newMetrics.viewersByServiceDuration[durationKey] || 0) + operation.count;
+          
+          // Agrupar costo por duración de servicio
+          if (operation.cost !== undefined) {
+            newMetrics.costByServiceDuration[durationKey] = (newMetrics.costByServiceDuration[durationKey] || 0) + operation.cost;
+          }
         }
       } else {
         newMetrics.failedOperations++;
@@ -841,23 +866,41 @@ const MetricsDashboard: React.FC = () => {
 
         <div className="chart-card">
           <h3>⏱️ Viewers por Duración de Servicio</h3>
-          <div className="simple-chart">
+          <div className="service-duration-table">
+            <div className="service-duration-header">
+              <div className="duration-cell">Duración</div>
+              <div className="viewers-cell">Viewers</div>
+              <div className="cost-cell">Costo Total</div>
+              <div className="graph-cell">Distribución</div>
+            </div>
             {Object.entries(metrics.viewersByServiceDuration)
-              .sort(([a], [b]) => parseFloat(a) - parseFloat(b)) // Ordenar por duración
-              .map(([duration, viewers]) => (
-              <div key={duration} className="chart-bar">
-                <div className="bar-label">{duration}</div>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill duration-bar" 
-                    style={{ 
-                      width: `${Math.max(10, (viewers / Math.max(...Object.values(metrics.viewersByServiceDuration), 1)) * 100)}%` 
-                    }}
-                  ></div>
-                </div>
-                <div className="bar-value">{viewers.toLocaleString()}</div>
-              </div>
-            ))}
+              .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
+              .map(([duration, viewers]) => {
+                const cost = metrics.costByServiceDuration[duration] || 0;
+                return (
+                  <div key={duration} className="service-duration-row">
+                    <div className="duration-cell">
+                      <span className="duration-badge">{duration}</span>
+                    </div>
+                    <div className="viewers-cell">
+                      <span className="viewers-count">{viewers.toLocaleString()}</span>
+                    </div>
+                    <div className="cost-cell">
+                      <span className="cost-amount">${cost.toFixed(2)}</span>
+                    </div>
+                    <div className="graph-cell">
+                      <div className="bar-container">
+                        <div 
+                          className="bar-fill duration-bar" 
+                          style={{ 
+                            width: `${Math.max(10, (viewers / Math.max(...Object.values(metrics.viewersByServiceDuration), 1)) * 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         </div>
       </div>
