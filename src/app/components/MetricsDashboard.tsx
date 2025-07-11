@@ -871,12 +871,13 @@ const MetricsDashboard: React.FC = () => {
               <div className="duration-cell">Duración</div>
               <div className="viewers-cell">Viewers</div>
               <div className="cost-cell">Costo Total</div>
-              <div className="graph-cell">Distribución</div>
+              <div className="percentage-cell">Porcentaje</div>
             </div>
             {Object.entries(metrics.viewersByServiceDuration)
               .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
               .map(([duration, viewers]) => {
                 const cost = metrics.costByServiceDuration[duration] || 0;
+                const percentage = metrics.totalViewers > 0 ? ((viewers / metrics.totalViewers) * 100) : 0;
                 return (
                   <div key={duration} className="service-duration-row">
                     <div className="duration-cell">
@@ -888,15 +889,8 @@ const MetricsDashboard: React.FC = () => {
                     <div className="cost-cell">
                       <span className="cost-amount">${cost.toFixed(2)}</span>
                     </div>
-                    <div className="graph-cell">
-                      <div className="bar-container">
-                        <div 
-                          className="bar-fill duration-bar" 
-                          style={{ 
-                            width: `${Math.max(10, (viewers / Math.max(...Object.values(metrics.viewersByServiceDuration), 1)) * 100)}%` 
-                          }}
-                        ></div>
-                      </div>
+                    <div className="percentage-cell">
+                      <span className="percentage-value">{percentage.toFixed(1)}%</span>
                     </div>
                   </div>
                 );

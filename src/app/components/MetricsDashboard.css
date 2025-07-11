@@ -484,7 +484,7 @@
 
 .service-duration-header {
   display: grid;
-  grid-template-columns: 80px 120px 120px 1fr;
+  grid-template-columns: 80px 120px 120px 100px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   font-weight: 600;
@@ -503,7 +503,7 @@
 
 .service-duration-row {
   display: grid;
-  grid-template-columns: 80px 120px 120px 1fr;
+  grid-template-columns: 80px 120px 120px 100px;
   gap: 1rem;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
@@ -576,36 +576,35 @@
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-.graph-cell {
+.percentage-cell {
   display: flex;
   align-items: center;
-  min-width: 100px;
+  justify-content: center;
 }
 
-.graph-cell .bar-container {
-  flex: 1;
-  height: 8px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  overflow: hidden;
+.percentage-value {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  text-align: center;
+  min-width: 60px;
 }
 
-.metrics-dashboard.dark .graph-cell .bar-container {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.graph-cell .bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-  transition: width 0.3s ease;
-  border-radius: 4px;
+.metrics-dashboard.dark .percentage-value {
+  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.15);
+  border-color: rgba(124, 58, 237, 0.3);
 }
 
 /* Responsive para la tabla */
 @media (max-width: 768px) {
   .service-duration-header,
   .service-duration-row {
-    grid-template-columns: 60px 90px 90px 1fr;
+    grid-template-columns: 60px 90px 90px 80px;
     gap: 0.5rem;
     padding: 0.5rem;
     font-size: 0.75rem;
@@ -620,5 +619,11 @@
   .cost-amount {
     font-size: 0.75rem;
     padding: 0.2rem 0.4rem;
+  }
+  
+  .percentage-value {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 50px;
   }
 }
