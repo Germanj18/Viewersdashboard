@@ -181,21 +181,31 @@ const MetricsDashboard: React.FC = () => {
       'Es Histórico'
     ];
 
-    const csvRows = operations.map(op => [
-      op.timestamp,
-      op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : 'N/A',
-      op.estimatedEndTime ? new Date(op.estimatedEndTime).toLocaleString('es-ES') : 'N/A',
-      `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
-      op.status,
-      op.message.replace(/,/g, ';'), // Escapar comas
-      op.duration || 0,
-      op.count || 0,
-      op.serviceId || '',
-      op.cost || 0,
-      op.orderId || '',
-      op.orderStatus || '',
-      op.isHistorical ? 'Sí' : 'No'
-    ]);
+    const csvRows = operations.map(op => {
+      // Calcular hora de finalización estimada si no existe
+      let estimatedEndTime = op.estimatedEndTime;
+      if (!estimatedEndTime && op.duration && op.timestamp) {
+        const startTime = new Date(op.startTime || op.timestamp);
+        const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+        estimatedEndTime = endTime.toISOString();
+      }
+
+      return [
+        op.timestamp,
+        op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : new Date(op.timestamp).toLocaleString('es-ES'),
+        estimatedEndTime ? new Date(estimatedEndTime).toLocaleString('es-ES') : 'N/A',
+        `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
+        op.status,
+        op.message.replace(/,/g, ';'), // Escapar comas
+        op.duration || 0,
+        op.count || 0,
+        op.serviceId || '',
+        op.cost || 0,
+        op.orderId || '',
+        op.orderStatus || '',
+        op.isHistorical ? 'Sí' : 'No'
+      ];
+    });
 
     const csvContent = [csvHeaders, ...csvRows]
       .map(row => row.map(field => `"${field}"`).join(','))
@@ -371,18 +381,28 @@ const MetricsDashboard: React.FC = () => {
             </tr>
         </thead>
         <tbody>
-            ${operations.map(op => `
+            ${operations.map(op => {
+              // Calcular hora de finalización estimada si no existe
+              let estimatedEndTime = op.estimatedEndTime;
+              if (!estimatedEndTime && op.duration && op.timestamp) {
+                const startTime = new Date(op.startTime || op.timestamp);
+                const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+                estimatedEndTime = endTime.toISOString();
+              }
+
+              return `
                 <tr ${op.isHistorical ? 'class="historical"' : ''}>
                     <td>${op.timestamp}</td>
-                    <td>${op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : 'N/A'}</td>
-                    <td>${op.estimatedEndTime ? new Date(op.estimatedEndTime).toLocaleString('es-ES') : 'N/A'}</td>
+                    <td>${op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : new Date(op.timestamp).toLocaleString('es-ES')}</td>
+                    <td>${estimatedEndTime ? new Date(estimatedEndTime).toLocaleString('es-ES') : 'N/A'}</td>
                     <td>Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
                     <td class="status-${op.status}">${op.status === 'success' ? '✅ Exitosa' : '❌ Fallida'}</td>
                     <td>${op.count || 0}</td>
                     <td>${op.duration || 0} min</td>
                     <td>$${op.cost || 0}</td>
                 </tr>
-            `).join('')}
+              `;
+            }).join('')}
         </tbody>
     </table>
 
@@ -805,7 +825,7 @@ const MetricsDashboard: React.FC = () => {
       {/* Nueva sección: Operaciones Recientes con Horarios */}
       <div className="recent-operations-section">
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <h3>📋 Operaciones Recientes (con Horarios)</h3>
+          <h3>📋 Todas las Operaciones (con Horarios)</h3>
           <div className="operations-table-container" style={{ overflowX: 'auto', maxHeight: '400px' }}>
             <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
               <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
@@ -821,8 +841,16 @@ const MetricsDashboard: React.FC = () => {
               </thead>
               <tbody>
                 {getAllOperationsData()
-                  .slice(0, 15) // Mostrar últimas 15 operaciones
-                  .map((op, index) => (
+                  .map((op, index) => {
+                    // Calcular hora de finalización estimada si no existe
+                    let estimatedEndTime = op.estimatedEndTime;
+                    if (!estimatedEndTime && op.duration && op.timestamp) {
+                      const startTime = new Date(op.startTime || op.timestamp);
+                      const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+                      estimatedEndTime = endTime.toISOString();
+                    }
+
+                    return (
                   <tr key={`${op.blockId}-${op.timestamp}-${index}`} 
                       style={{ 
                         backgroundColor: op.isHistorical 
@@ -841,20 +869,23 @@ const MetricsDashboard: React.FC = () => {
                     <td>{op.startTime ? new Date(op.startTime).toLocaleString('es-ES', { 
                       hour: '2-digit', 
                       minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit'
-                    }) : op.timestamp}</td>
-                    <td>{op.estimatedEndTime ? new Date(op.estimatedEndTime).toLocaleString('es-ES', { 
+                      second: '2-digit'
+                    }) : new Date(op.timestamp).toLocaleString('es-ES', { 
                       hour: '2-digit', 
                       minute: '2-digit',
-                      day: '2-digit',
-                      month: '2-digit'
+                      second: '2-digit'
+                    })}</td>
+                    <td>{estimatedEndTime ? new Date(estimatedEndTime).toLocaleString('es-ES', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      second: '2-digit'
                     }) : 'N/A'}</td>
                     <td>{op.duration || 0} min</td>
                     <td>{(op.count || 0).toLocaleString()}</td>
                     <td>${(op.cost || 0).toFixed(2)}</td>
                   </tr>
-                ))}
+                    );
+                  })}
               </tbody>
             </table>
           </div>
