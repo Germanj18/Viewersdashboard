@@ -13,6 +13,8 @@ export interface BlockStatus {
   count?: number;
   serviceId?: number;
   cost?: number;
+  startTime?: string;
+  estimatedEndTime?: string;
 }
 
 export interface BlockData {
@@ -322,6 +324,10 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       const timestamp = now.toTimeString().split(' ')[0]; // Formato HH:MM:SS
       
       const duration = getServiceDuration(serviceId);
+      
+      // Calcular hora de finalización estimada
+      const startTime = now.toISOString();
+      const estimatedEndTime = new Date(now.getTime() + (duration * 60 * 1000)).toISOString();
 
       console.log(`${currentBlockData.title}, Operation ${currentOpNum + 1}:`, data);
 
@@ -335,6 +341,8 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         count: operationCount,
         serviceId,
         cost: data.res?.sum || 0,
+        startTime,
+        estimatedEndTime,
       };
 
       setStatus(prev => [...prev, newStatus]);
@@ -374,13 +382,16 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     } catch (error) {
       console.error(`${blockDataRef.current.title}, Operation ${currentOperationRef.current + 1}:`, error);
 
+      const now = new Date();
       const newStatus: BlockStatus = {
         status: 'error',
         message: 'Error en la operación',
         details: error,
-        timestamp: new Date().toTimeString().split(' ')[0], // Formato consistente HH:MM:SS
+        timestamp: now.toTimeString().split(' ')[0], // Formato consistente HH:MM:SS
         duration: 0,
         cost: 0,
+        startTime: now.toISOString(),
+        estimatedEndTime: now.toISOString(), // Sin duración para errores
       };
 
       setStatus(prev => [...prev, newStatus]);

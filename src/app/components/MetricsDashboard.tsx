@@ -167,6 +167,8 @@ const MetricsDashboard: React.FC = () => {
     
     const csvHeaders = [
       'Fecha y Hora',
+      'Hora Inicio',
+      'Hora Finalización',
       'Bloque',
       'Estado',
       'Mensaje',
@@ -181,6 +183,8 @@ const MetricsDashboard: React.FC = () => {
 
     const csvRows = operations.map(op => [
       op.timestamp,
+      op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : 'N/A',
+      op.estimatedEndTime ? new Date(op.estimatedEndTime).toLocaleString('es-ES') : 'N/A',
       `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
       op.status,
       op.message.replace(/,/g, ';'), // Escapar comas
@@ -357,6 +361,8 @@ const MetricsDashboard: React.FC = () => {
         <thead>
             <tr>
                 <th>Fecha y Hora</th>
+                <th>Hora Inicio</th>
+                <th>Finalización</th>
                 <th>Bloque</th>
                 <th>Estado</th>
                 <th>Viewers</th>
@@ -368,6 +374,8 @@ const MetricsDashboard: React.FC = () => {
             ${operations.map(op => `
                 <tr ${op.isHistorical ? 'class="historical"' : ''}>
                     <td>${op.timestamp}</td>
+                    <td>${op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : 'N/A'}</td>
+                    <td>${op.estimatedEndTime ? new Date(op.estimatedEndTime).toLocaleString('es-ES') : 'N/A'}</td>
                     <td>Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
                     <td class="status-${op.status}">${op.status === 'success' ? '✅ Exitosa' : '❌ Fallida'}</td>
                     <td>${op.count || 0}</td>
@@ -790,6 +798,65 @@ const MetricsDashboard: React.FC = () => {
                 <div className="bar-value">{viewers.toLocaleString()}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Nueva sección: Operaciones Recientes con Horarios */}
+      <div className="recent-operations-section">
+        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
+          <h3>📋 Operaciones Recientes (con Horarios)</h3>
+          <div className="operations-table-container" style={{ overflowX: 'auto', maxHeight: '400px' }}>
+            <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
+              <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
+                <tr>
+                  <th>Bloque</th>
+                  <th>Estado</th>
+                  <th>Inicio</th>
+                  <th>Finalización Est.</th>
+                  <th>Duración</th>
+                  <th>Viewers</th>
+                  <th>Costo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {getAllOperationsData()
+                  .slice(0, 15) // Mostrar últimas 15 operaciones
+                  .map((op, index) => (
+                  <tr key={`${op.blockId}-${op.timestamp}-${index}`} 
+                      style={{ 
+                        backgroundColor: op.isHistorical 
+                          ? (theme === 'dark' ? '#451a03' : '#fef3c7')
+                          : 'transparent'
+                      }}>
+                    <td>Bloque {parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
+                    <td>
+                      <span style={{ 
+                        color: op.status === 'success' ? '#10b981' : '#ef4444',
+                        fontWeight: 'bold'
+                      }}>
+                        {op.status === 'success' ? '✅' : '❌'} {op.status}
+                      </span>
+                    </td>
+                    <td>{op.startTime ? new Date(op.startTime).toLocaleString('es-ES', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      day: '2-digit',
+                      month: '2-digit'
+                    }) : op.timestamp}</td>
+                    <td>{op.estimatedEndTime ? new Date(op.estimatedEndTime).toLocaleString('es-ES', { 
+                      hour: '2-digit', 
+                      minute: '2-digit',
+                      day: '2-digit',
+                      month: '2-digit'
+                    }) : 'N/A'}</td>
+                    <td>{op.duration || 0} min</td>
+                    <td>{(op.count || 0).toLocaleString()}</td>
+                    <td>${(op.cost || 0).toFixed(2)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
