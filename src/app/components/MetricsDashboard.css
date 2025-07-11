@@ -257,6 +257,9 @@
   border-radius: 0.75rem;
   background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .metrics-dashboard.dark .chart-card {
@@ -477,22 +480,31 @@
 /* Tabla de Viewers por Duración de Servicio */
 .service-duration-table {
   width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 .service-duration-header {
   display: grid;
-  grid-template-columns: 80px 120px 120px 100px;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
+  grid-template-columns: 1.2fr 1fr 1.2fr 1fr;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
   font-weight: 600;
   font-size: 0.875rem;
   border-radius: 0.5rem;
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
   color: #3b82f6;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .metrics-dashboard.dark .service-duration-header {
@@ -503,14 +515,18 @@
 
 .service-duration-row {
   display: grid;
-  grid-template-columns: 80px 120px 120px 100px;
-  gap: 1rem;
-  padding: 0.75rem 1rem;
+  grid-template-columns: 1.2fr 1fr 1.2fr 1fr;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
   border-radius: 0.5rem;
   background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   align-items: center;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .metrics-dashboard.dark .service-duration-row {
@@ -527,6 +543,8 @@
 .duration-cell {
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .duration-badge {
@@ -538,17 +556,26 @@
   color: white;
   text-align: center;
   min-width: 40px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .viewers-cell {
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .viewers-count {
   font-weight: 600;
   font-size: 0.875rem;
   color: #059669;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metrics-dashboard.dark .viewers-count {
@@ -558,6 +585,8 @@
 .cost-cell {
   display: flex;
   align-items: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .cost-amount {
@@ -568,6 +597,10 @@
   padding: 0.25rem 0.5rem;
   border-radius: 0.375rem;
   border: 1px solid rgba(220, 38, 38, 0.2);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metrics-dashboard.dark .cost-amount {
@@ -580,6 +613,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .percentage-value {
@@ -592,6 +627,10 @@
   border: 1px solid rgba(124, 58, 237, 0.2);
   text-align: center;
   min-width: 60px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .metrics-dashboard.dark .percentage-value {
@@ -604,26 +643,61 @@
 @media (max-width: 768px) {
   .service-duration-header,
   .service-duration-row {
-    grid-template-columns: 60px 90px 90px 80px;
-    gap: 0.5rem;
-    padding: 0.5rem;
+    grid-template-columns: 0.8fr 0.7fr 1fr 0.7fr;
+    gap: 0.25rem;
+    padding: 0.5rem 0.25rem;
     font-size: 0.75rem;
   }
   
   .duration-badge {
-    font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
-    min-width: 35px;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.4rem;
+    min-width: 30px;
+  }
+  
+  .viewers-count {
+    font-size: 0.75rem;
   }
   
   .cost-amount {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
   }
   
   .percentage-value {
-    font-size: 0.75rem;
-    padding: 0.2rem 0.4rem;
-    min-width: 50px;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.3rem;
+    min-width: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .service-duration-header,
+  .service-duration-row {
+    grid-template-columns: 60px 50px 80px 55px;
+    gap: 0.2rem;
+    padding: 0.4rem 0.2rem;
+    font-size: 0.7rem;
+  }
+  
+  .duration-badge {
+    font-size: 0.6rem;
+    padding: 0.15rem 0.3rem;
+    min-width: 25px;
+  }
+  
+  .viewers-count {
+    font-size: 0.7rem;
+  }
+  
+  .cost-amount {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.25rem;
+  }
+  
+  .percentage-value {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.25rem;
+    min-width: 35px;
   }
 }
