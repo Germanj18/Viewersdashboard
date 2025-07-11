@@ -185,15 +185,35 @@ const MetricsDashboard: React.FC = () => {
       // Calcular hora de finalización estimada si no existe
       let estimatedEndTime = op.estimatedEndTime;
       if (!estimatedEndTime && op.duration && op.timestamp) {
-        const startTime = new Date(op.startTime || op.timestamp);
-        const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
-        estimatedEndTime = endTime.toISOString();
+        try {
+          const startTime = new Date(op.startTime || op.timestamp);
+          if (!isNaN(startTime.getTime())) {
+            const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+            if (!isNaN(endTime.getTime())) {
+              estimatedEndTime = endTime.toISOString();
+            }
+          }
+        } catch (error) {
+          console.warn('Error calculando tiempo de finalización en CSV:', error);
+          estimatedEndTime = null;
+        }
       }
+
+      // Función helper para formatear fechas de forma segura
+      const safeFormatDate = (dateValue: any) => {
+        try {
+          if (!dateValue) return 'N/A';
+          const date = new Date(dateValue);
+          return !isNaN(date.getTime()) ? date.toLocaleString('es-ES') : 'N/A';
+        } catch {
+          return 'N/A';
+        }
+      };
 
       return [
         op.timestamp,
-        op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : new Date(op.timestamp).toLocaleString('es-ES'),
-        estimatedEndTime ? new Date(estimatedEndTime).toLocaleString('es-ES') : 'N/A',
+        safeFormatDate(op.startTime || op.timestamp),
+        safeFormatDate(estimatedEndTime),
         `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
         op.status,
         op.message.replace(/,/g, ';'), // Escapar comas
@@ -385,16 +405,36 @@ const MetricsDashboard: React.FC = () => {
               // Calcular hora de finalización estimada si no existe
               let estimatedEndTime = op.estimatedEndTime;
               if (!estimatedEndTime && op.duration && op.timestamp) {
-                const startTime = new Date(op.startTime || op.timestamp);
-                const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
-                estimatedEndTime = endTime.toISOString();
+                try {
+                  const startTime = new Date(op.startTime || op.timestamp);
+                  if (!isNaN(startTime.getTime())) {
+                    const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+                    if (!isNaN(endTime.getTime())) {
+                      estimatedEndTime = endTime.toISOString();
+                    }
+                  }
+                } catch (error) {
+                  console.warn('Error calculando tiempo de finalización en HTML:', error);
+                  estimatedEndTime = null;
+                }
               }
+
+              // Función helper para formatear fechas de forma segura
+              const safeFormatDate = (dateValue: any) => {
+                try {
+                  if (!dateValue) return 'N/A';
+                  const date = new Date(dateValue);
+                  return !isNaN(date.getTime()) ? date.toLocaleString('es-ES') : 'N/A';
+                } catch {
+                  return 'N/A';
+                }
+              };
 
               return `
                 <tr ${op.isHistorical ? 'class="historical"' : ''}>
                     <td>${op.timestamp}</td>
-                    <td>${op.startTime ? new Date(op.startTime).toLocaleString('es-ES') : new Date(op.timestamp).toLocaleString('es-ES')}</td>
-                    <td>${estimatedEndTime ? new Date(estimatedEndTime).toLocaleString('es-ES') : 'N/A'}</td>
+                    <td>${safeFormatDate(op.startTime || op.timestamp)}</td>
+                    <td>${safeFormatDate(estimatedEndTime)}</td>
                     <td>Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
                     <td class="status-${op.status}">${op.status === 'success' ? '✅ Exitosa' : '❌ Fallida'}</td>
                     <td>${op.count || 0}</td>
@@ -845,9 +885,18 @@ const MetricsDashboard: React.FC = () => {
                     // Calcular hora de finalización estimada si no existe
                     let estimatedEndTime = op.estimatedEndTime;
                     if (!estimatedEndTime && op.duration && op.timestamp) {
-                      const startTime = new Date(op.startTime || op.timestamp);
-                      const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
-                      estimatedEndTime = endTime.toISOString();
+                      try {
+                        const startTime = new Date(op.startTime || op.timestamp);
+                        if (!isNaN(startTime.getTime())) {
+                          const endTime = new Date(startTime.getTime() + (op.duration * 60 * 1000));
+                          if (!isNaN(endTime.getTime())) {
+                            estimatedEndTime = endTime.toISOString();
+                          }
+                        }
+                      } catch (error) {
+                        console.warn('Error calculando tiempo de finalización:', error);
+                        estimatedEndTime = null;
+                      }
                     }
 
                     return (
@@ -866,20 +915,41 @@ const MetricsDashboard: React.FC = () => {
                         {op.status === 'success' ? '✅' : '❌'} {op.status}
                       </span>
                     </td>
-                    <td>{op.startTime ? new Date(op.startTime).toLocaleString('es-ES', { 
-                      hour: '2-digit', 
-                      minute: '2-digit',
-                      second: '2-digit'
-                    }) : new Date(op.timestamp).toLocaleString('es-ES', { 
-                      hour: '2-digit', 
-                      minute: '2-digit',
-                      second: '2-digit'
-                    })}</td>
-                    <td>{estimatedEndTime ? new Date(estimatedEndTime).toLocaleString('es-ES', { 
-                      hour: '2-digit', 
-                      minute: '2-digit',
-                      second: '2-digit'
-                    }) : 'N/A'}</td>
+                    <td>{op.startTime ? (() => {
+                      try {
+                        const date = new Date(op.startTime);
+                        return !isNaN(date.getTime()) ? date.toLocaleString('es-ES', { 
+                          hour: '2-digit', 
+                          minute: '2-digit',
+                          second: '2-digit'
+                        }) : 'N/A';
+                      } catch {
+                        return 'N/A';
+                      }
+                    })() : (() => {
+                      try {
+                        const date = new Date(op.timestamp);
+                        return !isNaN(date.getTime()) ? date.toLocaleString('es-ES', { 
+                          hour: '2-digit', 
+                          minute: '2-digit',
+                          second: '2-digit'
+                        }) : 'N/A';
+                      } catch {
+                        return 'N/A';
+                      }
+                    })()}</td>
+                    <td>{estimatedEndTime ? (() => {
+                      try {
+                        const date = new Date(estimatedEndTime);
+                        return !isNaN(date.getTime()) ? date.toLocaleString('es-ES', { 
+                          hour: '2-digit', 
+                          minute: '2-digit',
+                          second: '2-digit'
+                        }) : 'N/A';
+                      } catch {
+                        return 'N/A';
+                      }
+                    })() : 'N/A'}</td>
                     <td>{op.duration || 0} min</td>
                     <td>{(op.count || 0).toLocaleString()}</td>
                     <td>${(op.cost || 0).toFixed(2)}</td>
