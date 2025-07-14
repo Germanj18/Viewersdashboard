@@ -795,6 +795,37 @@ const MetricsDashboard: React.FC = () => {
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
   };
 
+  // Función para eliminar un stream de YouTube del localStorage
+  const deleteYouTubeStream = useCallback((url: string) => {
+    try {
+      const videoId = extractVideoId(url);
+      if (videoId) {
+        // Eliminar del localStorage
+        localStorage.removeItem(`youtubeMonitor_${videoId}`);
+        
+        // También buscar y eliminar otras claves relacionadas
+        const keys = Object.keys(localStorage).filter(key => 
+          key.includes(videoId) || (key.includes('youtube') && localStorage.getItem(key)?.includes(url))
+        );
+        
+        keys.forEach(key => {
+          localStorage.removeItem(key);
+        });
+        
+        // Actualizar métricas
+        setMetrics(prevMetrics => ({
+          ...prevMetrics,
+          youtubeStreams: getYouTubeStreamsData()
+        }));
+        
+        showToast('🗑️ Stream eliminado del monitoreo', 'info');
+      }
+    } catch (error) {
+      console.error('Error deleting YouTube stream:', error);
+      showToast('❌ Error al eliminar el stream', 'error');
+    }
+  }, [getYouTubeStreamsData]);
+
   return (
     <div className={`metrics-dashboard ${theme}`}>
       {/* Header */}
@@ -1010,9 +1041,18 @@ const MetricsDashboard: React.FC = () => {
             {Object.entries(metrics.youtubeStreams).map(([url, streamData]) => (
               <div key={url} className="youtube-stream-card">
                 <div className="stream-header">
-                  <h4>📝 {streamData.title}</h4>
-                  <div className={`live-indicator ${streamData.isLive ? 'live' : 'offline'}`}>
-                    {streamData.isLive ? '🔴 En Vivo' : '⏹️ Offline'}
+                  <h4>� {streamData.title}</h4>
+                  <div className="stream-header-actions">
+                    <div className={`live-indicator ${streamData.isLive ? 'live' : 'offline'}`}>
+                      {streamData.isLive ? '🔴 En Vivo' : '⏹️ Offline'}
+                    </div>
+                    <button 
+                      className="delete-stream-btn"
+                      onClick={() => deleteYouTubeStream(url)}
+                      title="Eliminar monitoreo"
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
                 

@@ -355,6 +355,11 @@ const YouTubeMonitor: React.FC = () => {
       {/* Historial reciente */}
       {history.length > 0 && (
         <div className="history-section">
+          {currentData?.title && (
+            <div className="stream-title-header">
+              <h3>📺 {currentData.title}</h3>
+            </div>
+          )}
           <h4>📊 Historial Reciente</h4>
           <div className="history-content">
             <div className="history-chart-container">
