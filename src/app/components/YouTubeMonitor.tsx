@@ -187,6 +187,32 @@ const YouTubeMonitor: React.FC = () => {
     }
   }, []);
 
+  // Función para generar datos simulados
+  const generateSimulatedData = useCallback((targetUrl: string): YouTubeData => {
+    const baseViewers = 1500 + Math.floor(Math.random() * 2000);
+    const fluctuation = Math.floor((Math.random() - 0.5) * 200); // Fluctuación de -100 a +100
+    const currentViewers = Math.max(0, baseViewers + fluctuation);
+    
+    const titles = [
+      "🔴 STREAM EN VIVO - Reaccionando a Videos",
+      "🎮 JUGANDO EN VIVO - Minecraft Build Battle",
+      "📺 CHARLANDO CON LA COMUNIDAD",
+      "🎵 MÚSICA Y CHILL - Stream Relajado",
+      "🎭 REACCIONES A MEMES - Stream Divertido"
+    ];
+    
+    return {
+      viewers: currentViewers,
+      isLive: Math.random() > 0.1, // 90% probabilidad de estar live
+      title: titles[Math.floor(Math.random() * titles.length)],
+      status: 'success',
+      timestamp: new Date().toISOString(),
+      url: targetUrl,
+      environment: 'development',
+      isVercel: false
+    };
+  }, []);
+
   // Efecto para monitoreo automático
   useEffect(() => {
     let intervalId: NodeJS.Timeout;

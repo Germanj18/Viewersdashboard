@@ -148,38 +148,87 @@ export async function POST(request: NextRequest) {
 
 function extractYouTubeData(html: string, url: string): YouTubeData {
   try {
-    // Extraer título del video
+    console.log('🔍 Analizando HTML para extracción de datos...');
+    
+    // Extraer título del video con múltiples patrones
     let title = '';
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    if (titleMatch) {
-      title = titleMatch[1].replace(' - YouTube', '').trim();
+    
+    // Patrón 1: Meta property og:title
+    const ogTitleMatch = html.match(/<meta property="og:title" content="([^"]+)"/i);
+    if (ogTitleMatch) {
+      title = ogTitleMatch[1].trim();
+    }
+    
+    // Patrón 2: Title tag tradicional
+    if (!title) {
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      if (titleMatch) {
+        title = titleMatch[1].replace(' - YouTube', '').trim();
+      }
+    }
+    
+    // Patrón 3: JSON data
+    if (!title) {
+      const jsonMatches = html.match(/var ytInitialData = ({.*?});/);
+      if (jsonMatches) {
+        try {
+          const data = JSON.parse(jsonMatches[1]);
+          const foundTitle = findTitleInObject(data);
+          if (foundTitle) title = foundTitle;
+        } catch (e) {
+          console.warn('Error parseando ytInitialData para título:', e);
+        }
+      }
     }
 
-    // Buscar indicadores de stream en vivo
+    console.log('📝 Título extraído:', title || 'No encontrado');
+
+    // Buscar indicadores de stream en vivo con más patrones
     const liveIndicators = [
       /watching now/i,
       /viewers watching/i,
       /en directo/i,
       /live now/i,
       /"isLiveContent":true/i,
-      /"isLive":true/i
+      /"isLive":true/i,
+      /"videoDetails":[^}]*"isLive":true/i,
+      /LIVE/i,
+      /🔴/,
+      /"badges":[^]]*"LIVE"/i
     ];
 
     const isLive = liveIndicators.some(pattern => pattern.test(html));
+    console.log('🔴 Stream en vivo detectado:', isLive);
 
-    // Extraer número de viewers con múltiples patrones
+    // Extraer número de viewers con patrones ampliados
     let viewers = 0;
     
     if (isLive) {
-      // Patrones para viewers en vivo
+      console.log('🔍 Buscando viewers para stream en vivo...');
+      
+      // Patrones para viewers en vivo (mejorados para producción)
       const viewerPatterns = [
+        // Patrones JSON específicos
         /"viewCount":{"videoViewCountRenderer":{"viewCount":{"simpleText":"([^"]+)"/,
         /"concurrentViewers":"([^"]+)"/,
-        /"watching now"/i,
+        /"videoViewCountRenderer":{"viewCount":{"simpleText":"([^"]+)"/,
+        
+        // Patrones en texto natural
         /(\d+(?:,\d+)*)\s*watching/i,
         /(\d+(?:,\d+)*)\s*viewers?/i,
         /(\d+(?:\.\d+)?[KMB]?)\s*watching/i,
-        /(\d+(?:\.\d+)?[KMB]?)\s*viewers?/i
+        /(\d+(?:\.\d+)?[KMB]?)\s*viewers?/i,
+        
+        // Patrones más específicos
+        /"viewCount":"([^"]+)"/i,
+        /"shortViewCountText":{"simpleText":"([^"]+)"/,
+        /watching now.*?(\d+(?:,\d+)*)/i,
+        /(\d+(?:,\d+)*)\s*people watching/i,
+        
+        // Patrones para HTML simplificado (servidores)
+        /data-views="([^"]+)"/i,
+        /viewers="([^"]+)"/i,
+        /"watchingCount":"([^"]+)"/i
       ];
 
       for (const pattern of viewerPatterns) {
@@ -188,40 +237,80 @@ function extractYouTubeData(html: string, url: string): YouTubeData {
           let viewerText = match[1];
           viewers = parseViewerCount(viewerText);
           if (viewers > 0) {
-            console.log(`� Viewers encontrados con patrón: ${viewerText} → ${viewers}`);
+            console.log(`👥 Viewers encontrados con patrón: ${viewerText} → ${viewers}`);
             break;
           }
         }
       }
 
-      // Buscar en JSON embebido
+      // Buscar en JSON embebido (mejorado)
       if (viewers === 0) {
-        const jsonMatches = html.match(/var ytInitialData = ({.*?});/);
-        if (jsonMatches) {
-          try {
-            const data = JSON.parse(jsonMatches[1]);
-            viewers = findViewersInObject(data);
-          } catch (e) {
-            console.warn('Error parseando ytInitialData:', e);
+        console.log('🔍 Buscando en JSON embebido...');
+        
+        // Buscar múltiples tipos de JSON
+        const jsonPatterns = [
+          /var ytInitialData = ({.*?});/,
+          /window\["ytInitialData"\] = ({.*?});/,
+          /ytInitialData":\s*({.*?}),"/
+        ];
+        
+        for (const jsonPattern of jsonPatterns) {
+          const jsonMatch = html.match(jsonPattern);
+          if (jsonMatch) {
+            try {
+              const data = JSON.parse(jsonMatch[1]);
+              viewers = findViewersInObject(data);
+              if (viewers > 0) {
+                console.log(`👥 Viewers encontrados en JSON: ${viewers}`);
+                break;
+              }
+            } catch (e) {
+              console.warn('Error parseando JSON pattern:', e);
+            }
+          }
+        }
+      }
+      
+      // Último recurso: buscar números grandes en el HTML
+      if (viewers === 0) {
+        console.log('🔍 Último recurso: buscando números en HTML...');
+        const numberMatches = html.match(/\b(\d{2,})\b/g);
+        if (numberMatches) {
+          // Buscar números que parezcan viewers (entre 10 y 100,000)
+          const possibleViewers = numberMatches
+            .map(n => parseInt(n, 10))
+            .filter(n => n >= 10 && n <= 100000)
+            .sort((a, b) => b - a); // Ordenar descendente
+            
+          if (possibleViewers.length > 0) {
+            viewers = possibleViewers[0]; // Tomar el número más alto
+            console.log(`👥 Viewers estimados por números grandes: ${viewers}`);
           }
         }
       }
     } else {
+      console.log('🔍 Buscando views totales para video grabado...');
       // Para videos no en vivo, buscar views totales
       const viewPatterns = [
         /(\d+(?:,\d+)*)\s*views?/i,
         /(\d+(?:\.\d+)?[KMB]?)\s*views?/i,
-        /"viewCount":"([^"]+)"/
+        /"viewCount":"([^"]+)"/,
+        /"viewCountText":{"simpleText":"([^"]+)"/
       ];
 
       for (const pattern of viewPatterns) {
         const match = html.match(pattern);
         if (match) {
           viewers = parseViewerCount(match[1]);
-          if (viewers > 0) break;
+          if (viewers > 0) {
+            console.log(`👁️ Views encontradas: ${viewers}`);
+            break;
+          }
         }
       }
     }
+
+    console.log(`📊 Datos extraídos - Título: "${title}", Viewers: ${viewers}, Live: ${isLive}`);
 
     return {
       viewers,
@@ -244,6 +333,31 @@ function extractYouTubeData(html: string, url: string): YouTubeData {
       url
     };
   }
+}
+
+function findTitleInObject(obj: any): string | null {
+  if (!obj || typeof obj !== 'object') return null;
+  
+  const titleKeys = ['title', 'videoTitle', 'name', 'headline'];
+  
+  for (const key of titleKeys) {
+    if (obj[key]) {
+      const value = typeof obj[key] === 'object' ? obj[key].simpleText || obj[key].runs?.[0]?.text : obj[key];
+      if (value && typeof value === 'string') {
+        return value.toString().trim();
+      }
+    }
+  }
+  
+  // Búsqueda recursiva
+  for (const value of Object.values(obj)) {
+    if (typeof value === 'object' && value !== null) {
+      const result = findTitleInObject(value);
+      if (result) return result;
+    }
+  }
+  
+  return null;
 }
 
 function findViewersInObject(obj: any): number {
