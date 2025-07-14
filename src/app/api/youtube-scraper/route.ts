@@ -250,12 +250,15 @@ function parseViewerCount(text: string): number {
 
 // Función para scraping con diferentes estrategias
 async function attemptScrapingWithStrategies(url: string): Promise<YouTubeData> {
+  // Cambiar orden: método directo primero (funciona mejor a veces)
   const strategies = [
-    () => scrapWithProxy(url),
-    () => scrapWithVercelRegions(url),
-    () => scrapWithDelays(url),
-    () => scrapDirect(url) // Fallback original
+    () => scrapDirect(url), // Método original primero
+    () => scrapWithDelays(url), // Con delays
+    () => scrapWithVercelRegions(url), // Regiones
+    () => scrapWithProxy(url) // Proxy como último recurso
   ];
+
+  let lastError = '';
 
   for (let i = 0; i < strategies.length; i++) {
     try {
@@ -263,26 +266,33 @@ async function attemptScrapingWithStrategies(url: string): Promise<YouTubeData> 
       const result = await strategies[i]();
       
       // Verificar si obtenemos datos válidos
-      if (result.status === 'success' && (result.viewers > 10 || result.title)) {
+      if (result.status === 'success' && (result.viewers > 0 || result.title)) {
         console.log(`✅ Éxito con estrategia ${i + 1}`);
         return result;
       }
+      
+      // Si el resultado es válido pero sin datos, continuar
+      lastError = result.message || 'Sin datos válidos';
+      
     } catch (error) {
-      console.log(`❌ Estrategia ${i + 1} falló:`, error);
+      const errorMsg = error instanceof Error ? error.message : 'Error desconocido';
+      console.log(`❌ Estrategia ${i + 1} falló:`, errorMsg);
+      lastError = errorMsg;
+      
       if (i < strategies.length - 1) {
-        // Esperar antes del siguiente intento
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Esperar menos tiempo entre intentos para ser más rápido
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   }
 
-  // Si todas fallan, retornar error
+  // Si todas fallan, retornar error con el último mensaje
   return {
     viewers: 0,
     isLive: false,
     title: '',
     status: 'error',
-    message: 'Todas las estrategias de scraping fallaron',
+    message: `Todas las estrategias fallaron. Último error: ${lastError}`,
     timestamp: new Date().toISOString(),
     url
   };
@@ -308,6 +318,15 @@ async function scrapWithProxy(url: string): Promise<YouTubeData> {
     }
     
     const html = await response.text();
+    
+    // Verificar si YouTube devolvió una página de error
+    if (html.includes('An error occurred') || 
+        html.includes('Something went wrong') ||
+        html.includes('This page isn\'t working') ||
+        html.startsWith('<!DOCTYPE html>') && html.length < 5000) {
+      throw new Error('YouTube devolvió una página de error (posible bloqueo)');
+    }
+    
     return extractYouTubeData(html, url);
   }
   
