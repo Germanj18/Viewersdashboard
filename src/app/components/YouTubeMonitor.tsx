@@ -356,210 +356,202 @@ const YouTubeMonitor: React.FC = () => {
       {history.length > 0 && (
         <div className="history-section">
           <h4>📊 Historial Reciente</h4>
-          <div className="history-chart-container">
-            <svg className="line-chart" viewBox="0 0 800 200" preserveAspectRatio="xMidYMid meet">
-              {(() => {
-                const data = history.slice(-20);
-                if (data.length === 0) return null;
-                
-                const maxViewers = Math.max(...data.map(h => h.viewers));
-                const minViewers = Math.min(...data.map(h => h.viewers));
-                const range = maxViewers - minViewers || 1;
-                const padding = 50;
-                const width = 800 - (padding * 2);
-                const height = 200 - (padding * 2);
-                
-                // Calcular puntos de la línea
-                const points = data.map((entry, index) => {
-                  const x = padding + (index * width) / Math.max(data.length - 1, 1);
-                  const y = padding + height - ((entry.viewers - minViewers) / range) * height;
-                  return { x, y, entry, index };
-                });
-                
-                // Crear path de la línea con curvas suaves
-                let pathData = '';
-                if (points.length > 0) {
-                  pathData = `M ${points[0].x} ${points[0].y}`;
+          <div className="history-content">
+            <div className="history-chart-container">
+              <svg className="line-chart" viewBox="0 0 800 180" preserveAspectRatio="xMidYMid meet">
+                {(() => {
+                  const data = history.slice(-20);
+                  if (data.length === 0) return null;
                   
-                  for (let i = 1; i < points.length; i++) {
-                    const prevPoint = points[i - 1];
-                    const currentPoint = points[i];
+                  const maxViewers = Math.max(...data.map(h => h.viewers));
+                  const minViewers = Math.min(...data.map(h => h.viewers));
+                  const range = maxViewers - minViewers || 1;
+                  const padding = 40;
+                  const width = 800 - (padding * 2);
+                  const height = 180 - (padding * 2);
+                  
+                  // Calcular puntos de la línea
+                  const points = data.map((entry, index) => {
+                    const x = padding + (index * width) / Math.max(data.length - 1, 1);
+                    const y = padding + height - ((entry.viewers - minViewers) / range) * height;
+                    return { x, y, entry, index };
+                  });
+                  
+                  // Crear path de la línea con curvas suaves
+                  let pathData = '';
+                  if (points.length > 0) {
+                    pathData = `M ${points[0].x} ${points[0].y}`;
                     
-                    if (points.length > 2) {
-                      // Crear curvas suaves usando puntos de control
-                      const controlPointX = (prevPoint.x + currentPoint.x) / 2;
-                      pathData += ` Q ${controlPointX} ${prevPoint.y} ${currentPoint.x} ${currentPoint.y}`;
-                    } else {
-                      pathData += ` L ${currentPoint.x} ${currentPoint.y}`;
+                    for (let i = 1; i < points.length; i++) {
+                      const prevPoint = points[i - 1];
+                      const currentPoint = points[i];
+                      
+                      if (points.length > 2) {
+                        // Crear curvas suaves usando puntos de control
+                        const controlPointX = (prevPoint.x + currentPoint.x) / 2;
+                        pathData += ` Q ${controlPointX} ${prevPoint.y} ${currentPoint.x} ${currentPoint.y}`;
+                      } else {
+                        pathData += ` L ${currentPoint.x} ${currentPoint.y}`;
+                      }
                     }
                   }
-                }
-                
-                // Crear área bajo la línea
-                const areaData = points.length > 0 
-                  ? `M ${padding} ${padding + height} L ${points.map(p => `${p.x} ${p.y}`).join(' L ')} L ${points[points.length - 1].x} ${padding + height} Z`
-                  : '';
-                
-                return (
-                  <>
-                    {/* Grid lines */}
-                    <defs>
-                      <pattern id="grid" width="50" height="25" patternUnits="userSpaceOnUse">
-                        <path d="M 50 0 L 0 0 0 25" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.1"/>
-                      </pattern>
-                      <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.8"/>
-                        <stop offset="50%" stopColor="currentColor" stopOpacity="1"/>
-                        <stop offset="100%" stopColor="currentColor" stopOpacity="0.8"/>
-                      </linearGradient>
-                      <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="currentColor" stopOpacity="0.2"/>
-                        <stop offset="100%" stopColor="currentColor" stopOpacity="0.05"/>
-                      </linearGradient>
-                    </defs>
-                    
-                    <rect width="100%" height="100%" fill="url(#grid)" />
-                    
-                    {/* Líneas de referencia horizontales */}
-                    {[0.25, 0.5, 0.75].map((ratio, index) => (
-                      <line
-                        key={index}
-                        x1={padding}
-                        y1={padding + height * ratio}
-                        x2={padding + width}
-                        y2={padding + height * ratio}
-                        stroke="currentColor"
-                        strokeWidth="1"
-                        opacity="0.1"
-                        strokeDasharray="5,5"
-                      />
-                    ))}
-                    
-                    {/* Área bajo la línea */}
-                    {areaData && (
-                      <path
-                        d={areaData}
-                        fill="url(#areaGradient)"
-                        className="line-area"
-                      />
-                    )}
-                    
-                    {/* Línea principal */}
-                    {pathData && (
-                      <path
-                        d={pathData}
-                        fill="none"
-                        stroke="url(#lineGradient)"
-                        strokeWidth="3"
-                        strokeLinejoin="round"
-                        strokeLinecap="round"
-                        className="line-path"
-                      />
-                    )}
-                    
-                    {/* Puntos en la línea */}
-                    {points.map((point, index) => {
-                      const isFirst = index === 0;
-                      const isLast = index === points.length - 1;
-                      const change = index > 0 ? point.entry.viewers - points[index - 1].entry.viewers : 0;
-                      
-                      return (
-                        <g key={index}>
-                          <circle
-                            cx={point.x}
-                            cy={point.y}
-                            r={isFirst || isLast ? "5" : "3"}
-                            fill="currentColor"
-                            stroke={isFirst || isLast ? "rgba(255,255,255,0.8)" : "none"}
-                            strokeWidth={isFirst || isLast ? "2" : "0"}
-                            className="line-point"
-                            opacity={isFirst || isLast ? "1" : "0.8"}
-                          />
-                          <title>
-                            {new Date(point.entry.timestamp).toLocaleTimeString()}: {point.entry.viewers.toLocaleString()} viewers
-                            {change !== 0 && ` (${change > 0 ? '+' : ''}${change.toLocaleString()})`}
-                            {point.entry.isLive ? ' • 🔴 En Vivo' : ' • ⏹️ Grabado'}
-                          </title>
-                        </g>
-                      );
-                    })}
-                    
-                    {/* Etiquetas del eje Y */}
-                    <text x="15" y={padding - 5} fontSize="11" fill="currentColor" opacity="0.7" textAnchor="start">
-                      {maxViewers.toLocaleString()}
-                    </text>
-                    <text x="15" y={padding + height + 15} fontSize="11" fill="currentColor" opacity="0.7" textAnchor="start">
-                      {minViewers.toLocaleString()}
-                    </text>
-                    
-                    {/* Etiqueta del centro si hay suficiente rango */}
-                    {range > 1000 && (
-                      <text x="15" y={padding + height/2 + 4} fontSize="10" fill="currentColor" opacity="0.5" textAnchor="start">
-                        {Math.round((maxViewers + minViewers) / 2).toLocaleString()}
-                      </text>
-                    )}
-                    
-                    {/* Etiquetas del eje X */}
-                    {data.length > 0 && (
-                      <>
-                        <text x={padding} y={padding + height + 30} fontSize="10" fill="currentColor" opacity="0.7" textAnchor="start">
-                          {new Date(data[0].timestamp).toLocaleTimeString()}
-                        </text>
-                        <text x={padding + width} y={padding + height + 30} fontSize="10" fill="currentColor" opacity="0.7" textAnchor="end">
-                          {new Date(data[data.length - 1].timestamp).toLocaleTimeString()}
-                        </text>
-                        {data.length > 4 && (
-                          <text x={padding + width/2} y={padding + height + 30} fontSize="10" fill="currentColor" opacity="0.5" textAnchor="middle">
-                            {new Date(data[Math.floor(data.length/2)].timestamp).toLocaleTimeString()}
-                          </text>
-                        )}
-                      </>
-                    )}
-                    
-                    {/* Indicador de tendencia */}
-                    {trend && (
-                      <text x={padding + width - 10} y={padding + 20} fontSize="12" fill="currentColor" opacity="0.8" textAnchor="end">
-                        {trend.trend === 'up' ? '📈' : trend.trend === 'down' ? '📉' : '➡️'} {trend.growthPercent.toFixed(1)}%
-                      </text>
-                    )}
-                  </>
-                );
-              })()}
-            </svg>
-          </div>
-          
-          <div className="history-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>Hora</th>
-                  <th>Viewers</th>
-                  <th>Estado</th>
-                  <th>Cambio</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.slice(-10).reverse().map((entry, index) => {
-                  const prevEntry = history[history.length - 2 - index];
-                  const change = prevEntry ? entry.viewers - prevEntry.viewers : 0;
+                  
+                  // Crear área bajo la línea
+                  const areaData = points.length > 0 
+                    ? `M ${padding} ${padding + height} L ${points.map(p => `${p.x} ${p.y}`).join(' L ')} L ${points[points.length - 1].x} ${padding + height} Z`
+                    : '';
                   
                   return (
-                    <tr key={entry.timestamp}>
-                      <td>{new Date(entry.timestamp).toLocaleTimeString()}</td>
-                      <td>{entry.viewers.toLocaleString()}</td>
-                      <td>
-                        <span className={`status ${entry.isLive ? 'live' : 'offline'}`}>
-                          {entry.isLive ? '🔴 Live' : '⏹️ Offline'}
-                        </span>
-                      </td>
-                      <td className={`change ${change > 0 ? 'positive' : change < 0 ? 'negative' : ''}`}>
-                        {change !== 0 && (change > 0 ? '+' : '')}{change.toLocaleString()}
-                      </td>
-                    </tr>
+                    <>
+                      {/* Grid lines */}
+                      <defs>
+                        <pattern id="grid" width="50" height="20" patternUnits="userSpaceOnUse">
+                          <path d="M 50 0 L 0 0 0 20" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.1"/>
+                        </pattern>
+                        <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="currentColor" stopOpacity="0.8"/>
+                          <stop offset="50%" stopColor="currentColor" stopOpacity="1"/>
+                          <stop offset="100%" stopColor="currentColor" stopOpacity="0.8"/>
+                        </linearGradient>
+                        <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="currentColor" stopOpacity="0.2"/>
+                          <stop offset="100%" stopColor="currentColor" stopOpacity="0.05"/>
+                        </linearGradient>
+                      </defs>
+                      
+                      <rect width="100%" height="100%" fill="url(#grid)" />
+                      
+                      {/* Líneas de referencia horizontales */}
+                      {[0.25, 0.5, 0.75].map((ratio, index) => (
+                        <line
+                          key={index}
+                          x1={padding}
+                          y1={padding + height * ratio}
+                          x2={padding + width}
+                          y2={padding + height * ratio}
+                          stroke="currentColor"
+                          strokeWidth="1"
+                          opacity="0.1"
+                          strokeDasharray="5,5"
+                        />
+                      ))}
+                      
+                      {/* Área bajo la línea */}
+                      {areaData && (
+                        <path
+                          d={areaData}
+                          fill="url(#areaGradient)"
+                          className="line-area"
+                        />
+                      )}
+                      
+                      {/* Línea principal */}
+                      {pathData && (
+                        <path
+                          d={pathData}
+                          fill="none"
+                          stroke="url(#lineGradient)"
+                          strokeWidth="3"
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                          className="line-path"
+                        />
+                      )}
+                      
+                      {/* Puntos en la línea */}
+                      {points.map((point, index) => {
+                        const isFirst = index === 0;
+                        const isLast = index === points.length - 1;
+                        const change = index > 0 ? point.entry.viewers - points[index - 1].entry.viewers : 0;
+                        
+                        return (
+                          <g key={index}>
+                            <circle
+                              cx={point.x}
+                              cy={point.y}
+                              r={isFirst || isLast ? "4" : "2.5"}
+                              fill="currentColor"
+                              stroke={isFirst || isLast ? "rgba(255,255,255,0.8)" : "none"}
+                              strokeWidth={isFirst || isLast ? "2" : "0"}
+                              className="line-point"
+                              opacity={isFirst || isLast ? "1" : "0.8"}
+                            />
+                            <title>
+                              {new Date(point.entry.timestamp).toLocaleTimeString()}: {point.entry.viewers.toLocaleString()} viewers
+                              {change !== 0 && ` (${change > 0 ? '+' : ''}${change.toLocaleString()})`}
+                              {point.entry.isLive ? ' • 🔴 En Vivo' : ' • ⏹️ Grabado'}
+                            </title>
+                          </g>
+                        );
+                      })}
+                      
+                      {/* Etiquetas del eje Y */}
+                      <text x="10" y={padding - 5} fontSize="10" fill="currentColor" opacity="0.7" textAnchor="start">
+                        {maxViewers.toLocaleString()}
+                      </text>
+                      <text x="10" y={padding + height + 12} fontSize="10" fill="currentColor" opacity="0.7" textAnchor="start">
+                        {minViewers.toLocaleString()}
+                      </text>
+                      
+                      {/* Etiquetas del eje X */}
+                      {data.length > 0 && (
+                        <>
+                          <text x={padding} y={padding + height + 25} fontSize="9" fill="currentColor" opacity="0.7" textAnchor="start">
+                            {new Date(data[0].timestamp).toLocaleTimeString()}
+                          </text>
+                          <text x={padding + width} y={padding + height + 25} fontSize="9" fill="currentColor" opacity="0.7" textAnchor="end">
+                            {new Date(data[data.length - 1].timestamp).toLocaleTimeString()}
+                          </text>
+                        </>
+                      )}
+                      
+                      {/* Indicador de tendencia */}
+                      {trend && (
+                        <text x={padding + width - 10} y={padding + 15} fontSize="11" fill="currentColor" opacity="0.8" textAnchor="end">
+                          {trend.trend === 'up' ? '📈' : trend.trend === 'down' ? '📉' : '➡️'} {trend.growthPercent.toFixed(1)}%
+                        </text>
+                      )}
+                    </>
                   );
-                })}
-              </tbody>
-            </table>
+                })()}
+              </svg>
+            </div>
+            
+            <div className="history-table-container">
+              <div className="history-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Hora</th>
+                      <th>Viewers</th>
+                      <th>Estado</th>
+                      <th>Cambio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.slice(-8).reverse().map((entry, index) => {
+                      const prevEntry = history[history.length - 2 - index];
+                      const change = prevEntry ? entry.viewers - prevEntry.viewers : 0;
+                      
+                      return (
+                        <tr key={entry.timestamp}>
+                          <td>{new Date(entry.timestamp).toLocaleTimeString().slice(0,5)}</td>
+                          <td>{entry.viewers.toLocaleString()}</td>
+                          <td>
+                            <span className={`status ${entry.isLive ? 'live' : 'offline'}`}>
+                              {entry.isLive ? '🔴' : '⏹️'}
+                            </span>
+                          </td>
+                          <td className={`change ${change > 0 ? 'positive' : change < 0 ? 'negative' : ''}`}>
+                            {change !== 0 && (change > 0 ? '+' : '')}{change.toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       )}
