@@ -3,6 +3,7 @@ import { useGlobal } from './GlobalContext';
 import { useTheme } from '../ThemeContext';
 import Block, { BlockData } from './Block';
 import MetricsDashboard from './MetricsDashboard';
+import YouTubeMonitor from './YouTubeMonitor';
 import ResetWarningModal from './ResetWarningModal';
 import './Viewers.css';
 
@@ -11,6 +12,7 @@ const Viewers = () => {
   const { theme } = useTheme();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
+  const [showYouTubeMonitor, setShowYouTubeMonitor] = useState(false);
   const [showResetWarning, setShowResetWarning] = useState(false);
   
   // Estado para modales globales
@@ -327,6 +329,25 @@ const Viewers = () => {
         </button>
         
         <button
+          onClick={() => setShowYouTubeMonitor(!showYouTubeMonitor)}
+          className="youtube-monitor-button"
+          style={{
+            padding: '0.75rem 1.5rem',
+            fontSize: '0.875rem',
+            borderRadius: '0.5rem',
+            fontWeight: '500',
+            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+          title="Monitor de YouTube en tiempo real"
+        >
+          📺 {showYouTubeMonitor ? 'Ocultar YouTube' : 'Monitor YouTube'}
+        </button>
+        
+        <button
           onClick={handleResetAllBlocks}
           className="reset-button"
           style={{
@@ -343,6 +364,9 @@ const Viewers = () => {
 
       {/* Dashboard de Métricas */}
       {showMetrics && <MetricsDashboard />}
+
+      {/* Monitor de YouTube */}
+      {showYouTubeMonitor && <YouTubeMonitor />}
 
       {/* Grid de bloques usando tu estructura CSS original */}
       <div className="blocks-container">
