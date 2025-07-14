@@ -200,78 +200,9 @@
 }
 
 .error-message {
-  background: linear-gradient(135deg, #fef2f2, #fee2e2);
-  border: 1px solid #fecaca;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 0.75rem 0;
-  transition: all 0.3s ease;
-}
-
-.youtube-monitor.dark .error-message {
-  background: linear-gradient(135deg, #450a0a, #991b1b);
-  border-color: #dc2626;
-}
-
-.error-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.error-icon {
-  font-size: 1.5rem;
-  flex-shrink: 0;
-  margin-top: 0.125rem;
-}
-
-.error-text {
-  flex: 1;
-}
-
-.error-text strong {
-  color: #dc2626;
-  font-size: 0.875rem;
+  color: #ef4444;
   font-weight: 600;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.youtube-monitor.dark .error-text strong {
-  color: #fca5a5;
-}
-
-.error-text p {
-  color: #7f1d1d;
   font-size: 0.875rem;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
-}
-
-.youtube-monitor.dark .error-text p {
-  color: #fecaca;
-}
-
-.error-help {
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  margin-top: 0.5rem;
-}
-
-.youtube-monitor.dark .error-help {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.error-help small {
-  color: #991b1b;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  display: block;
-}
-
-.youtube-monitor.dark .error-help small {
-  color: #f87171;
 }
 
 /* Datos actuales */

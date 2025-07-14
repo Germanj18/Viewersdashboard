@@ -795,39 +795,50 @@ const MetricsDashboard: React.FC = () => {
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
   };
 
-  // Función para eliminar un stream del monitoreo
-  const removeStreamFromMonitoring = useCallback((urlToRemove: string) => {
+  // Función para eliminar un stream de YouTube del monitoreo
+  const removeYouTubeStream = (url: string) => {
     try {
-      const videoId = extractVideoId(urlToRemove);
-      if (!videoId) return;
-
-      // Eliminar de localStorage
-      const storageKey = `youtubeData_${videoId}`;
-      localStorage.removeItem(storageKey);
-
-      // Actualizar el estado local inmediatamente
-      setMetrics(prev => {
-        const updatedYoutubeStreams = { ...prev.youtubeStreams };
-        delete updatedYoutubeStreams[urlToRemove];
-        
-        return {
-          ...prev,
-          youtubeStreams: updatedYoutubeStreams
-        };
+      // Buscar y eliminar de localStorage
+      const youtubeDataKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('youtubeMonitor_') || key.includes('youtube')
+      );
+      
+      youtubeDataKeys.forEach(key => {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          if (data.url === url) {
+            localStorage.removeItem(key);
+          }
+        } catch (error) {
+          console.warn('Error checking localStorage key:', key, error);
+        }
       });
 
-      showToast(`🗑️ Stream eliminado del monitoreo`, 'success');
+      // También eliminar de sessionStorage si existe
+      const sessionKeys = Object.keys(sessionStorage).filter(key => 
+        key.includes('youtube') || key.includes('monitor')
+      );
       
-      // Forzar actualización de métricas
-      setTimeout(() => {
-        calculateMetrics();
-      }, 100);
+      sessionKeys.forEach(key => {
+        try {
+          const data = JSON.parse(sessionStorage.getItem(key) || '{}');
+          if (data.url === url) {
+            sessionStorage.removeItem(key);
+          }
+        } catch (error) {
+          console.warn('Error checking sessionStorage key:', key, error);
+        }
+      });
+
+      // Actualizar métricas inmediatamente
+      calculateMetrics();
       
+      showToast('Stream eliminado del monitoreo', 'info');
     } catch (error) {
-      console.error('Error removing stream from monitoring:', error);
-      showToast('❌ Error al eliminar stream del monitoreo', 'error');
+      console.error('Error eliminando stream de YouTube:', error);
+      showToast('❌ Error al eliminar stream', 'error');
     }
-  }, [extractVideoId, calculateMetrics]);
+  };
 
   return (
     <div className={`metrics-dashboard ${theme}`}>
@@ -1045,16 +1056,21 @@ const MetricsDashboard: React.FC = () => {
               <div key={url} className="youtube-stream-card">
                 <div className="stream-header">
                   <h4>📝 {streamData.title}</h4>
-                  <div className="stream-header-actions">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <div className={`live-indicator ${streamData.isLive ? 'live' : 'offline'}`}>
                       {streamData.isLive ? '🔴 En Vivo' : '⏹️ Offline'}
                     </div>
                     <button 
-                      className="remove-stream-btn"
-                      onClick={() => removeStreamFromMonitoring(url)}
-                      title="Eliminar del monitoreo"
+                      className="remove-stream-button"
+                      onClick={() => removeYouTubeStream(url)}
+                      title="Eliminar stream del monitoreo"
                     >
-                      🗑️
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 6H5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M8 6V4C8 3.46957 8.21071 2.96086 8.58579 2.58579C8.96086 2.21071 9.46957 2 10 2H14C14.5304 2 15.0391 2.21071 15.4142 2.58579C15.7893 2.96086 16 3.46957 16 4V6M19 6V20C19 20.5304 18.7893 21.0391 18.4142 21.4142C18.0391 21.7893 17.5304 22 17 22H7C6.46957 22 5.96086 21.7893 5.58579 21.4142C5.21071 21.0391 5 20.5304 5 20V6H19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M10 11V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M14 11V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
