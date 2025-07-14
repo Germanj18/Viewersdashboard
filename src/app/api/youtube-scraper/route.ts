@@ -10,6 +10,28 @@ interface YouTubeData {
   url: string;
 }
 
+// Configuración para proxies y anti-detección
+const PROXY_CONFIG = {
+  // ScraperAPI (opción recomendada)
+  scraperapi: {
+    enabled: process.env.SCRAPERAPI_KEY ? true : false,
+    key: process.env.SCRAPERAPI_KEY,
+    endpoint: 'http://api.scraperapi.com'
+  },
+  // Bright Data
+  brightdata: {
+    enabled: process.env.BRIGHTDATA_USER ? true : false,
+    user: process.env.BRIGHTDATA_USER,
+    pass: process.env.BRIGHTDATA_PASS,
+    endpoint: 'brd.superproxy.io:22225'
+  },
+  // Backend propio
+  customProxy: {
+    enabled: process.env.CUSTOM_PROXY_URL ? true : false,
+    url: process.env.CUSTOM_PROXY_URL
+  }
+};
+
 export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
@@ -41,29 +63,11 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Iniciando scraping de YouTube:', url);
+    console.log('🌐 Entorno:', process.env.NODE_ENV);
+    console.log('🏢 Vercel:', process.env.VERCEL ? 'Sí' : 'No');
 
-    // Hacer request a YouTube con headers que simulan navegador
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Cache-Control': 'no-cache'
-      },
-      method: 'GET'
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
-
-    const html = await response.text();
-    
-    // Extraer información del HTML
-    const result = extractYouTubeData(html, url);
+    // Usar estrategias múltiples para evadir detección
+    const result = await attemptScrapingWithStrategies(url);
     
     console.log('✅ Scraping completado:', result);
     
@@ -242,4 +246,172 @@ function parseViewerCount(text: string): number {
   }
   
   return 0;
+}
+
+// Función para scraping con diferentes estrategias
+async function attemptScrapingWithStrategies(url: string): Promise<YouTubeData> {
+  const strategies = [
+    () => scrapWithProxy(url),
+    () => scrapWithVercelRegions(url),
+    () => scrapWithDelays(url),
+    () => scrapDirect(url) // Fallback original
+  ];
+
+  for (let i = 0; i < strategies.length; i++) {
+    try {
+      console.log(`🔄 Estrategia ${i + 1}/${strategies.length}`);
+      const result = await strategies[i]();
+      
+      // Verificar si obtenemos datos válidos
+      if (result.status === 'success' && (result.viewers > 10 || result.title)) {
+        console.log(`✅ Éxito con estrategia ${i + 1}`);
+        return result;
+      }
+    } catch (error) {
+      console.log(`❌ Estrategia ${i + 1} falló:`, error);
+      if (i < strategies.length - 1) {
+        // Esperar antes del siguiente intento
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
+  }
+
+  // Si todas fallan, retornar error
+  return {
+    viewers: 0,
+    isLive: false,
+    title: '',
+    status: 'error',
+    message: 'Todas las estrategias de scraping fallaron',
+    timestamp: new Date().toISOString(),
+    url
+  };
+}
+
+// 1. Scraping con proxy
+async function scrapWithProxy(url: string): Promise<YouTubeData> {
+  if (PROXY_CONFIG.scraperapi.enabled) {
+    const proxyUrl = `${PROXY_CONFIG.scraperapi.endpoint}?api_key=${PROXY_CONFIG.scraperapi.key}&url=${encodeURIComponent(url)}&render=true&country_code=US`;
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
+    const response = await fetch(proxyUrl, {
+      headers: getRandomHeaders(),
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error(`Proxy error: ${response.status}`);
+    }
+    
+    const html = await response.text();
+    return extractYouTubeData(html, url);
+  }
+  
+  throw new Error('Proxy no configurado');
+}
+
+// 2. Scraping con diferentes regiones de Vercel
+async function scrapWithVercelRegions(url: string): Promise<YouTubeData> {
+  // Simular request desde diferentes regiones usando headers
+  const regionHeaders = {
+    'X-Forwarded-For': getRandomIP(),
+    'CF-IPCountry': getRandomCountry(),
+    ...getRandomHeaders()
+  };
+  
+  // Usar diferentes dominios de YouTube por región
+  const regionalUrls = [
+    url,
+    url.replace('youtube.com', 'youtube.co.uk'),
+    url.replace('youtube.com', 'youtube.ca'),
+    url + '&gl=US',
+    url + '&gl=GB'
+  ];
+  
+  for (const regionalUrl of regionalUrls) {
+    try {
+      const response = await fetch(regionalUrl, {
+        headers: regionHeaders,
+        redirect: 'follow'
+      });
+      
+      if (response.ok) {
+        const html = await response.text();
+        const result = extractYouTubeData(html, url);
+        if (result.viewers > 0 || result.title) {
+          return result;
+        }
+      }
+    } catch (error) {
+      continue;
+    }
+  }
+  
+  throw new Error('Todas las regiones fallaron');
+}
+
+// 3. Scraping con delays inteligentes
+async function scrapWithDelays(url: string): Promise<YouTubeData> {
+  // Delay aleatorio de 3-8 segundos
+  const delay = 3000 + Math.random() * 5000;
+  await new Promise(resolve => setTimeout(resolve, delay));
+  
+  return scrapDirect(url);
+}
+
+// 4. Scraping directo (método original)
+async function scrapDirect(url: string): Promise<YouTubeData> {
+  const response = await fetch(url, {
+    headers: getRandomHeaders(),
+    method: 'GET'
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  const html = await response.text();
+  return extractYouTubeData(html, url);
+}
+
+// Funciones auxiliares
+function getRandomHeaders() {
+  const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:122.0) Gecko/20100101 Firefox/122.0'
+  ];
+
+  const randomUA = userAgents[Math.floor(Math.random() * userAgents.length)];
+
+  return {
+    'User-Agent': randomUA,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9,es;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache'
+  };
+}
+
+function getRandomIP(): string {
+  // Generar IP aleatoria (para header X-Forwarded-For)
+  return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+}
+
+function getRandomCountry(): string {
+  const countries = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'ES', 'IT'];
+  return countries[Math.floor(Math.random() * countries.length)];
 }
