@@ -11,6 +11,8 @@ interface YouTubeData {
   message?: string;
   timestamp: string;
   url: string;
+  environment?: string;
+  isVercel?: boolean;
 }
 
 interface MonitorHistory {
@@ -60,10 +62,37 @@ const YouTubeMonitor: React.FC = () => {
       const data: YouTubeData = await response.json();
       
       if (data.status === 'error') {
-        setError(data.message || 'Error desconocido');
-        showToast(`❌ Error: ${data.message}`, 'error');
+        let errorMessage = data.message || 'Error desconocido';
+        
+        // Mejorar mensajes de error para production
+        if (data.environment === 'production' && data.isVercel) {
+          if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+            errorMessage = '⚠️ Timeout en servidor (común en producción). YouTube tardó demasiado en responder.';
+          } else if (errorMessage.includes('blocked') || errorMessage.includes('unusual traffic')) {
+            errorMessage = '🚫 YouTube está bloqueando el scraping desde servidor. Esto es normal en producción.';
+          } else if (errorMessage.includes('fetch') || errorMessage.includes('network')) {
+            errorMessage = '📡 Error de red desde servidor (Vercel). YouTube puede estar bloqueando IPs de servidor.';
+          } else {
+            errorMessage = `🏢 Error en producción: ${errorMessage}. Esto es común debido a restricciones de YouTube.`;
+          }
+        }
+        
+        setError(errorMessage);
+        showToast(errorMessage, 'error');
+        
+        // En caso de error, mantener datos anteriores si existen
+        if (currentData) {
+          // Actualizar solo el timestamp para mostrar que se intentó
+          setCurrentData(prev => prev ? {
+            ...prev,
+            timestamp: new Date().toISOString(),
+            status: 'error',
+            message: errorMessage
+          } : null);
+        }
       } else {
         setCurrentData(data);
+        setError(null); // Limpiar error anterior si el scraping fue exitoso
         
         // Agregar al historial
         const newEntry: MonitorHistory = {
@@ -294,7 +323,26 @@ const YouTubeMonitor: React.FC = () => {
           
           {error && (
             <div className="error-message">
-              ❌ {error}
+              <div className="error-content">
+                <div className="error-icon">
+                  {error.includes('producción') || error.includes('Vercel') || error.includes('servidor') ? '🏢' : 
+                   error.includes('blocked') || error.includes('bloqueando') ? '🚫' : 
+                   error.includes('timeout') || error.includes('Timeout') ? '⏱️' : 
+                   error.includes('network') || error.includes('red') ? '📡' : '❌'}
+                </div>
+                <div className="error-text">
+                  <strong>Error de Scraping:</strong>
+                  <p>{error}</p>
+                  {(error.includes('producción') || error.includes('Vercel') || error.includes('servidor')) && (
+                    <div className="error-help">
+                      <small>
+                        💡 <strong>Explicación:</strong> YouTube bloquea el scraping desde servidores en producción. 
+                        Esto es normal y esperado. El scraping funciona en desarrollo local pero no en Vercel/producción.
+                      </small>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -355,11 +403,6 @@ const YouTubeMonitor: React.FC = () => {
       {/* Historial reciente */}
       {history.length > 0 && (
         <div className="history-section">
-          {currentData?.title && (
-            <div className="stream-title-header">
-              <h3>📺 {currentData.title}</h3>
-            </div>
-          )}
           <h4>📊 Historial Reciente</h4>
           <div className="history-content">
             <div className="history-chart-container">

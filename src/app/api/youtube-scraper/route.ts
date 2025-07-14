@@ -41,45 +41,107 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Iniciando scraping de YouTube:', url);
+    console.log('🌐 Entorno:', process.env.NODE_ENV);
+    console.log('🏢 Vercel:', process.env.VERCEL ? 'Sí' : 'No');
 
-    // Hacer request a YouTube con headers que simulan navegador
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Cache-Control': 'no-cache'
-      },
-      method: 'GET'
-    });
+    // Headers más robustos para evitar detección
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+      'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+      'Accept-Encoding': 'gzip, deflate, br',
+      'Connection': 'keep-alive',
+      'Upgrade-Insecure-Requests': '1',
+      'Cache-Control': 'no-cache',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-User': '?1',
+      'DNT': '1'
+    };
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    // Timeout más largo para producción
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+
+    try {
+      // Hacer request a YouTube con headers mejorados
+      const response = await fetch(url, {
+        headers,
+        method: 'GET',
+        signal: controller.signal,
+        // Agregar configuración adicional para evitar caching
+        cache: 'no-store'
+      });
+
+      clearTimeout(timeoutId);
+
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+      console.log('📄 HTML length:', html.length);
+      
+      // Verificar si el HTML parece válido
+      if (!html || html.length < 1000) {
+        throw new Error('Respuesta de YouTube demasiado corta o vacía');
+      }
+
+      // Verificar si YouTube nos está bloqueando
+      if (html.includes('Our systems have detected unusual traffic') || 
+          html.includes('blocked') || 
+          html.includes('captcha')) {
+        throw new Error('YouTube está bloqueando el acceso (detección de bot)');
+      }
+      
+      // Extraer información del HTML
+      const result = extractYouTubeData(html, url);
+      
+      console.log('✅ Scraping completado:', result);
+      
+      return NextResponse.json(result);
+
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+        throw new Error('Timeout: YouTube tardó demasiado en responder');
+      }
+      
+      throw fetchError;
     }
-
-    const html = await response.text();
-    
-    // Extraer información del HTML
-    const result = extractYouTubeData(html, url);
-    
-    console.log('✅ Scraping completado:', result);
-    
-    return NextResponse.json(result);
 
   } catch (error) {
     console.error('❌ Error en scraping de YouTube:', error);
     
+    let errorMessage = 'Error desconocido';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      
+      // Agregar contexto específico para errores comunes en producción
+      if (errorMessage.includes('fetch')) {
+        errorMessage += ' (Posible bloqueo de red en producción)';
+      } else if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+        errorMessage += ' (YouTube responde lento desde servidor)';
+      } else if (errorMessage.includes('blocked') || errorMessage.includes('unusual traffic')) {
+        errorMessage += ' (YouTube detectó y bloqueó el scraping)';
+      }
+    }
+    
     return NextResponse.json({
       status: 'error',
-      message: error instanceof Error ? error.message : 'Error desconocido',
+      message: errorMessage,
       viewers: 0,
       isLive: false,
       title: '',
       timestamp: new Date().toISOString(),
-      url: ''
+      url: '',
+      environment: process.env.NODE_ENV,
+      isVercel: !!process.env.VERCEL
     }, { status: 500 });
   }
 }

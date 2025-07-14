@@ -795,36 +795,39 @@ const MetricsDashboard: React.FC = () => {
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
   };
 
-  // Función para eliminar un stream de YouTube del localStorage
-  const deleteYouTubeStream = useCallback((url: string) => {
+  // Función para eliminar un stream del monitoreo
+  const removeStreamFromMonitoring = useCallback((urlToRemove: string) => {
     try {
-      const videoId = extractVideoId(url);
-      if (videoId) {
-        // Eliminar del localStorage
-        localStorage.removeItem(`youtubeMonitor_${videoId}`);
+      const videoId = extractVideoId(urlToRemove);
+      if (!videoId) return;
+
+      // Eliminar de localStorage
+      const storageKey = `youtubeData_${videoId}`;
+      localStorage.removeItem(storageKey);
+
+      // Actualizar el estado local inmediatamente
+      setMetrics(prev => {
+        const updatedYoutubeStreams = { ...prev.youtubeStreams };
+        delete updatedYoutubeStreams[urlToRemove];
         
-        // También buscar y eliminar otras claves relacionadas
-        const keys = Object.keys(localStorage).filter(key => 
-          key.includes(videoId) || (key.includes('youtube') && localStorage.getItem(key)?.includes(url))
-        );
-        
-        keys.forEach(key => {
-          localStorage.removeItem(key);
-        });
-        
-        // Actualizar métricas
-        setMetrics(prevMetrics => ({
-          ...prevMetrics,
-          youtubeStreams: getYouTubeStreamsData()
-        }));
-        
-        showToast('🗑️ Stream eliminado del monitoreo', 'info');
-      }
+        return {
+          ...prev,
+          youtubeStreams: updatedYoutubeStreams
+        };
+      });
+
+      showToast(`🗑️ Stream eliminado del monitoreo`, 'success');
+      
+      // Forzar actualización de métricas
+      setTimeout(() => {
+        calculateMetrics();
+      }, 100);
+      
     } catch (error) {
-      console.error('Error deleting YouTube stream:', error);
-      showToast('❌ Error al eliminar el stream', 'error');
+      console.error('Error removing stream from monitoring:', error);
+      showToast('❌ Error al eliminar stream del monitoreo', 'error');
     }
-  }, [getYouTubeStreamsData]);
+  }, [extractVideoId, calculateMetrics]);
 
   return (
     <div className={`metrics-dashboard ${theme}`}>
@@ -1041,15 +1044,15 @@ const MetricsDashboard: React.FC = () => {
             {Object.entries(metrics.youtubeStreams).map(([url, streamData]) => (
               <div key={url} className="youtube-stream-card">
                 <div className="stream-header">
-                  <h4>� {streamData.title}</h4>
+                  <h4>📝 {streamData.title}</h4>
                   <div className="stream-header-actions">
                     <div className={`live-indicator ${streamData.isLive ? 'live' : 'offline'}`}>
                       {streamData.isLive ? '🔴 En Vivo' : '⏹️ Offline'}
                     </div>
                     <button 
-                      className="delete-stream-btn"
-                      onClick={() => deleteYouTubeStream(url)}
-                      title="Eliminar monitoreo"
+                      className="remove-stream-btn"
+                      onClick={() => removeStreamFromMonitoring(url)}
+                      title="Eliminar del monitoreo"
                     >
                       🗑️
                     </button>
