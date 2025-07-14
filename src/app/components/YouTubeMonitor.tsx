@@ -122,7 +122,44 @@ const YouTubeMonitor: React.FC = () => {
                 predictedFinal
               };
               
+              // Guardar datos actuales (para el dashboard)
               localStorage.setItem(`youtubeMonitor_${videoId}`, JSON.stringify(enhancedData));
+              
+              // Guardar en historial acumulativo
+              const historyKey = `youtubeHistory_${videoId}`;
+              let historyData = [];
+              
+              try {
+                const existingHistory = localStorage.getItem(historyKey);
+                if (existingHistory) {
+                  historyData = JSON.parse(existingHistory);
+                  if (!Array.isArray(historyData)) {
+                    historyData = [];
+                  }
+                }
+              } catch (error) {
+                console.warn('Error loading YouTube history:', error);
+                historyData = [];
+              }
+              
+              // Agregar nueva medición al historial
+              const historyEntry = {
+                ...enhancedData,
+                change: prev.length > 0 ? data.viewers - prev[prev.length - 1].viewers : 0,
+                estado: data.isLive ? 'En Vivo' : 'Offline',
+                source: `YouTubeMonitor_${videoId}`
+              };
+              
+              historyData.push(historyEntry);
+              
+              // Mantener solo las últimas 500 mediciones para evitar problemas de storage
+              if (historyData.length > 500) {
+                historyData = historyData.slice(-500);
+              }
+              
+              localStorage.setItem(historyKey, JSON.stringify(historyData));
+              
+              console.log(`📊 Guardada medición en historial. Total: ${historyData.length} registros`);
             }
           } catch (error) {
             console.warn('Error updating enhanced YouTube data:', error);

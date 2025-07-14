@@ -220,6 +220,7 @@ const MetricsDashboard: React.FC = () => {
   const exportToJSON = useCallback(() => {
     const allOperations = getAllOperationsData();
     const resetHistory = getResetHistory();
+    const youtubeHistory = getYouTubeMonitoringHistory();
     
     const exportData = {
       reportInfo: {
@@ -227,7 +228,9 @@ const MetricsDashboard: React.FC = () => {
         generatedBy: 'Dashboard de Métricas',
         reportType: 'Complete Operations Report',
         totalOperationsIncludingHistory: allOperations.length,
-        blocksResetCount: resetHistory.length
+        blocksResetCount: resetHistory.length,
+        youtubeStreamsMonitored: Object.keys(metrics.youtubeStreams).length,
+        youtubeHistoryEntries: youtubeHistory.length
       },
       summary: {
         totalOperations: metrics.totalOperations,
@@ -243,7 +246,13 @@ const MetricsDashboard: React.FC = () => {
       operationsPerBlock: metrics.operationsPerBlock,
       viewersPerHour: metrics.viewersPerHour,
       viewersByServiceDuration: metrics.viewersByServiceDuration,
-      youtubeStreams: metrics.youtubeStreams,
+      youtubeStreams: {
+        currentStreams: metrics.youtubeStreams,
+        monitoringHistory: youtubeHistory.sort((a, b) => 
+          new Date(b.timestamp || b.lastUpdate || 0).getTime() - 
+          new Date(a.timestamp || a.lastUpdate || 0).getTime()
+        )
+      },
       allOperations: allOperations, // Todas las operaciones, no solo recientes
       blockResetHistory: resetHistory,
       alerts: alerts
@@ -265,8 +274,10 @@ const MetricsDashboard: React.FC = () => {
   // Función para exportar como CSV
   const exportToCSV = useCallback(() => {
     const operations = getAllOperationsData();
+    const youtubeHistory = getYouTubeMonitoringHistory();
     
-    const csvHeaders = [
+    // Headers para operaciones
+    const operationsHeaders = [
       'Fecha y Hora',
       'Hora Inicio',
       'Hora Finalización',
@@ -280,6 +291,17 @@ const MetricsDashboard: React.FC = () => {
       'Order ID',
       'Order Status',
       'Es Histórico'
+    ];
+
+    // Headers para YouTube
+    const youtubeHeaders = [
+      'Fecha y Hora',
+      'URL',
+      'Título',
+      'Viewers',
+      'Estado (Live/Offline)',
+      'Tendencia',
+      'Fuente'
     ];
 
     const csvRows = operations.map(op => {
@@ -328,9 +350,30 @@ const MetricsDashboard: React.FC = () => {
       ];
     });
 
-    const csvContent = [csvHeaders, ...csvRows]
+    // Crear filas para el historial de YouTube
+    const youtubeRows = youtubeHistory.map(entry => {
+      return [
+        new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES'),
+        entry.url || '',
+        (entry.title || '').replace(/,/g, ';'), // Escapar comas
+        entry.currentViewers || 0,
+        entry.isLive ? 'En Vivo' : 'Offline',
+        entry.trend || 'N/A',
+        entry.source || 'YouTube Monitor'
+      ];
+    });
+
+    // Crear contenido CSV para operaciones
+    const operationsContent = [operationsHeaders, ...csvRows]
       .map(row => row.map(field => `"${field}"`).join(','))
       .join('\n');
+      
+    // Crear contenido CSV para YouTube
+    const youtubeContent = youtubeRows.length > 0 ? 
+      ['\n\n=== HISTORIAL DE YOUTUBE ===', youtubeHeaders, ...youtubeRows]
+        .map(row => Array.isArray(row) ? row.map(field => `"${field}"`).join(',') : row)
+        .join('\n') : 
+      '\n\n=== HISTORIAL DE YOUTUBE ===\nNo hay datos de YouTube disponibles';
     
     // Agregar sección resumen de costo por duración de servicio
     const summarySection = [
@@ -344,7 +387,9 @@ const MetricsDashboard: React.FC = () => {
         })
     ].join('\n');
 
-    const blob = new Blob([csvContent + summarySection], { type: 'text/csv;charset=utf-8;' });
+    const fullCsvContent = operationsContent + youtubeContent + summarySection;
+
+    const blob = new Blob([fullCsvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -362,6 +407,7 @@ const MetricsDashboard: React.FC = () => {
     const operations = getAllOperationsData();
     const resetHistory = getResetHistory();
     const successRate = getSuccessRate();
+    const youtubeHistory = getYouTubeMonitoringHistory();
     
     const htmlContent = `<!DOCTYPE html>
 <html lang="es">
@@ -503,6 +549,35 @@ const MetricsDashboard: React.FC = () => {
     </div>
     ` : ''}
 
+    ${youtubeHistory.length > 0 ? `
+    <h2>📺 Historial de Monitoreo de YouTube</h2>
+    <table class="operations-table">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Título</th>
+                <th>Viewers</th>
+                <th>Estado</th>
+                <th>Tendencia</th>
+                <th>Cambio</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${youtubeHistory.slice(0, 50).map(entry => `
+                <tr>
+                    <td>${new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES')}</td>
+                    <td>${(entry.title || 'Stream de YouTube').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>
+                    <td>${(entry.viewers || entry.currentViewers || 0).toLocaleString()}</td>
+                    <td>${entry.isLive ? '🔴 En Vivo' : '⏹️ Offline'}</td>
+                    <td>${entry.trend === 'up' ? '📈 Subiendo' : entry.trend === 'down' ? '📉 Bajando' : '➡️ Estable'}</td>
+                    <td>${entry.change || entry.growthPercent || 0}%</td>
+                </tr>
+            `).join('')}
+        </tbody>
+    </table>
+    <p><em>Mostrando las últimas 50 mediciones de YouTube</em></p>
+    ` : ''}
+
     <h2>📋 Todas las Operaciones</h2>
     <p><em>Nota: Las operaciones con fondo amarillo son del historial (de bloques reiniciados)</em></p>
     <table class="operations-table">
@@ -561,6 +636,34 @@ const MetricsDashboard: React.FC = () => {
                 </tr>
               `;
             }).join('')}
+        </tbody>
+    </table>
+
+    <h2>📺 Historial de Monitoreo de YouTube</h2>
+    <table class="operations-table">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>URL</th>
+                <th>Título</th>
+                <th>Viewers</th>
+                <th>Estado</th>
+                <th>Tendencia</th>
+                <th>Fuente</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${youtubeHistory.length > 0 ? youtubeHistory.map(entry => `
+                <tr>
+                    <td>${new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES')}</td>
+                    <td><a href="${entry.url || ''}" target="_blank">${entry.url || ''}</a></td>
+                    <td>${entry.title || 'N/A'}</td>
+                    <td>${(entry.currentViewers || 0).toLocaleString()}</td>
+                    <td class="status-${entry.isLive ? 'success' : 'error'}">${entry.isLive ? '🔴 En Vivo' : '⚫ Offline'}</td>
+                    <td>${entry.trend === 'up' ? '📈' : entry.trend === 'down' ? '📉' : '➡️'} ${entry.trend || 'N/A'}</td>
+                    <td>${entry.source || 'YouTube Monitor'}</td>
+                </tr>
+            `).join('') : '<tr><td colspan="7" style="text-align: center; color: #666;">No hay datos de YouTube disponibles</td></tr>'}
         </tbody>
     </table>
 
@@ -839,6 +942,119 @@ const MetricsDashboard: React.FC = () => {
       showToast('❌ Error al eliminar stream', 'error');
     }
   };
+
+  // Función para obtener el historial completo de monitoreo de YouTube
+  const getYouTubeMonitoringHistory = useCallback(() => {
+    const historyData: any[] = [];
+    
+    try {
+      // Buscar específicamente las claves de historial de YouTube
+      const allKeys = Object.keys(localStorage);
+      
+      console.log('🔍 Buscando historial de YouTube en localStorage...');
+      console.log('📊 Total de claves en localStorage:', allKeys.length);
+      
+      // Buscar claves de historial específicas (youtubeHistory_*)
+      const historyKeys = allKeys.filter(key => key.startsWith('youtubeHistory_'));
+      console.log('📈 Claves de historial encontradas:', historyKeys.length, historyKeys);
+      
+      historyKeys.forEach(key => {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '[]');
+          if (Array.isArray(data)) {
+            console.log(`📚 Procesando historial ${key} con ${data.length} entradas`);
+            data.forEach(entry => {
+              if (entry.url && (entry.viewers !== undefined || entry.currentViewers !== undefined)) {
+                historyData.push({
+                  url: entry.url,
+                  title: entry.title || 'Stream de YouTube',
+                  viewers: entry.viewers || entry.currentViewers || 0,
+                  currentViewers: entry.viewers || entry.currentViewers || 0,
+                  isLive: entry.isLive || false,
+                  timestamp: entry.timestamp || entry.lastUpdated || new Date().toISOString(),
+                  trend: entry.trend || 'stable',
+                  growthPercent: entry.growthPercent || 0,
+                  change: entry.change || entry.growthPercent || 0,
+                  estado: entry.estado || (entry.isLive ? 'En Vivo' : 'Offline'),
+                  source: entry.source || key
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.warn(`⚠️ Error parsing YouTube history from ${key}:`, error);
+        }
+      });
+      
+      // Si no hay historial específico, buscar datos individuales como fallback
+      if (historyData.length === 0) {
+        console.log('🔄 No se encontró historial específico, buscando datos individuales...');
+        allKeys.forEach(key => {
+          if (key.includes('youtube') || key.includes('YouTube')) {
+            try {
+              const data = JSON.parse(localStorage.getItem(key) || '{}');
+              
+              // Si es un objeto individual con datos válidos
+              if (data.url && (data.viewers !== undefined || data.currentViewers !== undefined)) {
+                console.log(`� Encontrado objeto individual en ${key}:`, data);
+                historyData.push({
+                  url: data.url,
+                  title: data.title || 'Stream de YouTube',
+                  viewers: data.viewers || data.currentViewers || 0,
+                  currentViewers: data.viewers || data.currentViewers || 0,
+                  isLive: data.isLive || false,
+                  timestamp: data.timestamp || data.lastUpdated || new Date().toISOString(),
+                  trend: data.trend || 'stable',
+                  growthPercent: data.growthPercent || 0,
+                  change: data.change || data.growthPercent || 0,
+                  estado: data.isLive ? 'En Vivo' : 'Offline',
+                  source: key
+                });
+              }
+            } catch (error) {
+              console.warn(`⚠️ Error parsing individual YouTube data from ${key}:`, error);
+            }
+          }
+        });
+      }
+      
+      console.log(`📊 Total de entradas de historial encontradas: ${historyData.length}`);
+      
+      // Remover duplicados basados en URL, timestamp y viewers (para evitar duplicados exactos)
+      const uniqueHistory = historyData.filter((item, index, self) => {
+        const duplicateIndex = self.findIndex(t => 
+          t.url === item.url && 
+          t.timestamp === item.timestamp && 
+          t.viewers === item.viewers
+        );
+        return duplicateIndex === index;
+      });
+      
+      console.log(`📈 Entradas únicas después de eliminar duplicados: ${uniqueHistory.length}`);
+      
+      // Ordenar por timestamp descendente (más reciente primero)
+      const sortedHistory = uniqueHistory.sort((a, b) => {
+        const dateA = new Date(a.timestamp || 0);
+        const dateB = new Date(b.timestamp || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+      
+      console.log('📊 Historial de YouTube procesado:', {
+        totalEntries: sortedHistory.length,
+        uniqueUrls: Array.from(new Set(sortedHistory.map(h => h.url))).length,
+        dateRange: sortedHistory.length > 0 ? {
+          newest: sortedHistory[0]?.timestamp,
+          oldest: sortedHistory[sortedHistory.length - 1]?.timestamp
+        } : null
+      });
+      
+      return sortedHistory;
+      
+    } catch (error) {
+      console.error('❌ Error getting YouTube monitoring history:', error);
+      return [];
+    }
+  }, []);
 
   return (
     <div className={`metrics-dashboard ${theme}`}>
