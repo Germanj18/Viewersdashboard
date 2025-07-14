@@ -4,6 +4,18 @@ import { useGlobal } from './GlobalContext';
 import { NotificationService, showToast } from './NotificationService';
 import './MetricsDashboard.css';
 
+interface YouTubeStreamData {
+  videoId: string;
+  url: string;
+  title: string;
+  currentViewers: number;
+  isLive: boolean;
+  lastUpdated: string;
+  trend: 'up' | 'down' | 'stable';
+  growthPercent: number;
+  predictedFinal: number;
+}
+
 interface OperationMetrics {
   totalOperations: number;
   successfulOperations: number;
@@ -16,6 +28,7 @@ interface OperationMetrics {
   viewersPerHour: { [hour: string]: number };
   viewersByServiceDuration: { [duration: string]: number };
   costByServiceDuration: { [duration: string]: number };
+  youtubeStreams: { [url: string]: YouTubeStreamData };
   lastUpdated: string;
 }
 
@@ -26,6 +39,7 @@ interface Alert {
   message: string;
   timestamp: string;
   blockId?: string;
+  youtubeUrl?: string;
 }
 
 const MetricsDashboard: React.FC = () => {
@@ -44,6 +58,7 @@ const MetricsDashboard: React.FC = () => {
     viewersPerHour: {},
     viewersByServiceDuration: {},
     costByServiceDuration: {},
+    youtubeStreams: {},
     lastUpdated: new Date().toISOString()
   });
 
@@ -118,6 +133,89 @@ const MetricsDashboard: React.FC = () => {
     return ((metrics.successfulOperations / metrics.totalOperations) * 100);
   };
 
+  // Función para obtener datos de YouTube del localStorage
+  const getYouTubeStreamsData = useCallback(() => {
+    const streamsData: { [url: string]: YouTubeStreamData } = {};
+    
+    try {
+      // Buscar datos de YouTube en localStorage
+      const youtubeDataKeys = Object.keys(localStorage).filter(key => 
+        key.startsWith('youtubeMonitor_') || key.includes('youtube')
+      );
+      
+      youtubeDataKeys.forEach(key => {
+        try {
+          const data = JSON.parse(localStorage.getItem(key) || '{}');
+          if (data.url && data.viewers !== undefined) {
+            const videoId = extractVideoId(data.url);
+            if (videoId) {
+              streamsData[data.url] = {
+                videoId,
+                url: data.url,
+                title: data.title || 'Stream de YouTube',
+                currentViewers: data.viewers || 0,
+                isLive: data.isLive || false,
+                lastUpdated: data.timestamp || new Date().toISOString(),
+                trend: data.trend || 'stable',
+                growthPercent: data.growthPercent || 0,
+                predictedFinal: data.predictedFinal || 0
+              };
+            }
+          }
+        } catch (error) {
+          console.warn('Error parsing YouTube data:', error);
+        }
+      });
+      
+      // También buscar en sessionStorage si no hay datos en localStorage
+      if (Object.keys(streamsData).length === 0) {
+        const sessionKeys = Object.keys(sessionStorage).filter(key => 
+          key.includes('youtube') || key.includes('monitor')
+        );
+        
+        sessionKeys.forEach(key => {
+          try {
+            const data = JSON.parse(sessionStorage.getItem(key) || '{}');
+            if (data.url && data.viewers !== undefined) {
+              const videoId = extractVideoId(data.url);
+              if (videoId) {
+                streamsData[data.url] = {
+                  videoId,
+                  url: data.url,
+                  title: data.title || 'Stream de YouTube',
+                  currentViewers: data.viewers || 0,
+                  isLive: data.isLive || false,
+                  lastUpdated: data.timestamp || new Date().toISOString(),
+                  trend: data.trend || 'stable',
+                  growthPercent: data.growthPercent || 0,
+                  predictedFinal: data.predictedFinal || 0
+                };
+              }
+            }
+          } catch (error) {
+            console.warn('Error parsing YouTube session data:', error);
+          }
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error getting YouTube streams data:', error);
+    }
+    
+    return streamsData;
+  }, []);
+
+  // Función para extraer video ID de URL de YouTube
+  const extractVideoId = (url: string): string | null => {
+    try {
+      const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  };
+
   // Función para exportar datos como JSON
   const exportToJSON = useCallback(() => {
     const allOperations = getAllOperationsData();
@@ -145,6 +243,7 @@ const MetricsDashboard: React.FC = () => {
       operationsPerBlock: metrics.operationsPerBlock,
       viewersPerHour: metrics.viewersPerHour,
       viewersByServiceDuration: metrics.viewersByServiceDuration,
+      youtubeStreams: metrics.youtubeStreams,
       allOperations: allOperations, // Todas las operaciones, no solo recientes
       blockResetHistory: resetHistory,
       alerts: alerts
@@ -500,6 +599,7 @@ const MetricsDashboard: React.FC = () => {
       viewersPerHour: {},
       viewersByServiceDuration: {},
       costByServiceDuration: {},
+      youtubeStreams: {},
       lastUpdated: new Date().toISOString()
     };
 
@@ -557,8 +657,11 @@ const MetricsDashboard: React.FC = () => {
       newMetrics.totalResetViewers += reset.viewersLost || 0;
     });
 
+    // Obtener datos de YouTube
+    newMetrics.youtubeStreams = getYouTubeStreamsData();
+
     setMetrics(newMetrics);
-  }, [totalViewers, getAllOperationsData]);
+  }, [totalViewers, getAllOperationsData, getYouTubeStreamsData]);
 
   // Función para generar alertas con mejor detección de cambios
   const generateAlerts = useCallback(() => {
@@ -898,6 +1001,51 @@ const MetricsDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Nueva sección: Monitoreo de YouTube */}
+      {Object.keys(metrics.youtubeStreams).length > 0 && (
+        <div className="youtube-section">
+          <h2>📺 Streams de YouTube Monitoreados</h2>
+          <div className="youtube-streams-grid">
+            {Object.entries(metrics.youtubeStreams).map(([url, streamData]) => (
+              <div key={url} className="youtube-stream-card">
+                <div className="stream-header">
+                  <h4>📝 {streamData.title}</h4>
+                  <div className={`live-indicator ${streamData.isLive ? 'live' : 'offline'}`}>
+                    {streamData.isLive ? '🔴 En Vivo' : '⏹️ Offline'}
+                  </div>
+                </div>
+                
+                <div className="stream-metrics">
+                  <div className="metric">
+                    <span className="metric-label">Viewers Actuales:</span>
+                    <span className="metric-value">{streamData.currentViewers.toLocaleString()}</span>
+                  </div>
+                  
+                  <div className="metric">
+                    <span className="metric-label">Tendencia:</span>
+                    <span className={`metric-value trend-${streamData.trend}`}>
+                      {streamData.trend === 'up' ? '📈' : streamData.trend === 'down' ? '📉' : '➡️'}
+                      {streamData.growthPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                  
+                  {streamData.predictedFinal > 0 && streamData.isLive && (
+                    <div className="metric">
+                      <span className="metric-label">Predicción Final:</span>
+                      <span className="metric-value">{streamData.predictedFinal.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="stream-footer">
+                  <small>Última actualización: {new Date(streamData.lastUpdated).toLocaleTimeString()}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Nueva sección: Operaciones Recientes con Horarios */}
       <div className="recent-operations-section">

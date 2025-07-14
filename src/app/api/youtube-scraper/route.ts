@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-interface YouTubeScrapingResult {
+interface YouTubeData {
   viewers: number;
   isLive: boolean;
   title: string;
@@ -14,147 +14,232 @@ export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
     
-    if (!url || !url.includes('youtube.com')) {
+    if (!url) {
       return NextResponse.json({
+        status: 'error',
+        message: 'URL de YouTube requerida',
         viewers: 0,
         isLive: false,
         title: '',
+        timestamp: new Date().toISOString(),
+        url: ''
+      }, { status: 400 });
+    }
+
+    // Validar que sea una URL de YouTube
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/;
+    if (!youtubeRegex.test(url)) {
+      return NextResponse.json({
         status: 'error',
         message: 'URL de YouTube inválida',
-        timestamp: new Date().toISOString(),
-        url
-      } as YouTubeScrapingResult);
-    }
-
-    // Extraer video ID de la URL
-    const videoIdMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-    if (!videoIdMatch) {
-      return NextResponse.json({
         viewers: 0,
         isLive: false,
         title: '',
-        status: 'error',
-        message: 'No se pudo extraer el ID del video',
         timestamp: new Date().toISOString(),
         url
-      } as YouTubeScrapingResult);
+      }, { status: 400 });
     }
 
-    const videoId = videoIdMatch[1];
-    console.log('🔍 Intentando scraping para video ID:', videoId);
+    console.log('🔍 Iniciando scraping de YouTube:', url);
 
-    // Configurar headers para simular un navegador real
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.5',
-      'Accept-Encoding': 'gzip, deflate, br',
-      'DNT': '1',
-      'Connection': 'keep-alive',
-      'Upgrade-Insecure-Requests': '1',
-    };
-
-    // Hacer request a YouTube
+    // Hacer request a YouTube con headers que simulan navegador
     const response = await fetch(url, {
-      headers,
-      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Cache-Control': 'no-cache'
+      },
+      method: 'GET'
     });
 
     if (!response.ok) {
-      return NextResponse.json({
-        viewers: 0,
-        isLive: false,
-        title: '',
-        status: 'error',
-        message: `Error HTTP: ${response.status}`,
-        timestamp: new Date().toISOString(),
-        url
-      } as YouTubeScrapingResult);
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const html = await response.text();
     
-    // Extraer información usando regex (más robusto que parsing HTML completo)
-    let viewers = 0;
-    let isLive = false;
-    let title = '';
-
-    // Buscar viewers en vivo
-    const liveViewersMatch = html.match(/"viewCount":"(\d+)"/);
-    const liveViewersMatch2 = html.match(/(\d+(?:,\d+)*)\s*watching/i);
-    const liveViewersMatch3 = html.match(/"concurrent":{"runs":\[{"text":"([\d,]+)"}]/);
+    // Extraer información del HTML
+    const result = extractYouTubeData(html, url);
     
-    if (liveViewersMatch3) {
-      viewers = parseInt(liveViewersMatch3[1].replace(/,/g, ''));
-      isLive = true;
-      console.log('📺 Viewers encontrados (método 3):', viewers);
-    } else if (liveViewersMatch2) {
-      viewers = parseInt(liveViewersMatch2[1].replace(/,/g, ''));
-      isLive = true;
-      console.log('📺 Viewers encontrados (método 2):', viewers);
-    } else if (liveViewersMatch) {
-      viewers = parseInt(liveViewersMatch[1]);
-      isLive = true;
-      console.log('📺 Viewers encontrados (método 1):', viewers);
-    } else {
-      // Buscar viewers de video grabado
-      const recordedViewsMatch = html.match(/"viewCount":{"simpleText":"([\d,]+) views?"}/);
-      if (recordedViewsMatch) {
-        viewers = parseInt(recordedViewsMatch[1].replace(/,/g, ''));
-        isLive = false;
-        console.log('📹 Video grabado, vistas:', viewers);
-      }
-    }
+    console.log('✅ Scraping completado:', result);
+    
+    return NextResponse.json(result);
 
-    // Extraer título
-    const titleMatch = html.match(/<title[^>]*>([^<]+)</i);
+  } catch (error) {
+    console.error('❌ Error en scraping de YouTube:', error);
+    
+    return NextResponse.json({
+      status: 'error',
+      message: error instanceof Error ? error.message : 'Error desconocido',
+      viewers: 0,
+      isLive: false,
+      title: '',
+      timestamp: new Date().toISOString(),
+      url: ''
+    }, { status: 500 });
+  }
+}
+
+function extractYouTubeData(html: string, url: string): YouTubeData {
+  try {
+    // Extraer título del video
+    let title = '';
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
     if (titleMatch) {
-      title = titleMatch[1]
-        .replace(' - YouTube', '')
-        .replace(/&#39;/g, "'")
-        .replace(/&quot;/g, '"')
-        .replace(/&amp;/g, '&')
-        .trim();
+      title = titleMatch[1].replace(' - YouTube', '').trim();
     }
 
-    // Verificar si está en vivo buscando indicadores adicionales
+    // Buscar indicadores de stream en vivo
     const liveIndicators = [
-      /LIVE/i,
-      /"isLive":true/i,
-      /"isLiveContent":true/i,
       /watching now/i,
-      /\d+\s*watching/i
+      /viewers watching/i,
+      /en directo/i,
+      /live now/i,
+      /"isLiveContent":true/i,
+      /"isLive":true/i
     ];
 
-    for (const indicator of liveIndicators) {
-      if (indicator.test(html)) {
-        isLive = true;
-        break;
+    const isLive = liveIndicators.some(pattern => pattern.test(html));
+
+    // Extraer número de viewers con múltiples patrones
+    let viewers = 0;
+    
+    if (isLive) {
+      // Patrones para viewers en vivo
+      const viewerPatterns = [
+        /"viewCount":{"videoViewCountRenderer":{"viewCount":{"simpleText":"([^"]+)"/,
+        /"concurrentViewers":"([^"]+)"/,
+        /"watching now"/i,
+        /(\d+(?:,\d+)*)\s*watching/i,
+        /(\d+(?:,\d+)*)\s*viewers?/i,
+        /(\d+(?:\.\d+)?[KMB]?)\s*watching/i,
+        /(\d+(?:\.\d+)?[KMB]?)\s*viewers?/i
+      ];
+
+      for (const pattern of viewerPatterns) {
+        const match = html.match(pattern);
+        if (match) {
+          let viewerText = match[1];
+          viewers = parseViewerCount(viewerText);
+          if (viewers > 0) {
+            console.log(`� Viewers encontrados con patrón: ${viewerText} → ${viewers}`);
+            break;
+          }
+        }
+      }
+
+      // Buscar en JSON embebido
+      if (viewers === 0) {
+        const jsonMatches = html.match(/var ytInitialData = ({.*?});/);
+        if (jsonMatches) {
+          try {
+            const data = JSON.parse(jsonMatches[1]);
+            viewers = findViewersInObject(data);
+          } catch (e) {
+            console.warn('Error parseando ytInitialData:', e);
+          }
+        }
+      }
+    } else {
+      // Para videos no en vivo, buscar views totales
+      const viewPatterns = [
+        /(\d+(?:,\d+)*)\s*views?/i,
+        /(\d+(?:\.\d+)?[KMB]?)\s*views?/i,
+        /"viewCount":"([^"]+)"/
+      ];
+
+      for (const pattern of viewPatterns) {
+        const match = html.match(pattern);
+        if (match) {
+          viewers = parseViewerCount(match[1]);
+          if (viewers > 0) break;
+        }
       }
     }
 
-    console.log('📊 Resultado scraping:', { viewers, isLive, title: title.substring(0, 50) + '...' });
-
-    return NextResponse.json({
+    return {
       viewers,
       isLive,
       title,
       status: 'success',
       timestamp: new Date().toISOString(),
       url
-    } as YouTubeScrapingResult);
+    };
 
   } catch (error) {
-    console.error('❌ Error en scraping:', error);
-    
-    return NextResponse.json({
+    console.error('Error extrayendo datos:', error);
+    return {
       viewers: 0,
       isLive: false,
       title: '',
       status: 'error',
-      message: error instanceof Error ? error.message : 'Error desconocido en scraping',
+      message: 'Error procesando respuesta de YouTube',
       timestamp: new Date().toISOString(),
-      url: ''
-    } as YouTubeScrapingResult);
+      url
+    };
   }
+}
+
+function findViewersInObject(obj: any): number {
+  if (!obj || typeof obj !== 'object') return 0;
+  
+  const keys = ['concurrentViewers', 'viewCount', 'watching', 'viewers'];
+  
+  for (const key of keys) {
+    if (obj[key]) {
+      const value = typeof obj[key] === 'object' ? obj[key].simpleText || obj[key].runs?.[0]?.text : obj[key];
+      if (value) {
+        const parsed = parseViewerCount(value.toString());
+        if (parsed > 0) return parsed;
+      }
+    }
+  }
+  
+  // Búsqueda recursiva
+  for (const value of Object.values(obj)) {
+    if (typeof value === 'object' && value !== null) {
+      const result = findViewersInObject(value);
+      if (result > 0) return result;
+    }
+  }
+  
+  return 0;
+}
+
+function parseViewerCount(text: string): number {
+  if (!text) return 0;
+  
+  // Limpiar texto
+  text = text.replace(/[^\d,.KMB]/gi, '');
+  
+  // Manejar notación con K, M, B
+  const multipliers: { [key: string]: number } = {
+    'K': 1000,
+    'M': 1000000,
+    'B': 1000000000
+  };
+  
+  const match = text.match(/^([\d,.]+)([KMB])?$/i);
+  if (match) {
+    let number = parseFloat(match[1].replace(/,/g, ''));
+    const suffix = match[2]?.toUpperCase();
+    
+    if (suffix && multipliers[suffix]) {
+      number *= multipliers[suffix];
+    }
+    
+    return Math.round(number);
+  }
+  
+  // Fallback: solo números
+  const numMatch = text.match(/[\d,]+/);
+  if (numMatch) {
+    return parseInt(numMatch[0].replace(/,/g, ''), 10) || 0;
+  }
+  
+  return 0;
 }

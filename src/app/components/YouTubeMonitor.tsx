@@ -30,6 +30,17 @@ const YouTubeMonitor: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Función para extraer video ID de URL de YouTube
+  const extractVideoId = (url: string): string | null => {
+    try {
+      const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/;
+      const match = url.match(regex);
+      return match ? match[1] : null;
+    } catch {
+      return null;
+    }
+  };
+
   // Función para hacer scraping
   const scrapeYouTube = useCallback(async (targetUrl: string) => {
     if (!targetUrl) return;
@@ -63,6 +74,59 @@ const YouTubeMonitor: React.FC = () => {
         
         setHistory(prev => {
           const updated = [...prev, newEntry].slice(-50); // Mantener últimos 50 registros
+          
+          // Calcular tendencia y predicción para el dashboard
+          let trend: 'up' | 'down' | 'stable' = 'stable';
+          let growthPercent = 0;
+          let predictedFinal = 0;
+          
+          if (updated.length >= 2) {
+            const recent = updated.slice(-5); // Últimos 5 registros
+            const first = recent[0];
+            const last = recent[recent.length - 1];
+            
+            const growth = last.viewers - first.viewers;
+            growthPercent = first.viewers > 0 ? (growth / first.viewers) * 100 : 0;
+            trend = growth > 0 ? 'up' : growth < 0 ? 'down' : 'stable';
+            
+            // Calcular predicción
+            if (updated.length >= 3 && data.isLive) {
+              const recent10 = updated.slice(-10);
+              let totalGrowth = 0;
+              
+              for (let i = 1; i < recent10.length; i++) {
+                totalGrowth += recent10[i].viewers - recent10[i-1].viewers;
+              }
+              
+              const avgGrowthPerInterval = totalGrowth / (recent10.length - 1);
+              const hoursLeft = 2; // Asumir 2 horas restantes
+              const intervalsLeft = (hoursLeft * 3600) / refreshInterval;
+              
+              predictedFinal = Math.max(0, Math.round(data.viewers + (avgGrowthPerInterval * intervalsLeft)));
+            }
+          }
+          
+          // Actualizar datos en localStorage con tendencia y predicción
+          try {
+            const videoId = extractVideoId(targetUrl);
+            if (videoId) {
+              const enhancedData = {
+                url: targetUrl,
+                title: data.title,
+                viewers: data.viewers,
+                isLive: data.isLive,
+                timestamp: data.timestamp,
+                lastUpdated: new Date().toISOString(),
+                trend,
+                growthPercent,
+                predictedFinal
+              };
+              
+              localStorage.setItem(`youtubeMonitor_${videoId}`, JSON.stringify(enhancedData));
+            }
+          } catch (error) {
+            console.warn('Error updating enhanced YouTube data:', error);
+          }
           
           // Detectar cambios significativos
           if (prev.length > 0) {
