@@ -57,26 +57,7 @@ const YouTubeMonitor: React.FC = () => {
         body: JSON.stringify({ url: targetUrl })
       });
 
-      // Verificar si la respuesta es JSON válida
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        throw new Error('Respuesta no válida del servidor (no es JSON)');
-      }
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-
-      let data: YouTubeData;
-      const responseText = await response.text();
-      
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('Error parseando JSON:', parseError);
-        console.error('Respuesta recibida:', responseText.substring(0, 200));
-        throw new Error('El servidor devolvió una respuesta inválida (posible bloqueo de YouTube)');
-      }
+      const data: YouTubeData = await response.json();
       
       if (data.status === 'error') {
         setError(data.message || 'Error desconocido');
