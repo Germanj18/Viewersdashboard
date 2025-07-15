@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../ThemeContext';
 import { useGlobal } from './GlobalContext';
 import { NotificationService, showToast } from './NotificationService';
+import * as XLSX from 'xlsx';
 import './MetricsDashboard.css';
 
 interface YouTubeStreamData {
@@ -1056,6 +1057,127 @@ const MetricsDashboard: React.FC = () => {
     }
   }, []);
 
+  // Función para descargar tabla de operaciones como CSV
+  const downloadOperationsTableCSV = useCallback(() => {
+    const operations = getAllOperationsData();
+    
+    const headers = [
+      'Bloque',
+      'Estado',
+      'Hora Inicio',
+      'Finalización Estimada',
+      'Duración (min)',
+      'Viewers',
+      'Costo ($)',
+      'Es Histórico'
+    ];
+
+    const csvRows = operations.map(op => {
+      // Calcular hora de finalización
+      let estimatedEndTime = 'N/A';
+      const startTimeDisplay = op.timestamp;
+      
+      if (op.duration && (op.savedAt || op.startTime)) {
+        try {
+          const baseTime = op.savedAt || op.startTime;
+          const startDate = new Date(baseTime);
+          
+          if (!isNaN(startDate.getTime())) {
+            const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
+            if (!isNaN(endTime.getTime())) {
+              const hours = endTime.getHours().toString().padStart(2, '0');
+              const minutes = endTime.getMinutes().toString().padStart(2, '0');
+              const seconds = endTime.getSeconds().toString().padStart(2, '0');
+              estimatedEndTime = `${hours}:${minutes}:${seconds}`;
+            }
+          }
+        } catch (error) {
+          estimatedEndTime = 'N/A';
+        }
+      }
+
+      return [
+        `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
+        op.status === 'success' ? 'Exitosa' : 'Fallida',
+        startTimeDisplay || 'N/A',
+        estimatedEndTime,
+        op.duration || 0,
+        (op.count || 0).toLocaleString(),
+        (op.cost || 0).toFixed(2),
+        op.isHistorical ? 'Sí' : 'No'
+      ];
+    });
+
+    const csvContent = [headers, ...csvRows]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tabla-operaciones-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showToast('📊 Tabla de operaciones descargada', 'success');
+  }, [getAllOperationsData]);
+
+  // Función para descargar historial de monitoreo de YouTube como XLSX
+  const downloadYouTubeHistoryXLSX = useCallback(() => {
+    const youtubeHistory = getYouTubeMonitoringHistory();
+    
+    if (youtubeHistory.length === 0) {
+      showToast('⚠️ No hay historial de YouTube para descargar', 'warning');
+      return;
+    }
+
+    // Preparar los datos para Excel con cada campo en su propia columna
+    const excelData = youtubeHistory.map(entry => ({
+      'Fecha y Hora': new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES'),
+      'Título': entry.title || 'Stream de YouTube',
+      'Viewers': entry.viewers || entry.currentViewers || 0,
+      'Estado': entry.isLive ? 'En Vivo' : 'Offline',
+      'Tendencia': entry.trend === 'up' ? 'Subiendo' : entry.trend === 'down' ? 'Bajando' : 'Estable',
+      'Cambio (%)': parseFloat((entry.change || entry.growthPercent || 0).toFixed(1)),
+      'URL': entry.url || '',
+      'Fuente': entry.source || 'YouTube Monitor'
+    }));
+
+    try {
+      // Crear workbook y worksheet
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+      // Configurar el ancho de las columnas para mejor visualización
+      const columnWidths = [
+        { wch: 20 }, // Fecha y Hora
+        { wch: 40 }, // Título
+        { wch: 12 }, // Viewers
+        { wch: 12 }, // Estado
+        { wch: 12 }, // Tendencia
+        { wch: 12 }, // Cambio (%)
+        { wch: 50 }, // URL
+        { wch: 20 }  // Fuente
+      ];
+      worksheet['!cols'] = columnWidths;
+
+      // Agregar hoja al workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Historial YouTube');
+
+      // Generar el archivo y descargarlo
+      const fileName = `historial-youtube-${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      
+      showToast('📺 Historial de YouTube descargado como Excel', 'success');
+    } catch (error) {
+      console.error('Error generando archivo Excel:', error);
+      showToast('❌ Error al generar archivo Excel', 'error');
+    }
+  }, [getYouTubeMonitoringHistory]);
+
   return (
     <div className={`metrics-dashboard ${theme}`}>
       {/* Header */}
@@ -1325,7 +1447,29 @@ const MetricsDashboard: React.FC = () => {
       {/* Nueva sección: Operaciones Recientes con Horarios */}
       <div className="recent-operations-section">
         <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <h3>📋 Todas las Operaciones (con Horarios)</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3>📋 Todas las Operaciones (con Horarios)</h3>
+            <button 
+              onClick={downloadOperationsTableCSV}
+              className="export-button"
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: '0.875rem',
+                borderRadius: '0.375rem',
+                background: 'linear-gradient(135deg, #059669, #047857)',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+              title="Descargar tabla de operaciones como CSV"
+            >
+              📥 Descargar CSV
+            </button>
+          </div>
           <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
             <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
               <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
@@ -1401,6 +1545,99 @@ const MetricsDashboard: React.FC = () => {
                   })}
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Nueva sección: Historial de Monitoreo de YouTube */}
+      <div className="recent-operations-section">
+        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3>📺 Historial de Monitoreo de YouTube</h3>
+            <button 
+              onClick={downloadYouTubeHistoryXLSX}
+              className="export-button"
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: '0.875rem',
+                borderRadius: '0.375rem',
+                background: 'linear-gradient(135deg, #16a34a, #15803d)',
+                color: 'white',
+                border: 'none',
+                cursor: 'pointer',
+                fontWeight: '500',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+              title="Descargar historial de YouTube como Excel"
+            >
+              � Descargar Excel
+            </button>
+          </div>
+          <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
+            {(() => {
+              const youtubeHistory = getYouTubeMonitoringHistory();
+              return youtubeHistory.length > 0 ? (
+                <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
+                  <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
+                    <tr>
+                      <th>Hora</th>
+                      <th>Título</th>
+                      <th>Viewers</th>
+                      <th>Estado</th>
+                      <th>Tendencia</th>
+                      <th>Cambio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {youtubeHistory.slice(0, 50).map((entry, index) => (
+                      <tr key={`youtube-${index}-${entry.timestamp}`}>
+                        <td>{new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleTimeString()}</td>
+                        <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {entry.title || 'Stream de YouTube'}
+                        </td>
+                        <td>{(entry.viewers || entry.currentViewers || 0).toLocaleString()}</td>
+                        <td>
+                          <span style={{ 
+                            color: entry.isLive ? '#10b981' : '#ef4444',
+                            fontWeight: 'bold'
+                          }}>
+                            {entry.isLive ? '🔴 En Vivo' : '⏹️ Offline'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{
+                            color: entry.trend === 'up' ? '#10b981' : entry.trend === 'down' ? '#ef4444' : '#6b7280'
+                          }}>
+                            {entry.trend === 'up' ? '📈 Subiendo' : entry.trend === 'down' ? '📉 Bajando' : '➡️ Estable'}
+                          </span>
+                        </td>
+                        <td>
+                          <span style={{
+                            color: (entry.change || entry.growthPercent || 0) > 0 ? '#10b981' : 
+                                  (entry.change || entry.growthPercent || 0) < 0 ? '#ef4444' : '#6b7280'
+                          }}>
+                            {(entry.change || entry.growthPercent || 0).toFixed(1)}%
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div style={{ 
+                  padding: '2rem', 
+                  textAlign: 'center', 
+                  color: theme === 'dark' ? '#9ca3af' : '#6b7280' 
+                }}>
+                  <p>📺 No hay historial de monitoreo de YouTube disponible</p>
+                  <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                    Los datos aparecerán aquí cuando empieces a monitorear streams de YouTube
+                  </p>
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
