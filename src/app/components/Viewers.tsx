@@ -211,7 +211,12 @@ const Viewers = () => {
     });
 
     const hasGlobalHistory = localStorage.getItem('globalOperationsHistory') || localStorage.getItem('blockResetHistory');
-    const hasAnyData = hasBlockData || hasGlobalHistory;
+    
+    // Verificar si hay datos de monitoreo de YouTube
+    const hasYouTubeData = Array.from({length: localStorage.length}, (_, i) => localStorage.key(i))
+      .some(key => key && (key.startsWith('youtubeMonitor_') || key.includes('youtube') || key.includes('stream')));
+    
+    const hasAnyData = hasBlockData || hasGlobalHistory || hasYouTubeData;
 
     if (!hasAnyData) {
       alert('No hay datos para resetear.');
@@ -240,7 +245,9 @@ const Viewers = () => {
       '• Todos los estados de bloques actuales\n' +
       '• Todo el historial de operaciones\n' +
       '• Todo el historial de resets\n' +
-      '• Todas las métricas acumuladas\n\n' +
+      '• Todas las métricas acumuladas\n' +
+      '• Todos los datos de monitoreo de YouTube\n' +
+      '• Historial de streams monitoreados\n\n' +
       '⚠️ Esta acción NO se puede deshacer.\n\n' +
       '¿Estás absolutamente seguro de continuar?'
     );
@@ -269,11 +276,18 @@ const Viewers = () => {
       localStorage.removeItem('globalOperationsHistory');
       localStorage.removeItem('blockResetHistory');
 
-      // 3. Limpiar cualquier otro dato relacionado
+      // 3. Limpiar datos de monitoreo de YouTube
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key && (key.startsWith('blockState_') || key.includes('metrics') || key.includes('dashboard'))) {
+        if (key && (
+          key.startsWith('blockState_') || 
+          key.includes('metrics') || 
+          key.includes('dashboard') ||
+          key.startsWith('youtubeMonitor_') || // Datos del monitor de YouTube
+          key.includes('youtube') || 
+          key.includes('stream')
+        )) {
           keysToRemove.push(key);
         }
       }
@@ -283,7 +297,7 @@ const Viewers = () => {
       setShowMetrics(false);
 
       // 5. Mostrar confirmación de éxito
-      alert('✅ Reset completo realizado con éxito.\n\nTodos los datos han sido eliminados permanentemente.\nLos bloques están listos para usar desde cero.');
+      alert('✅ Reset completo realizado con éxito.\n\nTodos los datos han sido eliminados permanentemente:\n• Estados de bloques\n• Historial de operaciones\n• Datos de monitoreo de YouTube\n• Métricas del dashboard\n\nLos bloques están listos para usar desde cero.');
 
     } catch (error) {
       console.error('Error durante el reset completo:', error);
