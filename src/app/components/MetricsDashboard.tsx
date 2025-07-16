@@ -129,10 +129,10 @@ const MetricsDashboard: React.FC = () => {
     }
   };
 
-  const getSuccessRate = () => {
+  const getSuccessRate = useCallback(() => {
     if (metrics.totalOperations === 0) return 0;
     return ((metrics.successfulOperations / metrics.totalOperations) * 100);
-  };
+  }, [metrics.totalOperations, metrics.successfulOperations]);
 
   // Función para obtener datos de YouTube del localStorage
   const getYouTubeStreamsData = useCallback(() => {
@@ -270,7 +270,7 @@ const MetricsDashboard: React.FC = () => {
     URL.revokeObjectURL(url);
     
     showToast('📄 Reporte JSON descargado exitosamente', 'success');
-  }, [metrics, alerts, getAllOperationsData, getResetHistory]);
+  }, [metrics, alerts, getAllOperationsData, getResetHistory, getSuccessRate]);
 
   // Función para exportar como CSV
   const exportToCSV = useCallback(() => {

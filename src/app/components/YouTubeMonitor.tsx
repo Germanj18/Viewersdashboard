@@ -193,7 +193,7 @@ const YouTubeMonitor: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [refreshInterval]);
 
   // Efecto para monitoreo automático
   useEffect(() => {
