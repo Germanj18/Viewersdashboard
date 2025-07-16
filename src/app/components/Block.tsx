@@ -26,6 +26,7 @@ export interface BlockData {
   operationType: 'add' | 'subtract';
   autoStart: boolean;
   startTime: string;
+  intervalMinutes: number; // Intervalo personalizable en minutos (1-5)
 }
 
 interface BlockProps {
@@ -93,7 +94,12 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
   
   const [blockData, setBlockData] = useState<BlockData>(() => {
     const savedState = loadBlockState();
-    return savedState?.blockData || initialData;
+    const data = savedState?.blockData || initialData;
+    // Asegurar que intervalMinutes tenga un valor por defecto
+    if (!data.intervalMinutes) {
+      data.intervalMinutes = 2; // 2 minutos por defecto
+    }
+    return data;
   });
   
   // Función para guardar estado en localStorage
@@ -436,8 +442,9 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     // Enviar la primera operación inmediatamente
     handleApiCall();
 
-    // Configurar el intervalo para las siguientes operaciones
-    const newIntervalId = setInterval(() => handleApiCall(), 120000); // 2 minutos
+    // Configurar el intervalo para las siguientes operaciones usando el intervalo personalizado
+    const intervalMs = (blockDataRef.current.intervalMinutes || 2) * 60 * 1000; // Convertir minutos a millisegundos
+    const newIntervalId = setInterval(() => handleApiCall(), intervalMs);
     intervalRef.current = newIntervalId;
     setIntervalId(newIntervalId);
   };
@@ -465,8 +472,9 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     // Llamar a la API inmediatamente después de reanudar
     handleApiCall();
 
-    // Reiniciar el intervalo
-    const newIntervalId = setInterval(handleApiCall, 120000);
+    // Reiniciar el intervalo usando el intervalo personalizado
+    const intervalMs = (blockDataRef.current.intervalMinutes || 2) * 60 * 1000;
+    const newIntervalId = setInterval(handleApiCall, intervalMs);
     intervalRef.current = newIntervalId;
     setIntervalId(newIntervalId);
   };
@@ -608,11 +616,17 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     <div className={`block ${theme}`}>
       <h2 className="block-title">{blockData.title}</h2>
       
-      {blockData.autoStart && blockData.startTime && (
-        <div className="auto-start-info">
-          ⏰ Inicio automático: {blockData.startTime}
+      <div className="block-info">
+        {blockData.autoStart && blockData.startTime && (
+          <div className="auto-start-info">
+            ⏰ Inicio automático: {blockData.startTime}
+          </div>
+        )}
+        
+        <div className="interval-info">
+          ⏱️ Intervalo: {blockData.intervalMinutes || 2} min{(blockData.intervalMinutes || 2) > 1 ? 'utos' : 'uto'}
         </div>
-      )}
+      </div>
 
       {(state === 'paused' || state === 'completed') && (
         <button onClick={generateExcel} className="download-icon">

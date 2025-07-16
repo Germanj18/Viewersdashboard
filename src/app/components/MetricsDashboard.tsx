@@ -302,6 +302,7 @@ const MetricsDashboard: React.FC = () => {
       'Viewers',
       'Estado (Live/Offline)',
       'Tendencia',
+      'Cambio',
       'Fuente'
     ];
 
@@ -353,6 +354,11 @@ const MetricsDashboard: React.FC = () => {
 
     // Crear filas para el historial de YouTube
     const youtubeRows = youtubeHistory.map(entry => {
+      const changeValue = entry.change || 0;
+      const changeDisplay = changeValue === 0 ? '0' : 
+                           changeValue > 0 ? `+${changeValue.toLocaleString()}` : 
+                           changeValue.toLocaleString();
+      
       return [
         new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES'),
         entry.url || '',
@@ -360,6 +366,7 @@ const MetricsDashboard: React.FC = () => {
         entry.currentViewers || 0,
         entry.isLive ? 'En Vivo' : 'Offline',
         entry.trend || 'N/A',
+        changeDisplay,
         entry.source || 'YouTube Monitor'
       ];
     });
@@ -571,7 +578,11 @@ const MetricsDashboard: React.FC = () => {
                     <td>${(entry.viewers || entry.currentViewers || 0).toLocaleString()}</td>
                     <td>${entry.isLive ? '🔴 En Vivo' : '⏹️ Offline'}</td>
                     <td>${entry.trend === 'up' ? '📈 Subiendo' : entry.trend === 'down' ? '📉 Bajando' : '➡️ Estable'}</td>
-                    <td>${entry.change || entry.growthPercent || 0}%</td>
+                    <td>${(() => {
+                      const changeValue = entry.change || 0;
+                      if (changeValue === 0) return '0';
+                      return changeValue > 0 ? `+${changeValue.toLocaleString()}` : changeValue.toLocaleString();
+                    })()}</td>
                 </tr>
             `).join('')}
         </tbody>
@@ -637,34 +648,6 @@ const MetricsDashboard: React.FC = () => {
                 </tr>
               `;
             }).join('')}
-        </tbody>
-    </table>
-
-    <h2>📺 Historial de Monitoreo de YouTube</h2>
-    <table class="operations-table">
-        <thead>
-            <tr>
-                <th>Fecha y Hora</th>
-                <th>URL</th>
-                <th>Título</th>
-                <th>Viewers</th>
-                <th>Estado</th>
-                <th>Tendencia</th>
-                <th>Fuente</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${youtubeHistory.length > 0 ? youtubeHistory.map(entry => `
-                <tr>
-                    <td>${new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES')}</td>
-                    <td><a href="${entry.url || ''}" target="_blank">${entry.url || ''}</a></td>
-                    <td>${entry.title || 'N/A'}</td>
-                    <td>${(entry.currentViewers || 0).toLocaleString()}</td>
-                    <td class="status-${entry.isLive ? 'success' : 'error'}">${entry.isLive ? '🔴 En Vivo' : '⚫ Offline'}</td>
-                    <td>${entry.trend === 'up' ? '📈' : entry.trend === 'down' ? '📉' : '➡️'} ${entry.trend || 'N/A'}</td>
-                    <td>${entry.source || 'YouTube Monitor'}</td>
-                </tr>
-            `).join('') : '<tr><td colspan="7" style="text-align: center; color: #666;">No hay datos de YouTube disponibles</td></tr>'}
         </tbody>
     </table>
 
@@ -1135,16 +1118,23 @@ const MetricsDashboard: React.FC = () => {
     }
 
     // Preparar los datos para Excel con cada campo en su propia columna
-    const excelData = youtubeHistory.map(entry => ({
-      'Fecha y Hora': new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES'),
-      'Título': entry.title || 'Stream de YouTube',
-      'Viewers': entry.viewers || entry.currentViewers || 0,
-      'Estado': entry.isLive ? 'En Vivo' : 'Offline',
-      'Tendencia': entry.trend === 'up' ? 'Subiendo' : entry.trend === 'down' ? 'Bajando' : 'Estable',
-      'Cambio (%)': parseFloat((entry.change || entry.growthPercent || 0).toFixed(1)),
-      'URL': entry.url || '',
-      'Fuente': entry.source || 'YouTube Monitor'
-    }));
+    const excelData = youtubeHistory.map(entry => {
+      const changeValue = entry.change || 0;
+      const changeDisplay = changeValue === 0 ? '0' : 
+                           changeValue > 0 ? `+${changeValue.toLocaleString()}` : 
+                           changeValue.toLocaleString();
+      
+      return {
+        'Fecha y Hora': new Date(entry.timestamp || entry.lastUpdate || 0).toLocaleString('es-ES'),
+        'Título': entry.title || 'Stream de YouTube',
+        'Viewers': entry.viewers || entry.currentViewers || 0,
+        'Estado': entry.isLive ? 'En Vivo' : 'Offline',
+        'Tendencia': entry.trend === 'up' ? 'Subiendo' : entry.trend === 'down' ? 'Bajando' : 'Estable',
+        'Cambio': changeDisplay,
+        'URL': entry.url || '',
+        'Fuente': entry.source || 'YouTube Monitor'
+      };
+    });
 
     try {
       // Crear workbook y worksheet
@@ -1158,7 +1148,7 @@ const MetricsDashboard: React.FC = () => {
         { wch: 12 }, // Viewers
         { wch: 12 }, // Estado
         { wch: 12 }, // Tendencia
-        { wch: 12 }, // Cambio (%)
+        { wch: 12 }, // Cambio
         { wch: 50 }, // URL
         { wch: 20 }  // Fuente
       ];
@@ -1615,10 +1605,14 @@ const MetricsDashboard: React.FC = () => {
                         </td>
                         <td>
                           <span style={{
-                            color: (entry.change || entry.growthPercent || 0) > 0 ? '#10b981' : 
-                                  (entry.change || entry.growthPercent || 0) < 0 ? '#ef4444' : '#6b7280'
+                            color: (entry.change || 0) > 0 ? '#10b981' : 
+                                  (entry.change || 0) < 0 ? '#ef4444' : '#6b7280'
                           }}>
-                            {(entry.change || entry.growthPercent || 0).toFixed(1)}%
+                            {(() => {
+                              const changeValue = entry.change || 0;
+                              if (changeValue === 0) return '0';
+                              return changeValue > 0 ? `+${changeValue.toLocaleString()}` : changeValue.toLocaleString();
+                            })()}
                           </span>
                         </td>
                       </tr>

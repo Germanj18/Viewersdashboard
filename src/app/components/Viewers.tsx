@@ -55,7 +55,11 @@ const Viewers = () => {
 
   const handleShowEditModal = (blockId: string, blockData: BlockData) => {
     setShowEditModal({ blockId, blockData });
-    setEditData({ ...blockData });
+    // Asegurar que intervalMinutes tenga un valor por defecto
+    setEditData({ 
+      ...blockData, 
+      intervalMinutes: blockData.intervalMinutes || 2 
+    });
   };
 
   const handleWarningConfirm = () => {
@@ -78,8 +82,14 @@ const Viewers = () => {
         return;
       }
       
+      // Asegurar que intervalMinutes tenga un valor por defecto
+      const updatedData = {
+        ...editData,
+        intervalMinutes: editData.intervalMinutes || 2
+      };
+      
       const { blockId } = showEditModal;
-      (window as any)[`updateBlockData_${blockId}`]?.(editData);
+      (window as any)[`updateBlockData_${blockId}`]?.(updatedData);
       setShowEditModal(null);
       setEditData(null);
     }
@@ -95,7 +105,8 @@ const Viewers = () => {
       decrement: 10,
       operationType: 'subtract',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 2',
@@ -105,7 +116,8 @@ const Viewers = () => {
       decrement: 15,
       operationType: 'subtract',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 3',
@@ -115,7 +127,8 @@ const Viewers = () => {
       decrement: 5,
       operationType: 'add',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 4',
@@ -125,7 +138,8 @@ const Viewers = () => {
       decrement: 20,
       operationType: 'subtract',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 5',
@@ -135,7 +149,8 @@ const Viewers = () => {
       decrement: 10,
       operationType: 'add',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 6',
@@ -145,7 +160,8 @@ const Viewers = () => {
       decrement: 25,
       operationType: 'subtract',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 7',
@@ -155,7 +171,8 @@ const Viewers = () => {
       decrement: 30,
       operationType: 'add',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 8',
@@ -165,7 +182,8 @@ const Viewers = () => {
       decrement: 40,
       operationType: 'subtract',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 9',
@@ -175,7 +193,8 @@ const Viewers = () => {
       decrement: 20,
       operationType: 'add',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     },
     {
       title: 'Bloque 10',
@@ -185,7 +204,8 @@ const Viewers = () => {
       decrement: 35,
       operationType: 'subtract',
       autoStart: false,
-      startTime: ''
+      startTime: '',
+      intervalMinutes: 2
     }
   ];
 
@@ -535,6 +555,21 @@ const Viewers = () => {
                 >
                   <option value="add">➕ Sumar</option>
                   <option value="subtract">➖ Restar</option>
+                </select>
+              </label>
+
+              <label>
+                ⏱️ Intervalo entre Operaciones:
+                <select
+                  value={editData.intervalMinutes || 2}
+                  onChange={(e) => setEditData(prev => prev ? ({ ...prev, intervalMinutes: Number(e.target.value) }) : null)}
+                  className={`input-${theme}`}
+                >
+                  <option value={2}>⏱️ 2 minutos</option>
+                  <option value={3}>⏱️ 3 minutos</option>
+                  <option value={4}>⏱️ 4 minutos</option>
+                  <option value={5}>⏱️ 5 minutos</option>
+                  <option value={10}>⏱️ 10 minutos</option>
                 </select>
               </label>
 

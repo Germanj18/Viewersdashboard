@@ -21,8 +21,21 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 
-// Inicializar Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+// Inicializar Stripe con validación
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
+// Verificar si la clave es válida (no temporal o placeholder)
+const isValidStripeKey = stripePublishableKey && 
+  stripePublishableKey !== "pk_test_temp" && 
+  stripePublishableKey.startsWith('pk_');
+
+if (!stripePublishableKey) {
+  console.error('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY no está configurada');
+} else if (!isValidStripeKey) {
+  console.warn('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY parece ser temporal o inválida');
+}
+
+const stripePromise = isValidStripeKey ? loadStripe(stripePublishableKey) : null;
 
 function CheckoutForm({ amount, description, onSuccess, onError }: {
   amount: number;
@@ -548,6 +561,22 @@ export default function StripePayment() {
                 <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">Procesamiento Global</p>
               </div>
             </div>
+          </div>
+        </div>
+      ) : !isValidStripeKey ? (
+        <div className={`p-8 rounded-xl border-2 ${theme === 'dark' ? 'bg-red-900/20 border-red-800/50' : 'bg-red-50 border-red-200'} text-center`}>
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-600 text-4xl mb-4" />
+          <h3 className="text-xl font-bold text-red-600 mb-2">Stripe no está configurado</h3>
+          <p className={`${theme === 'dark' ? 'text-red-400' : 'text-red-700'} mb-4`}>
+            La clave pública de Stripe no está configurada correctamente.
+          </p>
+          <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'} text-left text-sm`}>
+            <p className="font-semibold mb-2">Para configurar Stripe:</p>
+            <ol className="list-decimal list-inside space-y-1">
+              <li>Obtén tu clave pública de Stripe Dashboard</li>
+              <li>Agrega NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY al archivo .env</li>
+              <li>Reinicia el servidor de desarrollo</li>
+            </ol>
           </div>
         </div>
       ) : (
