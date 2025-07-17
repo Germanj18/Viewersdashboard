@@ -65,6 +65,7 @@ const MetricsDashboard: React.FC = () => {
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showExpiredModal, setShowExpiredModal] = useState(false);
 
   // Función para obtener todos los datos de operaciones (actuales + historial)
   const getAllOperationsData = useCallback(() => {
@@ -133,6 +134,58 @@ const MetricsDashboard: React.FC = () => {
     if (metrics.totalOperations === 0) return 0;
     return ((metrics.successfulOperations / metrics.totalOperations) * 100);
   }, [metrics.totalOperations, metrics.successfulOperations]);
+
+  // Función para obtener operaciones expiradas con detalles
+  const getExpiredOperationsDetails = useCallback(() => {
+    const allOperations = getAllOperationsData();
+    const expiredOperations: any[] = [];
+    const currentTime = new Date();
+
+    allOperations.forEach((operation: any) => {
+      if (operation.status === 'success' && operation.savedAt && operation.duration) {
+        try {
+          const startTime = new Date(operation.savedAt);
+          const endTime = new Date(startTime.getTime() + (operation.duration * 60 * 1000));
+          
+          if (currentTime >= endTime) {
+            // Esta operación ha expirado
+            const startTimeFormatted = startTime.toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+            
+            const endTimeFormatted = endTime.toLocaleTimeString('es-ES', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+
+            const dateFormatted = startTime.toLocaleDateString('es-ES', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            });
+
+            expiredOperations.push({
+              ...operation,
+              startTimeFormatted,
+              endTimeFormatted,
+              dateFormatted,
+              startTime: startTime,
+              endTime: endTime,
+              minutesExpired: Math.floor((currentTime.getTime() - endTime.getTime()) / (1000 * 60))
+            });
+          }
+        } catch (error) {
+          console.warn('Error processing operation for expiration:', error);
+        }
+      }
+    });
+
+    // Ordenar por hora de finalización (más recientes primero)
+    return expiredOperations.sort((a, b) => b.endTime.getTime() - a.endTime.getTime());
+  }, [getAllOperationsData]);
 
   // Función para obtener datos de YouTube del localStorage
   const getYouTubeStreamsData = useCallback(() => {
@@ -1040,6 +1093,58 @@ const MetricsDashboard: React.FC = () => {
     }
   }, []);
 
+  // Función para descargar operaciones expiradas como CSV
+  const downloadExpiredOperationsCSV = useCallback(() => {
+    const expiredOps = getExpiredOperationsDetails();
+    
+    if (expiredOps.length === 0) {
+      showToast('⚠️ No hay operaciones expiradas para descargar', 'warning');
+      return;
+    }
+
+    const headers = [
+      'Fecha',
+      'Bloque',
+      'Hora Inicio',
+      'Hora Finalización',
+      'Duración (min)',
+      'Viewers',
+      'Costo ($)',
+      'Service ID',
+      'Minutos Expirados',
+      'Estado'
+    ];
+
+    const csvRows = expiredOps.map(op => [
+      op.dateFormatted,
+      `Bloque ${parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}`,
+      op.startTimeFormatted,
+      op.endTimeFormatted,
+      op.duration || 0,
+      (op.count || 0).toLocaleString(),
+      (op.cost || 0).toFixed(2),
+      op.serviceId || 'N/A',
+      op.minutesExpired,
+      'Expirada'
+    ]);
+
+    const csvContent = [headers, ...csvRows]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `operaciones-expiradas-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    showToast('📥 Operaciones expiradas descargadas', 'success');
+  }, [getExpiredOperationsDetails]);
+
   // Función para descargar tabla de operaciones como CSV
   const downloadOperationsTableCSV = useCallback(() => {
     const operations = getAllOperationsData();
@@ -1253,13 +1358,13 @@ const MetricsDashboard: React.FC = () => {
             <h3>Total Viewers</h3>
             <div className="metric-value">{totalViewers.toLocaleString()}</div>
             <div className="metric-subtitle">
-              Activos: {(metrics.totalViewers + getExpiredViewersCount()).toLocaleString()} | 
+              Enviados: {(metrics.totalViewers + getExpiredViewersCount()).toLocaleString()} | 
               Expirados: -{getExpiredViewersCount().toLocaleString()}
             </div>
           </div>
         </div>
 
-        <div className="metric-card">
+        <div className="metric-card clickable-card" onClick={() => setShowExpiredModal(true)} style={{ cursor: 'pointer' }}>
           <div className="metric-icon">⏰</div>
           <div className="metric-content">
             <h3>Viewers Expirados</h3>
@@ -1698,6 +1803,134 @@ const MetricsDashboard: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de Operaciones Expiradas */}
+      {showExpiredModal && (
+        <div className="modal-overlay" onClick={() => setShowExpiredModal(false)}>
+          <div className="modal-content-large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>⏰ Operaciones Expiradas Detalladas</h3>
+              <div className="modal-header-actions">
+                <button 
+                  onClick={downloadExpiredOperationsCSV}
+                  className="export-button"
+                  style={{ marginRight: '1rem' }}
+                  title="Descargar operaciones expiradas como CSV"
+                >
+                  📥 Descargar CSV
+                </button>
+                <button 
+                  onClick={() => setShowExpiredModal(false)}
+                  className="close-button"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+            
+            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+              {(() => {
+                const expiredOps = getExpiredOperationsDetails();
+                return expiredOps.length > 0 ? (
+                  <>
+                    <div className="expired-summary" style={{ 
+                      marginBottom: '1rem', 
+                      padding: '1rem', 
+                      backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb',
+                      borderRadius: '0.5rem'
+                    }}>
+                      <h4>📊 Resumen</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+                        <div>
+                          <strong>Total Operaciones:</strong> {expiredOps.length}
+                        </div>
+                        <div>
+                          <strong>Total Viewers:</strong> {expiredOps.reduce((sum, op) => sum + (op.count || 0), 0).toLocaleString()}
+                        </div>
+                        <div>
+                          <strong>Costo Total:</strong> ${expiredOps.reduce((sum, op) => sum + (op.cost || 0), 0).toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <table className="expired-operations-table" style={{ 
+                      width: '100%', 
+                      borderCollapse: 'collapse',
+                      fontSize: '0.875rem'
+                    }}>
+                      <thead style={{ 
+                        position: 'sticky', 
+                        top: 0, 
+                        backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6',
+                        zIndex: 1
+                      }}>
+                        <tr>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Fecha</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Bloque</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Inicio</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Finalización</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Duración</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Viewers</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Costo</th>
+                          <th style={{ padding: '0.75rem', border: '1px solid #d1d5db', textAlign: 'left' }}>Expiró hace</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {expiredOps.map((op, index) => (
+                          <tr key={`expired-${index}`} style={{
+                            backgroundColor: index % 2 === 0 
+                              ? (theme === 'dark' ? '#1f2937' : '#ffffff')
+                              : (theme === 'dark' ? '#111827' : '#f9fafb')
+                          }}>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db' }}>
+                              {op.dateFormatted}
+                            </td>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db' }}>
+                              Bloque {parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}
+                            </td>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db' }}>
+                              {op.startTimeFormatted}
+                            </td>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db' }}>
+                              {op.endTimeFormatted}
+                            </td>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db' }}>
+                              {op.duration} min
+                            </td>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db', fontWeight: 'bold' }}>
+                              {(op.count || 0).toLocaleString()}
+                            </td>
+                            <td style={{ padding: '0.75rem', border: '1px solid #d1d5db' }}>
+                              ${(op.cost || 0).toFixed(2)}
+                            </td>
+                            <td style={{ 
+                              padding: '0.75rem', 
+                              border: '1px solid #d1d5db',
+                              color: '#ef4444',
+                              fontWeight: 'bold'
+                            }}>
+                              {op.minutesExpired} min
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </>
+                ) : (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '3rem', 
+                    color: theme === 'dark' ? '#9ca3af' : '#6b7280' 
+                  }}>
+                    <h4>🎉 ¡No hay operaciones expiradas!</h4>
+                    <p>Todas las operaciones están activas o aún no han completado su duración.</p>
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

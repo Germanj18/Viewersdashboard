@@ -1064,3 +1064,199 @@
     margin-bottom: 0.5rem;
   }
 }
+
+/* Modal de Operaciones Expiradas */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.modal-content-large {
+  background: white;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  max-height: 90vh;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.metrics-dashboard.dark .modal-content-large {
+  background: #1f2937;
+  color: #f9fafb;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.metrics-dashboard.dark .modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+}
+
+.metrics-dashboard.dark .close-button {
+  color: #9ca3af;
+}
+
+.metrics-dashboard.dark .close-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #d1d5db;
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.expired-summary {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.expired-summary h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.expired-operations-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.expired-operations-table th {
+  background: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+  border: 1px solid #d1d5db;
+  font-size: 0.8rem;
+}
+
+.metrics-dashboard.dark .expired-operations-table th {
+  background: #374151;
+  color: #f9fafb;
+  border-color: #4b5563;
+}
+
+.expired-operations-table td {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  vertical-align: top;
+}
+
+.metrics-dashboard.dark .expired-operations-table td {
+  border-color: #4b5563;
+}
+
+.expired-operations-table tr:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.metrics-dashboard.dark .expired-operations-table tr:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Tarjeta clickeable */
+.clickable-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clickable-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.clickable-card:active {
+  transform: translateY(-1px);
+}
+
+/* Responsive para el modal */
+@media (max-width: 768px) {
+  .modal-overlay {
+    padding: 1rem;
+  }
+  
+  .modal-content-large {
+    max-width: 100%;
+    border-radius: 0.5rem;
+  }
+  
+  .modal-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .modal-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .expired-operations-table {
+    font-size: 0.75rem;
+  }
+  
+  .expired-operations-table th,
+  .expired-operations-table td {
+    padding: 0.5rem 0.25rem;
+  }
+}

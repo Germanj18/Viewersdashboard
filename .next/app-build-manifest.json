@@ -18,11 +18,10 @@
       "static/css/app/admin/page.css",
       "static/chunks/app/admin/page.js"
     ],
-    "/pago/page": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/pago/page.css",
-      "static/chunks/app/pago/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }
