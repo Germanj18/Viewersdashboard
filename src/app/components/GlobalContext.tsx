@@ -5,6 +5,7 @@ interface GlobalContextProps {
   setLink: (link: string) => void;
   totalViewers: number;
   updateBlockViewers: (blockId: string, viewers: number) => void;
+  getExpiredViewersCount: () => number;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -12,6 +13,63 @@ const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
 export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [link, setLink] = useState<string>(() => localStorage.getItem('link') || '');
   const [blockViewers, setBlockViewers] = useState<Record<string, number>>({});
+  const [expiredViewers, setExpiredViewers] = useState<number>(0);
+  
+  // Calcular viewers que deben descontarse por haber completado su duración
+  const getExpiredViewersCount = useCallback(() => {
+    try {
+      const globalHistoryKey = 'globalOperationsHistory';
+      const globalHistory = localStorage.getItem(globalHistoryKey);
+      
+      if (!globalHistory) return 0;
+      
+      const operations = JSON.parse(globalHistory);
+      const now = new Date();
+      let expiredViewers = 0;
+      
+      operations.forEach((op: any) => {
+        // Solo procesar operaciones exitosas con duración
+        if (op.status === 'success' && op.duration && (op.savedAt || op.startTime)) {
+          try {
+            const baseTime = op.savedAt || op.startTime;
+            const startDate = new Date(baseTime);
+            
+            if (!isNaN(startDate.getTime())) {
+              const endTime = new Date(startDate.getTime() + (op.duration * 60 * 1000));
+              
+              // Si la operación ya terminó naturalmente, descontar sus viewers
+              if (now > endTime) {
+                expiredViewers += op.count || 0;
+              }
+            }
+          } catch (error) {
+            console.warn('Error calculando operación expirada:', error);
+          }
+        }
+      });
+      
+      return expiredViewers;
+    } catch (error) {
+      console.error('Error calculando viewers expirados:', error);
+      return 0;
+    }
+  }, []);
+
+  // Actualizar viewers expirados cada minuto
+  useEffect(() => {
+    const updateExpiredViewers = () => {
+      const expired = getExpiredViewersCount();
+      setExpiredViewers(expired);
+    };
+    
+    // Actualizar inmediatamente
+    updateExpiredViewers();
+    
+    // Actualizar cada minuto
+    const interval = setInterval(updateExpiredViewers, 60000);
+    
+    return () => clearInterval(interval);
+  }, [getExpiredViewersCount]);
 
   // Guardar link en localStorage
   useEffect(() => {
@@ -31,14 +89,17 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     });
   }, []);
 
-  const totalViewers = Object.values(blockViewers).reduce((acc, viewers) => acc + viewers, 0);
+  // Calcular total de viewers: suma de bloques activos - viewers de operaciones que ya terminaron
+  const currentActiveViewers = Object.values(blockViewers).reduce((acc, viewers) => acc + viewers, 0);
+  const totalViewers = Math.max(0, currentActiveViewers - expiredViewers);
 
   return (
     <GlobalContext.Provider value={{
       link,
       setLink,
       totalViewers,
-      updateBlockViewers
+      updateBlockViewers,
+      getExpiredViewersCount
     }}>
       {children}
     </GlobalContext.Provider>
