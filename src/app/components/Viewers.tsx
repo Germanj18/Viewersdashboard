@@ -397,10 +397,18 @@ const Viewers = () => {
       </div>
 
       {/* Dashboard de Métricas */}
-      {showMetrics && <MetricsDashboard />}
+      {showMetrics && (
+        <div className="main-components-container">
+          <MetricsDashboard />
+        </div>
+      )}
 
       {/* Monitor de YouTube */}
-      {showYouTubeMonitor && <YouTubeMonitor />}
+      {showYouTubeMonitor && (
+        <div className="main-components-container">
+          <YouTubeMonitor />
+        </div>
+      )}
 
       {/* Grid de bloques usando tu estructura CSS original */}
       <div className="blocks-container">

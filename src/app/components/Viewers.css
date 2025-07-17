@@ -622,3 +622,93 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+/* Layout mejorado para componentes principales */
+.main-components-container {
+  width: 100%;
+  max-width: none;
+  margin: 2rem 0;
+}
+
+/* Dashboard de Métricas - Layout horizontal mejorado */
+.metrics-dashboard {
+  width: 100%;
+  max-width: none !important;
+  margin: 0 0 2rem 0;
+}
+
+.metrics-dashboard .metrics-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 1rem;
+}
+
+.metrics-dashboard .charts-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.metrics-dashboard .chart-card {
+  min-height: 300px;
+}
+
+/* Monitor de YouTube - Layout horizontal mejorado */
+.youtube-monitor {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 0 2rem 0;
+}
+
+.youtube-monitor .monitor-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.youtube-monitor .current-data {
+  width: 100%;
+}
+
+.youtube-monitor .data-grid {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 1rem;
+}
+
+.youtube-monitor .history-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+/* Responsive para pantallas más pequeñas */
+@media (max-width: 1200px) {
+  .metrics-dashboard .charts-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .youtube-monitor .monitor-config {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .youtube-monitor .history-content {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .viewers-container {
+    padding: 1rem;
+  }
+  
+  .metrics-dashboard .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+  
+  .youtube-monitor .data-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

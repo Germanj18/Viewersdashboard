@@ -1295,6 +1295,55 @@ const MetricsDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Historial de Resets */}
+      {getResetHistory().length > 0 && (
+        <div className="reset-history-section">
+          <h3>🔄 Historial de Resets Detallado</h3>
+          <div className="reset-cards">
+            {getResetHistory().slice(-10).reverse().map((reset: any, index: number) => (
+              <div key={index} className="reset-card">
+                <div className="reset-header">
+                  <div className="reset-title">
+                    <span className="reset-icon">🔄</span>
+                    <strong>{reset.blockTitle || `Bloque ${reset.blockId}`}</strong>
+                  </div>
+                  <div className="reset-date">
+                    {new Date(reset.resetAt).toLocaleString('es-ES', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+                <div className="reset-details">
+                  <div className="reset-stat">
+                    <span className="stat-label">📊 Operaciones perdidas:</span>
+                    <span className="stat-value">{reset.operationsLost || 0}</span>
+                  </div>
+                  <div className="reset-stat">
+                    <span className="stat-label">👥 Viewers perdidos:</span>
+                    <span className="stat-value">{(reset.viewersLost || 0).toLocaleString()}</span>
+                  </div>
+                  {reset.operationsLost > 0 && reset.viewersLost > 0 && (
+                    <div className="reset-stat">
+                      <span className="stat-label">⚡ Promedio por operación:</span>
+                      <span className="stat-value">{Math.round(reset.viewersLost / reset.operationsLost)} viewers</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          {getResetHistory().length > 10 && (
+            <div className="reset-summary">
+              <p>Mostrando los últimos 10 resets. Total de resets: <strong>{getResetHistory().length}</strong></p>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Gráficos simples */}
       <div className="charts-section">
         <div className="chart-card">
