@@ -1479,7 +1479,7 @@ const MetricsDashboard: React.FC = () => {
             <h3>Total Viewers</h3>
             <div className="metric-value">{totalViewers.toLocaleString()}</div>
             <div className="metric-subtitle">
-              Enviados: {(metrics.totalViewers + getExpiredViewersCount()).toLocaleString()} | 
+              Enviados: {(metrics.totalViewers + getExpiredViewersCount() + metrics.totalResetViewers).toLocaleString()} | 
               Expirados: -{getExpiredViewersCount().toLocaleString()}
             </div>
           </div>
