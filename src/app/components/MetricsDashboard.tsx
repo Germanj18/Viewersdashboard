@@ -66,6 +66,7 @@ const MetricsDashboard: React.FC = () => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [showAlerts, setShowAlerts] = useState(false);
   const [showExpiredModal, setShowExpiredModal] = useState(false);
+  const [showResetHistory, setShowResetHistory] = useState(false);
 
   // Función para obtener todos los datos de operaciones (actuales + historial)
   const getAllOperationsData = useCallback(() => {
@@ -1538,45 +1539,72 @@ const MetricsDashboard: React.FC = () => {
       {/* Historial de Resets */}
       {getResetHistory().length > 0 && (
         <div className="reset-history-section">
-          <h3>🔄 Historial de Resets Detallado</h3>
-          <div className="reset-cards">
-            {getResetHistory().slice(-10).reverse().map((reset: any, index: number) => (
-              <div key={index} className="reset-card">
-                <div className="reset-header">
-                  <div className="reset-title">
-                    <span className="reset-icon">🔄</span>
-                    <strong>{reset.blockTitle || `Bloque ${reset.blockId}`}</strong>
-                  </div>
-                  <div className="reset-date">
-                    {new Date(reset.resetAt).toLocaleString('es-ES', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-                <div className="reset-details">
-                  <div className="reset-stat">
-                    <span className="stat-label">📊 Operaciones enviadas:</span>
-                    <span className="stat-value">{reset.operationsLost || 0}</span>
-                  </div>
-                  <div className="reset-stat">
-                    <span className="stat-label">👥 Viewers enviados:</span>
-                    <span className="stat-value">{(reset.viewersLost || 0).toLocaleString()}</span>
-                  </div>
-                  {reset.operationsLost > 0 && reset.viewersLost > 0 && (
-                    <div className="reset-stat">
-                      <span className="stat-label">⚡ Promedio por operación:</span>
-                      <span className="stat-value">{Math.round(reset.viewersLost / reset.operationsLost)} viewers</span>
+          <h3 
+            onClick={() => setShowResetHistory(!showResetHistory)}
+            style={{ 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              userSelect: 'none',
+              transition: 'opacity 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <span style={{ 
+              transform: showResetHistory ? 'rotate(90deg)' : 'rotate(0deg)',
+              transition: 'transform 0.2s ease'
+            }}>
+              ▶️
+            </span>
+            🔄 Historial de Resets Detallado
+            <span style={{ fontSize: '0.75rem', opacity: '0.7' }}>
+              ({getResetHistory().length} resets)
+            </span>
+          </h3>
+          
+          {showResetHistory && (
+            <div className="reset-cards">
+              {getResetHistory().slice(-10).reverse().map((reset: any, index: number) => (
+                <div key={index} className="reset-card">
+                  <div className="reset-header">
+                    <div className="reset-title">
+                      <span className="reset-icon">🔄</span>
+                      <strong>{reset.blockTitle || `Bloque ${reset.blockId}`}</strong>
                     </div>
-                  )}
+                    <div className="reset-date">
+                      {new Date(reset.resetAt).toLocaleString('es-ES', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                  <div className="reset-details">
+                    <div className="reset-stat">
+                      <span className="stat-label">📊 Operaciones enviadas:</span>
+                      <span className="stat-value">{reset.operationsLost || 0}</span>
+                    </div>
+                    <div className="reset-stat">
+                      <span className="stat-label">👥 Viewers enviados:</span>
+                      <span className="stat-value">{(reset.viewersLost || 0).toLocaleString()}</span>
+                    </div>
+                    {reset.operationsLost > 0 && reset.viewersLost > 0 && (
+                      <div className="reset-stat">
+                        <span className="stat-label">⚡ Promedio por operación:</span>
+                        <span className="stat-value">{Math.round(reset.viewersLost / reset.operationsLost)} viewers</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          {getResetHistory().length > 10 && (
+              ))}
+            </div>
+          )}
+          
+          {showResetHistory && getResetHistory().length > 10 && (
             <div className="reset-summary">
               <p>Mostrando los últimos 10 resets. Total de resets: <strong>{getResetHistory().length}</strong></p>
             </div>
