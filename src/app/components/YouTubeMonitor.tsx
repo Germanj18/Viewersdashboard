@@ -11,12 +11,18 @@ interface YouTubeData {
   message?: string;
   timestamp: string;
   url: string;
+  channelId?: string;
+  channelName?: string;
+  videoId?: string;
+  redirectedUrl?: string;
 }
 
 interface MonitorHistory {
   timestamp: string;
   viewers: number;
   isLive: boolean;
+  title?: string;
+  url?: string;
 }
 
 const YouTubeMonitor: React.FC = () => {
@@ -29,6 +35,7 @@ const YouTubeMonitor: React.FC = () => {
   const [refreshInterval, setRefreshInterval] = useState(60); // segundos
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [monitorMode, setMonitorMode] = useState<'video' | 'channel'>('video');
 
   // Función para extraer video ID de URL de YouTube
   const extractVideoId = (url: string): string | null => {
@@ -54,7 +61,10 @@ const YouTubeMonitor: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: targetUrl })
+        body: JSON.stringify({ 
+          url: targetUrl, 
+          mode: monitorMode 
+        })
       });
 
       const data: YouTubeData = await response.json();
@@ -69,7 +79,9 @@ const YouTubeMonitor: React.FC = () => {
         const newEntry: MonitorHistory = {
           timestamp: data.timestamp,
           viewers: data.viewers,
-          isLive: data.isLive
+          isLive: data.isLive,
+          title: data.title,
+          url: data.redirectedUrl || data.url
         };
         
         setHistory(prev => {
@@ -193,7 +205,7 @@ const YouTubeMonitor: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [refreshInterval]);
+  }, [refreshInterval, monitorMode]);
 
   // Efecto para monitoreo automático
   useEffect(() => {
@@ -283,7 +295,10 @@ const YouTubeMonitor: React.FC = () => {
         <div className="url-input">
           <input
             type="url"
-            placeholder="https://www.youtube.com/watch?v=..."
+            placeholder={monitorMode === 'channel' ? 
+              "https://www.youtube.com/@canalname" : 
+              "https://www.youtube.com/watch?v=..."
+            }
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             disabled={isMonitoring}
@@ -291,6 +306,18 @@ const YouTubeMonitor: React.FC = () => {
         </div>
         
         <div className="config-controls">
+          <div className="mode-selector">
+            <label>Modo:</label>
+            <select 
+              value={monitorMode} 
+              onChange={(e) => setMonitorMode(e.target.value as 'video' | 'channel')}
+              disabled={isMonitoring}
+            >
+              <option value="video">Video con Auto-Redirect</option>
+              <option value="channel">Canal (Auto-Detección)</option>
+            </select>
+          </div>
+          
           <div className="interval-selector">
             <label>Intervalo:</label>
             <select 
@@ -317,6 +344,15 @@ const YouTubeMonitor: React.FC = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Información del modo actual */}
+      <div className="mode-info">
+        {monitorMode === 'video' ? (
+          <p>📺 <strong>Modo Video:</strong> Monitorea un video específico. Si termina, busca automáticamente nuevos streams del mismo canal.</p>
+        ) : (
+          <p>🔍 <strong>Modo Canal:</strong> Busca automáticamente streams en vivo del canal especificado.</p>
+        )}
       </div>
 
       {/* Estado actual */}

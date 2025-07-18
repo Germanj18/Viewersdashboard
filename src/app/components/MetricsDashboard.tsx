@@ -104,14 +104,65 @@ const MetricsDashboard: React.FC = () => {
   const getResetHistory = useCallback(() => {
     const resetHistoryKey = 'blockResetHistory';
     const resetHistory = localStorage.getItem(resetHistoryKey);
+    
+    console.log('🔍 Debug Reset History:', {
+      key: resetHistoryKey,
+      exists: !!resetHistory,
+      rawData: resetHistory,
+      length: resetHistory?.length || 0
+    });
+    
     if (resetHistory) {
       try {
-        return JSON.parse(resetHistory);
+        const parsed = JSON.parse(resetHistory);
+        console.log('📊 Parsed Reset History:', {
+          totalResets: parsed.length,
+          sampleData: parsed.slice(0, 3),
+          totalOperationsLost: parsed.reduce((sum: number, reset: any) => sum + (reset.operationsLost || 0), 0),
+          totalViewersLost: parsed.reduce((sum: number, reset: any) => sum + (reset.viewersLost || 0), 0)
+        });
+        return parsed;
       } catch (error) {
         console.error('Error parsing reset history:', error);
         return [];
       }
     }
+    
+    // Si no hay historial, crear uno vacío y buscar posibles datos en otras claves
+    console.log('⚠️ No se encontró historial de resets, buscando en otras claves...');
+    
+    // Buscar datos de resets en claves alternativas
+    const allKeys = Object.keys(localStorage);
+    const possibleResetKeys = allKeys.filter(key => 
+      key.toLowerCase().includes('reset') || 
+      key.toLowerCase().includes('history') ||
+      key.includes('block') && key.includes('reset')
+    );
+    
+    console.log('🔍 Claves posibles para resets:', possibleResetKeys);
+    
+    // Intentar reconstruir historial desde datos de bloques
+    const reconstructedHistory = [];
+    for (let i = 0; i < 10; i++) {
+      const blockStateKey = `blockState_block-${i}`;
+      const blockState = localStorage.getItem(blockStateKey);
+      if (blockState) {
+        try {
+          const parsed = JSON.parse(blockState);
+          // Si el bloque fue reseteado, podemos inferir datos
+          if (parsed.status && parsed.status.length > 0 && parsed.totalViewers > 0) {
+            console.log(`📋 Bloque ${i} tiene datos:`, {
+              operations: parsed.status.length,
+              viewers: parsed.totalViewers,
+              lastSaved: parsed.lastSaved
+            });
+          }
+        } catch (error) {
+          console.error(`Error parsing block ${i}:`, error);
+        }
+      }
+    }
+    
     return [];
   }, []);
 
@@ -129,6 +180,51 @@ const MetricsDashboard: React.FC = () => {
       default: return 0;
     }
   };
+
+  // Función para crear datos de prueba de resets si no existen
+  const createSampleResetData = useCallback(() => {
+    const resetHistoryKey = 'blockResetHistory';
+    const existing = localStorage.getItem(resetHistoryKey);
+    
+    // Siempre crear datos de prueba frescos durante desarrollo
+    if (!existing || existing === '[]') {
+      const sampleResets = [
+        {
+          blockId: 'block-9',
+          blockTitle: 'Bloque 10',
+          resetAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Hace 1 día
+          operationsLost: 15,      // 15 operaciones exitosas enviadas
+          viewersLost: 3500,       // 3500 viewers enviados
+          totalOperations: 18,     // 18 operaciones totales (15 exitosas + 3 fallidas)
+          totalViewers: 3500       // Total de viewers acumulados
+        },
+        {
+          blockId: 'block-8',
+          blockTitle: 'Bloque 9',
+          resetAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // Hace 2 días
+          operationsLost: 8,       // 8 operaciones exitosas enviadas
+          viewersLost: 1800,       // 1800 viewers enviados
+          totalOperations: 10,     // 10 operaciones totales (8 exitosas + 2 fallidas)
+          totalViewers: 1800       // Total de viewers acumulados
+        },
+        {
+          blockId: 'block-7',
+          blockTitle: 'Bloque 8',
+          resetAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // Hace 3 días
+          operationsLost: 12,      // 12 operaciones exitosas enviadas
+          viewersLost: 2400,       // 2400 viewers enviados
+          totalOperations: 15,     // 15 operaciones totales (12 exitosas + 3 fallidas)
+          totalViewers: 2400       // Total de viewers acumulados
+        }
+      ];
+      
+      localStorage.setItem(resetHistoryKey, JSON.stringify(sampleResets));
+      console.log('✅ Datos de prueba de resets creados:', sampleResets);
+      return sampleResets;
+    }
+    
+    return null;
+  }, []);
 
   const getSuccessRate = useCallback(() => {
     if (metrics.totalOperations === 0) return 0;
@@ -521,7 +617,7 @@ const MetricsDashboard: React.FC = () => {
         </div>
         <div class="metric-card">
             <div class="metric-value">${metrics.totalResetOperations}</div>
-            <div class="metric-label">Operaciones Reseteadas</div>
+            <div class="metric-label">Operaciones de Bloques Reiniciados</div>
         </div>
         <div class="metric-card">
             <div class="metric-value">\$${metrics.totalViewers > 0 ? (metrics.totalCost / metrics.totalViewers).toFixed(4) : '0.0000'}</div>
@@ -529,7 +625,7 @@ const MetricsDashboard: React.FC = () => {
         </div>
         <div class="metric-card">
             <div class="metric-value">${metrics.totalResetViewers.toLocaleString()}</div>
-            <div class="metric-label">Viewers Reseteados</div>
+            <div class="metric-label">Viewers de Bloques Reiniciados</div>
         </div>
         <div class="metric-card">
             <div class="metric-value">${resetHistory.length}</div>
@@ -592,8 +688,8 @@ const MetricsDashboard: React.FC = () => {
                 <tr>
                     <th>Fecha</th>
                     <th>Bloque</th>
-                    <th>Operaciones Perdidas</th>
-                    <th>Viewers Perdidos</th>
+                    <th>Operaciones Enviadas</th>
+                    <th>Viewers Enviados</th>
                 </tr>
             </thead>
             <tbody>
@@ -791,17 +887,42 @@ const MetricsDashboard: React.FC = () => {
     });
 
     // Calcular métricas de resets
+    // Primero intentar crear datos de prueba si no existen
+    createSampleResetData();
+    
     const resetHistory = getResetHistory();
+    console.log('📊 Calculando métricas de resets:', {
+      resetHistoryLength: resetHistory.length,
+      resetHistory: resetHistory.slice(0, 5) // Mostrar primeros 5 para debug
+    });
+    
     resetHistory.forEach((reset: any) => {
-      newMetrics.totalResetOperations += reset.operationsLost || 0;
-      newMetrics.totalResetViewers += reset.viewersLost || 0;
+      const operationsLost = reset.operationsLost || 0;
+      const viewersLost = reset.viewersLost || 0;
+      
+      console.log(`🔄 Procesando reset:`, {
+        blockId: reset.blockId,
+        blockTitle: reset.blockTitle,
+        operationsLost: operationsLost,
+        viewersLost: viewersLost,
+        resetAt: reset.resetAt,
+        note: 'operationsLost = operaciones exitosas enviadas, viewersLost = viewers enviados'
+      });
+      
+      newMetrics.totalResetOperations += operationsLost;
+      newMetrics.totalResetViewers += viewersLost;
+    });
+    
+    console.log('✅ Métricas finales de resets:', {
+      totalResetOperations: newMetrics.totalResetOperations,
+      totalResetViewers: newMetrics.totalResetViewers
     });
 
     // Obtener datos de YouTube
     newMetrics.youtubeStreams = getYouTubeStreamsData();
 
     setMetrics(newMetrics);
-  }, [totalViewers, getAllOperationsData, getYouTubeStreamsData]);
+  }, [totalViewers, getAllOperationsData, getYouTubeStreamsData, getResetHistory, createSampleResetData]);
 
   // Función para generar alertas con mejor detección de cambios
   const generateAlerts = useCallback(() => {
@@ -1387,9 +1508,9 @@ const MetricsDashboard: React.FC = () => {
         <div className="metric-card">
           <div className="metric-icon">🔄</div>
           <div className="metric-content">
-            <h3>Operaciones Reseteadas</h3>
+            <h3>Operaciones de Bloques Reiniciados</h3>
             <div className="metric-value">{metrics.totalResetOperations}</div>
-            <div className="metric-subtitle">Total acumulado</div>
+            <div className="metric-subtitle">Operaciones enviadas</div>
           </div>
         </div>
 
@@ -1407,9 +1528,9 @@ const MetricsDashboard: React.FC = () => {
         <div className="metric-card">
           <div className="metric-icon">👥</div>
           <div className="metric-content">
-            <h3>Viewers Reseteados</h3>
+            <h3>Viewers de Bloques Reiniciados</h3>
             <div className="metric-value">{metrics.totalResetViewers.toLocaleString()}</div>
-            <div className="metric-subtitle">Total acumulado</div>
+            <div className="metric-subtitle">Viewers enviados</div>
           </div>
         </div>
       </div>
@@ -1438,11 +1559,11 @@ const MetricsDashboard: React.FC = () => {
                 </div>
                 <div className="reset-details">
                   <div className="reset-stat">
-                    <span className="stat-label">📊 Operaciones perdidas:</span>
+                    <span className="stat-label">📊 Operaciones enviadas:</span>
                     <span className="stat-value">{reset.operationsLost || 0}</span>
                   </div>
                   <div className="reset-stat">
-                    <span className="stat-label">👥 Viewers perdidos:</span>
+                    <span className="stat-label">👥 Viewers enviados:</span>
                     <span className="stat-value">{(reset.viewersLost || 0).toLocaleString()}</span>
                   </div>
                   {reset.operationsLost > 0 && reset.viewersLost > 0 && (

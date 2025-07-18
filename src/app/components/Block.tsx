@@ -594,12 +594,27 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       }
     }
     
+    // Calcular operaciones exitosas enviadas y viewers enviados
+    const successfulOperations = status.filter(op => op.status === 'success');
+    const totalViewersSent = successfulOperations.reduce((sum, op) => sum + (op.count || 0), 0);
+    
+    console.log('📊 Registrando reset del bloque:', {
+      blockId,
+      blockTitle: blockData.title,
+      totalOperations: status.length,
+      successfulOperations: successfulOperations.length,
+      totalViewers: totalViewers,
+      calculatedViewers: totalViewersSent
+    });
+    
     const resetRecord = {
       blockId,
       blockTitle: blockData.title,
       resetAt: new Date().toISOString(),
-      operationsLost: status.length,
-      viewersLost: totalViewers
+      operationsLost: successfulOperations.length,  // Operaciones exitosas enviadas
+      viewersLost: totalViewersSent,               // Viewers enviados de operaciones exitosas
+      totalOperations: status.length,             // Total de operaciones realizadas
+      totalViewers: totalViewers                  // Total de viewers del bloque
     };
     
     resets.push(resetRecord);
@@ -610,7 +625,9 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     }
     
     localStorage.setItem(resetHistoryKey, JSON.stringify(resets));
-  }, [blockId, blockData.title, status.length, totalViewers]);
+    
+    console.log('✅ Reset registrado:', resetRecord);
+  }, [blockId, blockData.title, status, totalViewers]);
 
   return (
     <div className={`block ${theme}`}>
