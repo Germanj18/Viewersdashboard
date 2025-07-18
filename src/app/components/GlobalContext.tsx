@@ -6,6 +6,7 @@ interface GlobalContextProps {
   totalViewers: number;
   updateBlockViewers: (blockId: string, viewers: number) => void;
   getExpiredViewersCount: () => number;
+  getTotalViewersSent: () => number;
 }
 
 const GlobalContext = createContext<GlobalContextProps | undefined>(undefined);
@@ -93,13 +94,45 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const currentActiveViewers = Object.values(blockViewers).reduce((acc, viewers) => acc + viewers, 0);
   const totalViewers = Math.max(0, currentActiveViewers - expiredViewers);
 
+  // Función para calcular el total de viewers enviados incluyendo reiniciados
+  const getTotalViewersSent = useCallback(() => {
+    try {
+      // Viewers activos actuales
+      const activeViewers = totalViewers;
+      
+      // Viewers expirados (que terminaron su duración)
+      const expiredViewers = getExpiredViewersCount();
+      
+      // Viewers de bloques reiniciados
+      const resetHistoryKey = 'blockResetHistory';
+      const resetHistory = localStorage.getItem(resetHistoryKey);
+      let resetViewers = 0;
+      
+      if (resetHistory) {
+        try {
+          const resets = JSON.parse(resetHistory);
+          resetViewers = resets.reduce((sum: number, reset: any) => sum + (reset.viewersLost || 0), 0);
+        } catch (error) {
+          console.error('Error calculando viewers reiniciados:', error);
+        }
+      }
+      
+      // Total enviados = activos + expirados + reiniciados
+      return activeViewers + expiredViewers + resetViewers;
+    } catch (error) {
+      console.error('Error calculando total de viewers enviados:', error);
+      return totalViewers;
+    }
+  }, [totalViewers, getExpiredViewersCount]);
+
   return (
     <GlobalContext.Provider value={{
       link,
       setLink,
       totalViewers,
       updateBlockViewers,
-      getExpiredViewersCount
+      getExpiredViewersCount,
+      getTotalViewersSent
     }}>
       {children}
     </GlobalContext.Provider>

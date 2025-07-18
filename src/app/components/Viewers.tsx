@@ -8,7 +8,7 @@ import ResetWarningModal from './ResetWarningModal';
 import './Viewers.css';
 
 const Viewers = () => {
-  const { link, setLink, totalViewers, updateBlockViewers, getExpiredViewersCount } = useGlobal();
+  const { link, setLink, totalViewers, updateBlockViewers, getExpiredViewersCount, getTotalViewersSent } = useGlobal();
   const { theme } = useTheme();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
@@ -342,9 +342,9 @@ const Viewers = () => {
       />
       
       {/* Header con total de viewers mejorado con detalles de cálculo */}
-      <div className="total-viewers-header" title="Cálculo: Viewers Activos - Viewers de Operaciones Expiradas">
+      <div className="total-viewers-header" title="Total de viewers enviados (activos + expirados + reiniciados) menos viewers expirados">
         <div style={{ fontSize: '1rem', fontWeight: '600' }}>
-          💫 Total cargado: {totalViewers.toLocaleString()}
+          💫 Total cargado: {(getTotalViewersSent() - getExpiredViewersCount()).toLocaleString()}
         </div>
         <div style={{ fontSize: '0.75rem', opacity: '0.8', marginTop: '0.25rem' }}>
           📊 Expirados: -{getExpiredViewersCount().toLocaleString()}

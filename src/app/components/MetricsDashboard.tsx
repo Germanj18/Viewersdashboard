@@ -45,7 +45,7 @@ interface Alert {
 
 const MetricsDashboard: React.FC = () => {
   const { theme } = useTheme();
-  const { totalViewers, getExpiredViewersCount } = useGlobal();
+  const { totalViewers, getExpiredViewersCount, getTotalViewersSent } = useGlobal();
   
   const [metrics, setMetrics] = useState<OperationMetrics>({
     totalOperations: 0,
@@ -1477,9 +1477,9 @@ const MetricsDashboard: React.FC = () => {
           <div className="metric-icon">👥</div>
           <div className="metric-content">
             <h3>Total Viewers</h3>
-            <div className="metric-value">{totalViewers.toLocaleString()}</div>
+            <div className="metric-value">{(getTotalViewersSent() - getExpiredViewersCount()).toLocaleString()}</div>
             <div className="metric-subtitle">
-              Enviados: {(metrics.totalViewers + getExpiredViewersCount() + metrics.totalResetViewers).toLocaleString()} | 
+              Enviados: {getTotalViewersSent().toLocaleString()} | 
               Expirados: -{getExpiredViewersCount().toLocaleString()}
             </div>
           </div>
