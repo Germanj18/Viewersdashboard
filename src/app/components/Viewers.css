@@ -614,8 +614,8 @@
 
 .download-icon {
   position: absolute;
-  top: 1.5rem;
-  left: 1.5rem;
+  top: 1rem;
+  right: 1rem;
   background: linear-gradient(135deg, #2563eb, #1d4ed8);
   border: none;
   border-radius: 0.75rem;
@@ -623,6 +623,12 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 15;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .download-icon:hover {
@@ -632,12 +638,9 @@
 }
 
 .icon-download {
-  display: inline-block;
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 12px solid white;
+  font-size: 16px;
+  color: white;
+  line-height: 1;
 }
 
 .completed-message {
@@ -1489,6 +1492,19 @@
   .progress-micro {
     width: 40px;
     height: 6px;
+  }
+  
+  .download-icon {
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+  }
+  
+  .icon-download {
+    font-size: 14px;
   }
 }
 
