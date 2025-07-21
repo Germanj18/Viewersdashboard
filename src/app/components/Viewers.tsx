@@ -399,7 +399,7 @@ const Viewers = () => {
       </div>
       
       {/* Botones de control debajo del total */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
+      <div className="dashboard-buttons-container">
         <button
           onClick={() => setShowMetrics(!showMetrics)}
           className="dashboard-button metrics-button"
