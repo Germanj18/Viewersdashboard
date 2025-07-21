@@ -172,41 +172,10 @@ const MetricsDashboard: React.FC = () => {
     const resetHistoryKey = 'blockResetHistory';
     const existing = localStorage.getItem(resetHistoryKey);
     
-    // Siempre crear datos de prueba frescos durante desarrollo
+    // NO crear datos de prueba automáticamente - solo retornar null si no existen datos reales
     if (!existing || existing === '[]') {
-      const sampleResets = [
-        {
-          blockId: 'block-9',
-          blockTitle: 'Bloque 10',
-          resetAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // Hace 1 día
-          operationsLost: 15,      // 15 operaciones exitosas enviadas
-          viewersLost: 3500,       // 3500 viewers enviados
-          totalOperations: 18,     // 18 operaciones totales (15 exitosas + 3 fallidas)
-          totalViewers: 3500       // Total de viewers acumulados
-        },
-        {
-          blockId: 'block-8',
-          blockTitle: 'Bloque 9',
-          resetAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // Hace 2 días
-          operationsLost: 8,       // 8 operaciones exitosas enviadas
-          viewersLost: 1800,       // 1800 viewers enviados
-          totalOperations: 10,     // 10 operaciones totales (8 exitosas + 2 fallidas)
-          totalViewers: 1800       // Total de viewers acumulados
-        },
-        {
-          blockId: 'block-7',
-          blockTitle: 'Bloque 8',
-          resetAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // Hace 3 días
-          operationsLost: 12,      // 12 operaciones exitosas enviadas
-          viewersLost: 2400,       // 2400 viewers enviados
-          totalOperations: 15,     // 15 operaciones totales (12 exitosas + 3 fallidas)
-          totalViewers: 2400       // Total de viewers acumulados
-        }
-      ];
-      
-      localStorage.setItem(resetHistoryKey, JSON.stringify(sampleResets));
-      console.log('✅ Datos de prueba de resets creados:', sampleResets);
-      return sampleResets;
+      console.log('⚠️ No hay datos de reset history, no se crean datos de prueba automáticamente');
+      return null;
     }
     
     return null;
@@ -888,10 +857,7 @@ const MetricsDashboard: React.FC = () => {
       }
     });
 
-    // Calcular métricas de resets
-    // Primero intentar crear datos de prueba si no existen
-    createSampleResetData();
-    
+    // Calcular métricas de resets - NO crear datos de prueba automáticamente
     const resetHistory = getResetHistory();
     console.log('📊 Calculando métricas de resets:', {
       resetHistoryLength: resetHistory.length,
@@ -924,7 +890,7 @@ const MetricsDashboard: React.FC = () => {
     newMetrics.youtubeStreams = getYouTubeStreamsData();
 
     setMetrics(newMetrics);
-  }, [totalViewers, getAllOperationsData, getYouTubeStreamsData, getResetHistory, createSampleResetData]);
+  }, [totalViewers, getAllOperationsData, getYouTubeStreamsData, getResetHistory]);
 
   // Función para generar alertas con mejor detección de cambios
   const generateAlerts = useCallback(() => {

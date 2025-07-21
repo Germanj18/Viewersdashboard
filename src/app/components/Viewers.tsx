@@ -296,7 +296,7 @@ const Viewers = () => {
       localStorage.removeItem('globalOperationsHistory');
       localStorage.removeItem('blockResetHistory');
 
-      // 3. Limpiar datos de monitoreo de YouTube
+      // 3. Limpiar todas las claves relacionadas con métricas y datos del dashboard
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -304,9 +304,19 @@ const Viewers = () => {
           key.startsWith('blockState_') || 
           key.includes('metrics') || 
           key.includes('dashboard') ||
+          key.includes('reset') ||  // Claves que contengan 'reset'
+          key.includes('Reset') ||  // Claves que contengan 'Reset'
+          key.includes('history') || // Claves que contengan 'history'
+          key.includes('History') || // Claves que contengan 'History'
           key.startsWith('youtubeMonitor_') || // Datos del monitor de YouTube
           key.includes('youtube') || 
-          key.includes('stream')
+          key.includes('stream') ||
+          key.startsWith('lastKnown') || // Alertas y valores conocidos
+          key.includes('Alert') || // Datos de alertas
+          key.includes('Successful') || // Métricas de operaciones exitosas
+          key.includes('Operations') || // Métricas de operaciones
+          key.includes('Viewers') || // Métricas de viewers
+          key.includes('Cost') // Métricas de costos
         )) {
           keysToRemove.push(key);
         }
