@@ -92,13 +92,12 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Calcular total de viewers: suma de bloques activos - viewers de operaciones que ya terminaron
   const currentActiveViewers = Object.values(blockViewers).reduce((acc, viewers) => acc + viewers, 0);
-  const totalViewers = Math.max(0, currentActiveViewers - expiredViewers);
 
   // Función para calcular el total de viewers enviados incluyendo reiniciados
   const getTotalViewersSent = useCallback(() => {
     try {
-      // Viewers activos actuales
-      const activeViewers = totalViewers;
+      // Viewers activos actuales (sin restar nada - estos son los de los bloques)
+      const activeViewers = currentActiveViewers;
       
       // Viewers expirados (que terminaron su duración)
       const expiredViewers = getExpiredViewersCount();
@@ -118,12 +117,16 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       }
       
       // Total enviados = activos + expirados + reiniciados
+      // IMPORTANTE: No se resta nada, esto es el TOTAL ENVIADO HISTÓRICO
       return activeViewers + expiredViewers + resetViewers;
     } catch (error) {
       console.error('Error calculando total de viewers enviados:', error);
-      return totalViewers;
+      return currentActiveViewers;
     }
-  }, [totalViewers, getExpiredViewersCount]);
+  }, [currentActiveViewers, getExpiredViewersCount]);
+
+  // Total cargados = Total enviados - expirados
+  const totalViewers = Math.max(0, getTotalViewersSent() - expiredViewers);
 
   return (
     <GlobalContext.Provider value={{
