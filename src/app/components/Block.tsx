@@ -41,6 +41,9 @@ interface BlockProps {
 const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, blockId, onShowWarning, onShowEditModal }) => {
   const { theme } = useTheme();
   
+  // Estado para minimizar/expandir - por defecto minimizado
+  const [isMinimized, setIsMinimized] = useState(true);
+  
   // Función para cargar estado desde localStorage
   const loadBlockState = useCallback(() => {
     const savedState = localStorage.getItem(`blockState_${blockId}`);
@@ -215,6 +218,51 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     }
   };
 
+  // Calcular duración total estimada del bloque
+  const getTotalEstimatedDuration = useCallback(() => {
+    const operationInterval = blockData.intervalMinutes || 2;
+    const totalDurationMinutes = (blockData.totalOperations - 1) * operationInterval;
+    const hours = Math.floor(totalDurationMinutes / 60);
+    const minutes = totalDurationMinutes % 60;
+    
+    if (hours > 0) {
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+    return `${minutes}m`;
+  }, [blockData.totalOperations, blockData.intervalMinutes]);
+
+  // Obtener duración de operación individual configurada
+  const getOperationDuration = useCallback(() => {
+    const duration = getServiceDuration(blockData.serviceId);
+    const hours = Math.floor(duration / 60);
+    const minutes = duration % 60;
+    
+    if (hours > 0) {
+      return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+    }
+    return `${minutes}m`;
+  }, [blockData.serviceId]);
+
+  // Calcular progreso del bloque
+  const getProgress = useCallback(() => {
+    const percentage = blockData.totalOperations > 0 ? (currentOperation / blockData.totalOperations) * 100 : 0;
+    return Math.min(percentage, 100);
+  }, [currentOperation, blockData.totalOperations]);
+
+  // Obtener estado resumido para vista minimizada
+  const getSummaryStatus = useCallback(() => {
+    const successCount = status.filter(s => s.status === 'success').length;
+    const errorCount = status.filter(s => s.status === 'error').length;
+    const totalCost = status.reduce((sum, s) => sum + (s.cost || 0), 0);
+    
+    return {
+      success: successCount,
+      errors: errorCount,
+      totalCost: totalCost.toFixed(2),
+      progress: getProgress()
+    };
+  }, [status, getProgress]);
+
   const generateExcel = useCallback(() => {
     // Crear el resumen para el Excel
     const currentStatus = statusRef.current;
@@ -304,9 +352,14 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
 
   const handleApiCall = useCallback(async () => {
     // Verificar condiciones usando refs para valores actuales
-    if (!link || stateRef.current !== 'running') {
-      console.log(`${blockDataRef.current.title}: No ejecutando API call. Link: ${link}, State: ${stateRef.current}`);
+    if (stateRef.current !== 'running') {
+      console.log(`${blockDataRef.current.title}: No ejecutando API call. State: "${stateRef.current}"`);
       return;
+    }
+
+    if (!link) {
+      console.log(`${blockDataRef.current.title}: ⚠️ Sin link configurado, pero manteniendo estado running`);
+      return; // Solo retornar, mantener el estado running
     }
 
     try {
@@ -479,13 +532,16 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     setIntervalId(newIntervalId);
   };
 
-  const finalizeBlock = () => {
+  const finalizeBlock = useCallback(() => {
+    console.log(`🏁 Finalizando bloque ${blockData.title}, estado actual: ${state}`);
+    
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
       setIntervalId(null);
     }
     if (state !== 'completed') {
+      console.log(`🏁 Cambiando estado de ${state} a completed`);
       setState('completed');
       stateRef.current = 'completed';
       
@@ -498,11 +554,13 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       }
       
       generateExcel();
+    } else {
+      console.log(`🏁 Bloque ya estaba completado, no se realizó cambio de estado`);
     }
     setBlockData(prev => ({ ...prev, autoStart: false }));
-  };
+  }, [state, blockData.title, totalViewers, generateExcel]);
 
-  const resetBlock = () => {
+  const resetBlock = useCallback(() => {
     // CORRIGIDO: No guardamos las operaciones nuevamente porque ya fueron guardadas
     // cuando se ejecutaron originalmente en handleApiCall (líneas 341 y 377)
     
@@ -524,16 +582,16 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     
     // Limpiar estado guardado del localStorage
     localStorage.removeItem(`blockState_${blockId}`);
-  };
+  }, [blockId]);
 
   const handleEditModal = () => {
     onShowEditModal(blockId, blockData);
   };
 
   // Función para actualizar blockData desde el componente padre
-  const updateBlockData = (newData: BlockData) => {
+  const updateBlockData = useCallback((newData: BlockData) => {
     setBlockData(newData);
-  };
+  }, []);
 
   // Exponer funciones al componente padre mediante efectos
   React.useEffect(() => {
@@ -545,7 +603,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       delete (window as any)[`finalizeBlock_${blockId}`];
       delete (window as any)[`resetBlock_${blockId}`];
     };
-  }, [blockId]);
+  }, [blockId, updateBlockData, finalizeBlock, resetBlock]);
 
   // Función para guardar operación en historial permanente
   const saveToGlobalHistory = useCallback((operation: BlockStatus) => {
@@ -629,94 +687,250 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     console.log('✅ Reset registrado:', resetRecord);
   }, [blockId, blockData.title, status, totalViewers]);
 
+  const summaryStatus = getSummaryStatus();
+
   return (
-    <div className={`block ${theme}`}>
-      <h2 className="block-title">{blockData.title}</h2>
-      
-      <div className="block-info">
-        {blockData.autoStart && blockData.startTime && (
-          <div className="auto-start-info">
-            ⏰ Inicio automático: {blockData.startTime}
-          </div>
-        )}
-        
-        <div className="interval-info">
-          ⏱️ Intervalo: {blockData.intervalMinutes || 2} min{(blockData.intervalMinutes || 2) > 1 ? 'utos' : 'uto'}
-        </div>
+    <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'}`}>
+      <div className="block-header">
+        <h2 className="block-title">{blockData.title}</h2>
+        <button 
+          onClick={() => setIsMinimized(!isMinimized)} 
+          className="minimize-toggle"
+          title={isMinimized ? "Expandir" : "Minimizar"}
+        >
+          {isMinimized ? '📈 Expandir' : '📉 Minimizar'}
+        </button>
       </div>
 
-      {(state === 'paused' || state === 'completed') && (
-        <button onClick={generateExcel} className="download-icon">
-          <span className="icon-download"></span>
-        </button>
-      )}
+      {isMinimized ? (
+        // Vista ultra minimizada - Layout en columnas
+        <div className="block-ultra-minimized">
+          <div className="ultra-compact-header">
+            <div className="progress-micro">
+              <div 
+                className="progress-fill-micro" 
+                style={{ width: `${summaryStatus.progress}%` }}
+              ></div>
+            </div>
+            <span className="progress-label">{currentOperation}/{blockData.totalOperations}</span>
+          </div>
 
-      <div className="status">
-        {Array.from({ length: blockData.totalOperations }).map((_, statusIndex) => (
-          <div key={statusIndex} className="status-item">
-            {`Operación ${statusIndex + 1}: `}
-            {status[statusIndex] ? (
+          <div className="ultra-compact-body">
+            <div className="ultra-stats-column">
+              <div className="stat-group">
+                <label className="stat-label">Viewers:</label>
+                <span className="stat-value">👥 {totalViewers}</span>
+              </div>
+              <div className="stat-group">
+                <label className="stat-label">Éxito:</label>
+                <span className="stat-value success">✅ {summaryStatus.success}</span>
+              </div>
+              {summaryStatus.errors > 0 && (
+                <div className="stat-group">
+                  <label className="stat-label">Errores:</label>
+                  <span className="stat-value error">❌ {summaryStatus.errors}</span>
+                </div>
+              )}
+              <div className="stat-group">
+                <label className="stat-label">Costo:</label>
+                <span className="stat-value">💰 ${summaryStatus.totalCost}</span>
+              </div>
+            </div>
+
+            <div className="ultra-duration-column">
+              <div className="duration-group">
+                <label className="duration-label">Intervalo:</label>
+                <span className="duration-value">🔄 {blockData.intervalMinutes || 2}m</span>
+              </div>
+              <div className="duration-group">
+                <label className="duration-label">Duración Op:</label>
+                <span className="duration-value">⏱️ {getOperationDuration()}</span>
+              </div>
+              <div className="duration-group">
+                <label className="duration-label">Tiempo Total:</label>
+                <span className="duration-value">📅 {getTotalEstimatedDuration()}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="ultra-compact-controls">
+            {state === 'idle' && (
               <>
-                {status[statusIndex].status === 'success' ? (
-                  <span className="status-success">✅</span>
-                ) : (
-                  <span className="status-error">❌</span>
-                )}
-                <span className="timestamp">{status[statusIndex].timestamp}</span>
-                {status[statusIndex].orderStatus && (
-                  <span className="order-status">{status[statusIndex].orderStatus}</span>
-                )}
+                <button onClick={startBlock} className="micro-btn start" title="Iniciar">
+                  ▶️ Iniciar
+                </button>
+                <button onClick={handleEditModal} className="micro-btn edit" title="Editar">
+                  ✏️ Editar
+                </button>
               </>
-            ) : (
-              <span className="status-pending">⏳</span>
+            )}
+            
+            {state === 'running' && (
+              <>
+                <button onClick={pauseBlock} className="micro-btn pause" title="Pausar">
+                  ⏸️ Pausar
+                </button>
+                <button onClick={handleEditModal} className="micro-btn edit" title="Editar">
+                  ✏️ Editar
+                </button>
+              </>
+            )}
+            
+            {state === 'paused' && (
+              <>
+                <button onClick={resumeBlock} className="micro-btn resume" title="Reanudar">
+                  ▶️ Reanudar
+                </button>
+                <button onClick={() => onShowWarning(blockId, 'finalizar')} className="micro-btn finalize" title="Finalizar">
+                  🏁 Finalizar
+                </button>
+                <button onClick={() => onShowWarning(blockId, 'reiniciar')} className="micro-btn reset" title="Reiniciar">
+                  🔄 Reiniciar
+                </button>
+                <button onClick={handleEditModal} className="micro-btn edit" title="Editar">
+                  ✏️ Editar
+                </button>
+                <button onClick={generateExcel} className="micro-btn download" title="Descargar Excel">
+                  📊 Excel
+                </button>
+              </>
+            )}
+            
+            {state === 'completed' && (
+              <>
+                <span className="micro-completed">✅ Completado</span>
+                <button onClick={() => onShowWarning(blockId, 'reiniciar')} className="micro-btn reset" title="Reiniciar">
+                  🔄 Reiniciar
+                </button>
+                <button onClick={handleEditModal} className="micro-btn edit" title="Editar">
+                  ✏️ Editar
+                </button>
+                <button onClick={generateExcel} className="micro-btn download" title="Descargar Excel">
+                  📊 Excel
+                </button>
+              </>
             )}
           </div>
-        ))}
-      </div>
+        </div>
+      ) : (
+        // Vista expandida (original pero más compacta)
+        <>
+          <div className="block-info">
+            <div className="info-row">
+              <span className="duration-info" title="Tiempo entre cada operación">
+                🔄 Intervalo: {blockData.intervalMinutes || 2} min{(blockData.intervalMinutes || 2) > 1 ? 'utos' : 'uto'}
+              </span>
+              <span className="operation-duration-info" title="Duración estimada por operación">
+                ⏱️ Duración Op: {getOperationDuration()}
+              </span>
+              <span className="total-duration-info" title="Tiempo total estimado del bloque">
+                📅 Tiempo Total: {getTotalEstimatedDuration()}
+              </span>
+            </div>
+            
+            {blockData.autoStart && blockData.startTime && (
+              <div className="auto-start-info">
+                ⏰ Inicio automático: {blockData.startTime}
+              </div>
+            )}
+            
+            <div className="progress-container">
+              <div className="progress-bar">
+                <div 
+                  className="progress-fill" 
+                  style={{ width: `${summaryStatus.progress}%` }}
+                ></div>
+                <span className="progress-text">
+                  {currentOperation}/{blockData.totalOperations} operaciones ({summaryStatus.progress.toFixed(0)}%)
+                </span>
+              </div>
+            </div>
+          </div>
 
-      <div className="block-controls">
-        {state === 'idle' && (
-          <button onClick={startBlock} className="start-button">
-            ▶️ Iniciar
-          </button>
-        )}
-        
-        {state === 'running' && (
-          <button onClick={pauseBlock} className="pause-button">
-            ⏸️ Pausar
-          </button>
-        )}
-        
-        {state === 'paused' && (
-          <>
-            <button onClick={resumeBlock} className="resume-button">
-              ▶️ Reanudar
+          {(state === 'paused' || state === 'completed') && (
+            <button onClick={generateExcel} className="download-icon">
+              <span className="icon-download">📊</span>
             </button>
-            <button onClick={() => onShowWarning(blockId, 'finalizar')} className="finalize-button">
-              🏁 Finalizar
-            </button>
-            <button onClick={() => onShowWarning(blockId, 'reiniciar')} className="reset-button">
-              🔄 Reiniciar
-            </button>
-          </>
-        )}
-        
-        {state === 'completed' && (
-          <>
-            <div className="completed-message">✅ Bloque finalizado</div>
-            <button onClick={() => onShowWarning(blockId, 'reiniciar')} className="reset-button">
-              🔄 Reiniciar
-            </button>
-          </>
-        )}
-        
-        
-        <button onClick={handleEditModal} className="edit-button">
-          ✏️ Editar
-        </button>
-      </div>
+          )}
 
-      <div className="total-viewers">👥 {totalViewers}</div>
+          <div className="status-compact">
+            <div className="status-summary">
+              <span className="summary-item success" title="Operaciones completadas exitosamente">✅ Éxito: {summaryStatus.success}</span>
+              <span className="summary-item error" title="Operaciones con errores">❌ Errores: {summaryStatus.errors}</span>
+              <span className="summary-item cost" title="Costo total acumulado">💰 Costo: ${summaryStatus.totalCost}</span>
+            </div>
+            
+            <details className="status-details">
+              <summary>Ver detalles de operaciones</summary>
+              <div className="status-list">
+                {Array.from({ length: blockData.totalOperations }).map((_, statusIndex) => (
+                  <div key={statusIndex} className="status-item">
+                    {`Op ${statusIndex + 1}: `}
+                    {status[statusIndex] ? (
+                      <>
+                        {status[statusIndex].status === 'success' ? (
+                          <span className="status-success">✅</span>
+                        ) : (
+                          <span className="status-error">❌</span>
+                        )}
+                        <span className="timestamp">{status[statusIndex].timestamp}</span>
+                        {status[statusIndex].orderStatus && (
+                          <span className="order-status">{status[statusIndex].orderStatus}</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="status-pending">⏳</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </details>
+          </div>
+
+          <div className="block-controls">
+            {state === 'idle' && (
+              <button onClick={startBlock} className="start-button">
+                ▶️ Iniciar
+              </button>
+            )}
+            
+            {state === 'running' && (
+              <button onClick={pauseBlock} className="pause-button">
+                ⏸️ Pausar
+              </button>
+            )}
+            
+            {state === 'paused' && (
+              <>
+                <button onClick={resumeBlock} className="resume-button">
+                  ▶️ Reanudar
+                </button>
+                <button onClick={() => onShowWarning(blockId, 'finalizar')} className="finalize-button">
+                  🏁 Finalizar
+                </button>
+                <button onClick={() => onShowWarning(blockId, 'reiniciar')} className="reset-button">
+                  🔄 Reiniciar
+                </button>
+              </>
+            )}
+            
+            {state === 'completed' && (
+              <>
+                <div className="completed-message">✅ Bloque finalizado</div>
+                <button onClick={() => onShowWarning(blockId, 'reiniciar')} className="reset-button">
+                  🔄 Reiniciar
+                </button>
+              </>
+            )}
+            
+            <button onClick={handleEditModal} className="edit-button">
+              ✏️ Editar
+            </button>
+          </div>
+
+          <div className="total-viewers">👥 {totalViewers} viewers totales</div>
+        </>
+      )}
     </div>
   );
 };

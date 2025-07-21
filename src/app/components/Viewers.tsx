@@ -65,9 +65,19 @@ const Viewers = () => {
   const handleWarningConfirm = () => {
     if (showWarning) {
       const { blockId, type } = showWarning;
+      console.log(`🚨 Confirmando warning para bloque ${blockId}, tipo: ${type}`);
+      
       if (type === 'finalizar') {
-        (window as any)[`finalizeBlock_${blockId}`]?.();
+        console.log(`🏁 Llamando finalizeBlock_${blockId}`);
+        const finalizeFunction = (window as any)[`finalizeBlock_${blockId}`];
+        if (finalizeFunction) {
+          finalizeFunction();
+          console.log(`✅ Función finalizeBlock_${blockId} ejecutada`);
+        } else {
+          console.error(`❌ Función finalizeBlock_${blockId} no encontrada`);
+        }
       } else if (type === 'reiniciar') {
+        console.log(`🔄 Llamando resetBlock_${blockId}`);
         (window as any)[`resetBlock_${blockId}`]?.();
       }
       setShowWarning(null);
