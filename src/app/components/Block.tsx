@@ -36,9 +36,10 @@ interface BlockProps {
   blockId: string;
   onShowWarning: (blockId: string, warningType: string) => void;
   onShowEditModal: (blockId: string, blockData: BlockData) => void;
+  isRecentlyEdited?: boolean;
 }
 
-const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, blockId, onShowWarning, onShowEditModal }) => {
+const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, blockId, onShowWarning, onShowEditModal, isRecentlyEdited = false }) => {
   const { theme } = useTheme();
   
   // Estado para minimizar/expandir - por defecto minimizado
@@ -690,7 +691,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
   const summaryStatus = getSummaryStatus();
 
   return (
-    <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'}`}>
+    <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'} ${isRecentlyEdited ? 'recently-edited' : ''}`}>
       <div className="block-header">
         <h2 className="block-title">{blockData.title}</h2>
         <button 

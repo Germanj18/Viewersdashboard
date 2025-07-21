@@ -19,6 +19,9 @@ const Viewers = () => {
   const [showWarning, setShowWarning] = useState<{ blockId: string; type: string } | null>(null);
   const [showEditModal, setShowEditModal] = useState<{ blockId: string; blockData: BlockData } | null>(null);
   const [editData, setEditData] = useState<BlockData | null>(null);
+  
+  // Estado para resaltar bloque recién editado
+  const [recentlyEditedBlock, setRecentlyEditedBlock] = useState<string | null>(null);
 
   // Función para limpiar localStorage de bloques antiguos al inicializar
   useEffect(() => {
@@ -100,8 +103,29 @@ const Viewers = () => {
       
       const { blockId } = showEditModal;
       (window as any)[`updateBlockData_${blockId}`]?.(updatedData);
+      
+      // Cerrar modal
       setShowEditModal(null);
       setEditData(null);
+      
+      // Resaltar y hacer scroll al bloque editado
+      setRecentlyEditedBlock(blockId);
+      
+      // Hacer scroll al bloque después de un pequeño delay para asegurar que se renderice
+      setTimeout(() => {
+        const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+        if (blockElement) {
+          blockElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100);
+      
+      // Quitar el resaltado después de 3 segundos
+      setTimeout(() => {
+        setRecentlyEditedBlock(null);
+      }, 3000);
     }
   };
 
@@ -438,15 +462,21 @@ const Viewers = () => {
       {/* Grid de bloques usando tu estructura CSS original */}
       <div className="blocks-container">
         {initialBlocksData.map((blockData, index) => (
-          <Block
+          <div 
             key={`block-${index}`}
-            blockId={`block-${index}`}
-            initialData={blockData}
-            link={link}
-            onTotalViewersChange={updateBlockViewers}
-            onShowWarning={handleShowWarning}
-            onShowEditModal={handleShowEditModal}
-          />
+            data-block-id={`block-${index}`}
+            className={`block-wrapper ${recentlyEditedBlock === `block-${index}` ? 'recently-edited' : ''}`}
+          >
+            <Block
+              blockId={`block-${index}`}
+              initialData={blockData}
+              link={link}
+              onTotalViewersChange={updateBlockViewers}
+              onShowWarning={handleShowWarning}
+              onShowEditModal={handleShowEditModal}
+              isRecentlyEdited={recentlyEditedBlock === `block-${index}`}
+            />
+          </div>
         ))}
       </div>
 

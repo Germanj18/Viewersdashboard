@@ -68,14 +68,28 @@
 
 .blocks-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 0.75rem;
   width: 100%;
-  max-width: 1400px;
+  max-width: none;
   margin-top: 1rem;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   align-items: start;
+}
+
+/* Para pantallas grandes con sidebar, permitir 2 columnas */
+@media (min-width: 1400px) {
+  .blocks-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Para pantallas muy grandes, permitir 3 columnas */
+@media (min-width: 1800px) {
+  .blocks-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Ultra minimized block - Layout compacto en columnas */
@@ -325,14 +339,7 @@
     gap: 4px;
   }
 }
-@media (max-width: 1200px) {
-  .blocks-container {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-    align-items: start;
-  }
-}
-
+/* Para pantallas pequeñas, mantener 1 columna */
 @media (max-width: 768px) {
   .blocks-container {
     grid-template-columns: 1fr;
@@ -1433,5 +1440,71 @@
   .progress-micro {
     width: 40px;
     height: 6px;
+  }
+}
+
+/* Estilos para bloque recién editado */
+.block-wrapper {
+  transition: all 0.3s ease;
+}
+
+.block-wrapper.recently-edited {
+  position: relative;
+  z-index: 5;
+}
+
+.block.recently-edited {
+  position: relative;
+  animation: pulseEdit 2s ease-in-out;
+  transform: scale(1.02);
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.4), 0 20px 40px -12px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(34, 197, 94, 0.6);
+}
+
+.block.recently-edited::before {
+  content: "✏️ Recién Editado";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(34, 197, 94, 0.3);
+  z-index: 10;
+  animation: slideDown 0.5s ease-out;
+}
+
+.block.dark.recently-edited {
+  box-shadow: 0 0 30px rgba(34, 197, 94, 0.5), 0 20px 40px -12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(34, 197, 94, 0.7);
+}
+
+@keyframes pulseEdit {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(34, 197, 94, 0);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+  }
+  100% {
+    transform: scale(1.02);
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
