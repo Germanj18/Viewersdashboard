@@ -375,23 +375,26 @@ const Viewers = () => {
   };
 
   return (
-    <div className="viewers-container">
-      {/* Input para el link de YouTube usando tus estilos originales */}
-      <input
-        type="text"
-        value={link}
-        onChange={(e) => handleLinkChange(e.target.value)}
-        placeholder="Ingrese el enlace de YouTube"
-        className={`input-link ${theme}`}
-      />
-      
-      {/* Header con total de viewers mejorado con detalles de cálculo */}
-      <div className="total-viewers-header" title="Total de viewers enviados (activos + expirados + reiniciados) menos viewers expirados">
-        <div style={{ fontSize: '1rem', fontWeight: '600' }}>
-          💫 Total cargado: {(getTotalViewersSent() - getExpiredViewersCount()).toLocaleString()}
-        </div>
-        <div style={{ fontSize: '0.75rem', opacity: '0.8', marginTop: '0.25rem' }}>
-          📊 Expirados: -{getExpiredViewersCount().toLocaleString()}
+    <div className={`viewers-container ${theme}`}>
+      {/* Contenedor horizontal para input y total */}
+      <div className="input-total-container">
+        {/* Input para el link de YouTube usando tus estilos originales */}
+        <input
+          type="text"
+          value={link}
+          onChange={(e) => handleLinkChange(e.target.value)}
+          placeholder="Ingrese el enlace de YouTube"
+          className={`input-link ${theme}`}
+        />
+        
+        {/* Header con total de viewers mejorado con detalles de cálculo */}
+        <div className="total-viewers-header" title="Total de viewers enviados (activos + expirados + reiniciados) menos viewers expirados">
+          <div style={{ fontSize: '1rem', fontWeight: '600' }}>
+            💫 Total cargado: {(getTotalViewersSent() - getExpiredViewersCount()).toLocaleString()}
+          </div>
+          <div style={{ fontSize: '0.75rem', opacity: '0.8', marginTop: '0.25rem' }}>
+            📊 Expirados: -{getExpiredViewersCount().toLocaleString()}
+          </div>
         </div>
       </div>
       
@@ -399,13 +402,7 @@ const Viewers = () => {
       <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
         <button
           onClick={() => setShowMetrics(!showMetrics)}
-          className="edit-button"
-          style={{
-            padding: '0.75rem 1.5rem',
-            fontSize: '0.875rem',
-            borderRadius: '0.5rem',
-            fontWeight: '500'
-          }}
+          className="dashboard-button metrics-button"
           title="Ver dashboard de métricas"
         >
           📊 {showMetrics ? 'Ocultar Métricas' : 'Ver Métricas'}
@@ -413,18 +410,7 @@ const Viewers = () => {
         
         <button
           onClick={() => setShowYouTubeMonitor(!showYouTubeMonitor)}
-          className="youtube-monitor-button"
-          style={{
-            padding: '0.75rem 1.5rem',
-            fontSize: '0.875rem',
-            borderRadius: '0.5rem',
-            fontWeight: '500',
-            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-            color: 'white',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
+          className="dashboard-button youtube-monitor-button"
           title="Monitor de YouTube en tiempo real"
         >
           📺 {showYouTubeMonitor ? 'Ocultar YouTube' : 'Monitor YouTube'}
@@ -432,13 +418,7 @@ const Viewers = () => {
         
         <button
           onClick={handleResetAllBlocks}
-          className="reset-button"
-          style={{
-            padding: '0.75rem 1.5rem',
-            fontSize: '0.875rem',
-            borderRadius: '0.5rem',
-            fontWeight: '500'
-          }}
+          className="dashboard-button reset-all-button"
           title="Resetear todos los bloques"
         >
           🗑️ Reset All

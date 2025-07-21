@@ -13,24 +13,167 @@
   overflow-x: hidden;
 }
 
+/* Contenedor para input y total en desktop */
+.input-total-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1.5rem;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 1200px;
+  margin-bottom: 2rem;
+}
+
+/* Para pantallas grandes - asegurar layout horizontal */
+@media (min-width: 769px) {
+  .input-total-container {
+    flex-direction: row !important;
+    align-items: flex-end !important;
+  }
+}
+
+/* Para pantallas medianas, ajustar gap y layout */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .input-total-container {
+    gap: 1rem;
+  }
+  
+  .total-viewers-header {
+    min-width: 280px;
+    font-size: 0.9rem;
+    padding: 0.6rem 1.2rem;
+  }
+}
+
 .total-viewers-header {
-  position: absolute;
-  top: 2.5rem;
-  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   font-size: 1rem;
   font-weight: 600;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-radius: 1rem;
   backdrop-filter: blur(10px);
   background: rgba(59, 130, 246, 0.1);
   border: 1px solid rgba(59, 130, 246, 0.2);
   color: #3b82f6;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 0;
+  flex-shrink: 0;
+  min-width: 300px;
   z-index: 10;
+  white-space: nowrap;
+  align-self: flex-end;
+  height: 58px; /* Misma altura que el input */
+  min-height: 58px;
+}
+
+/* Botones principales del dashboard con estilo de los botones minimizar */
+.dashboard-button {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  z-index: 20;
+  font-weight: normal;
+}
+
+.dashboard-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+/* Estilos específicos por tipo de botón manteniendo el estilo base */
+.metrics-button {
+  color: #7c3aed;
+}
+
+.metrics-button:hover {
+  background: rgba(124, 58, 237, 0.1);
+  border-color: rgba(124, 58, 237, 0.2);
+  color: #6d28d9;
+}
+
+.youtube-monitor-button {
+  color: #ef4444;
+}
+
+.youtube-monitor-button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.reset-all-button {
+  color: #6b7280;
+}
+
+.reset-all-button:hover {
+  background: rgba(107, 114, 128, 0.1);
+  border-color: rgba(107, 114, 128, 0.2);
+  color: #4b5563;
+}
+
+/* Estilos para tema oscuro */
+.viewers-container.dark .dashboard-button {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(71, 85, 105, 0.5);
+  color: #f1f5f9;
+}
+
+.viewers-container.dark .dashboard-button:hover {
+  background: rgba(71, 85, 105, 0.8);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+.viewers-container.dark .metrics-button {
+  color: #a78bfa;
+}
+
+.viewers-container.dark .metrics-button:hover {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.3);
+  color: #c4b5fd;
+}
+
+.viewers-container.dark .youtube-monitor-button {
+  color: #f87171;
+}
+
+.viewers-container.dark .youtube-monitor-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.viewers-container.dark .reset-all-button {
+  color: #9ca3af;
+}
+
+.viewers-container.dark .reset-all-button:hover {
+  background: rgba(107, 114, 128, 0.2);
+  border-color: rgba(107, 114, 128, 0.3);
+  color: #d1d5db;
+}
+
+.viewers-container.dark .total-viewers-header {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
 }
 
 .input-link {
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   padding: 1rem 1.5rem;
   border: 2px solid transparent;
   border-radius: 1rem;
@@ -40,6 +183,7 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  flex: 1;
 }
 
 .input-link.dark {
@@ -187,12 +331,15 @@
 }
 
 .start-time-label {
+  background: rgba(34, 197, 94, 0.1);
+  color: var(--success-color, #22c55e);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary);
   white-space: nowrap;
   margin-left: auto;
-  opacity: 0.8;
 }
 
 /* Grupos de estadísticas */
@@ -350,23 +497,38 @@
     gap: 4px;
   }
 }
-/* Para pantallas pequeñas, mantener 1 columna */
+/* Para pantallas pequeñas (móviles), cambiar a layout vertical */
 @media (max-width: 768px) {
+  .input-total-container {
+    flex-direction: column !important;
+    gap: 1rem;
+    align-items: center !important;
+  }
+  
+  .input-link {
+    margin-bottom: 0;
+    max-width: 100%;
+  }
+  
+  .total-viewers-header {
+    min-width: unset;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    max-width: 600px;
+  }
+  
   .blocks-container {
     grid-template-columns: 1fr;
-    gap: 1rem; /* Aumentado el gap para dar más espacio */
+    gap: 1rem;
     align-items: start;
-    padding-bottom: 2rem; /* Padding extra al final */
+    padding-bottom: 2rem;
   }
   
   .viewers-container {
     padding: 1rem;
-  }
-  
-  .total-viewers-header {
-    position: static;
-    margin-bottom: 1rem;
-    align-self: flex-end;
   }
 }
 
@@ -613,33 +775,42 @@
 }
 
 .download-icon {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  border: none;
-  border-radius: 0.75rem;
-  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 15;
-  width: 40px;
-  height: 40px;
+  font-size: 0.9rem;
+  white-space: nowrap;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  position: relative;
+  z-index: 20;
+  color: inherit;
 }
 
 .download-icon:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.2);
+  transform: scale(1.05);
+}
+
+.block.dark .download-icon {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(71, 85, 105, 0.5);
+  color: #f1f5f9;
+}
+
+.block.dark .download-icon:hover {
+  background: rgba(71, 85, 105, 0.8);
+  border-color: rgba(148, 163, 184, 0.5);
 }
 
 .icon-download {
   font-size: 16px;
-  color: white;
+  color: inherit;
   line-height: 1;
 }
 
@@ -995,6 +1166,12 @@
   z-index: 10;
 }
 
+.block-header-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .block.minimized .block-header {
   margin-bottom: 0.5rem;
 }
@@ -1229,6 +1406,11 @@
 }
 
 .block.dark .start-time-info {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.3);
+}
+
+.block.dark .start-time-label {
   background: rgba(34, 197, 94, 0.15);
   border-color: rgba(34, 197, 94, 0.3);
 }
@@ -1468,6 +1650,21 @@
   
   .start-time-label {
     font-size: 11px;
+    padding: 0.15rem 0.3rem;
+  }
+  
+  .block-header-buttons {
+    gap: 0.25rem;
+  }
+  
+  .download-icon {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+  }
+  
+  .minimize-toggle {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
   }
   
   .micro-btn {
@@ -1492,19 +1689,6 @@
   .progress-micro {
     width: 40px;
     height: 6px;
-  }
-  
-  .download-icon {
-    top: 0.5rem;
-    right: 0.5rem;
-    width: 36px;
-    height: 36px;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-  }
-  
-  .icon-download {
-    font-size: 14px;
   }
 }
 

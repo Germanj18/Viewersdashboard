@@ -717,13 +717,20 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'} ${isRecentlyEdited ? 'recently-edited' : ''}`}>
       <div className="block-header">
         <h2 className="block-title">{blockData.title}</h2>
-        <button 
-          onClick={() => setIsMinimized(!isMinimized)} 
-          className="minimize-toggle"
-          title={isMinimized ? "Expandir" : "Minimizar"}
-        >
-          {isMinimized ? '📈 Expandir' : '📉 Minimizar'}
-        </button>
+        <div className="block-header-buttons">
+          {(state === 'paused' || state === 'completed') && !isMinimized && (
+            <button onClick={generateExcel} className="download-icon">
+              📊 Excel
+            </button>
+          )}
+          <button 
+            onClick={() => setIsMinimized(!isMinimized)} 
+            className="minimize-toggle"
+            title={isMinimized ? "Expandir" : "Minimizar"}
+          >
+            {isMinimized ? '📈 Expandir' : '📉 Minimizar'}
+          </button>
+        </div>
       </div>
 
       {isMinimized ? (
@@ -880,12 +887,6 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
               </div>
             </div>
           </div>
-
-          {(state === 'paused' || state === 'completed') && (
-            <button onClick={generateExcel} className="download-icon">
-              <span className="icon-download">📊</span>
-            </button>
-          )}
 
           <div className="status-compact">
             <div className="status-summary">
