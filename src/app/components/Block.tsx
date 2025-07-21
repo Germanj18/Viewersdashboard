@@ -96,6 +96,11 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     return savedState?.totalViewers || 0;
   });
   
+  const [blockStartTime, setBlockStartTime] = useState(() => {
+    const savedState = loadBlockState();
+    return savedState?.blockStartTime || null;
+  });
+  
   const [blockData, setBlockData] = useState<BlockData>(() => {
     const savedState = loadBlockState();
     const data = savedState?.blockData || initialData;
@@ -114,15 +119,16 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       state,
       totalViewers,
       blockData,
+      blockStartTime,
       lastSaved: new Date().toISOString()
     };
     localStorage.setItem(`blockState_${blockId}`, JSON.stringify(stateToSave));
-  }, [blockId, status, currentOperation, state, totalViewers, blockData]);
+  }, [blockId, status, currentOperation, state, totalViewers, blockData, blockStartTime]);
 
   // Guardar estado cada vez que cambie algún valor importante
   useEffect(() => {
     saveBlockState();
-  }, [status, currentOperation, state, totalViewers, blockData, saveBlockState]);
+  }, [status, currentOperation, state, totalViewers, blockData, blockStartTime, saveBlockState]);
   
   // Refs para mantener valores actualizados en el intervalo
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -190,6 +196,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         state: stateRef.current === 'running' ? 'paused' : stateRef.current,
         totalViewers: totalViewersRef.current,
         blockData: blockDataRef.current,
+        blockStartTime: blockStartTime,
         lastSaved: new Date().toISOString()
       };
       localStorage.setItem(`blockState_${blockId}`, JSON.stringify(finalState));
@@ -249,6 +256,17 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     const percentage = blockData.totalOperations > 0 ? (currentOperation / blockData.totalOperations) * 100 : 0;
     return Math.min(percentage, 100);
   }, [currentOperation, blockData.totalOperations]);
+
+  // Formatear hora de inicio del bloque
+  const getFormattedStartTime = useCallback(() => {
+    if (!blockStartTime) return null;
+    const date = new Date(blockStartTime);
+    return date.toLocaleTimeString('es-ES', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: false 
+    });
+  }, [blockStartTime]);
 
   // Obtener estado resumido para vista minimizada
   const getSummaryStatus = useCallback(() => {
@@ -487,6 +505,10 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
   const startBlock = () => {
     if (state === 'running') return;
 
+    // Capturar la hora de inicio del bloque
+    const startTime = new Date().toISOString();
+    setBlockStartTime(startTime);
+
     setIsPaused(false);
     setState('running');
     
@@ -579,6 +601,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     setState('idle');
     stateRef.current = 'idle';
     setTotalViewers(0);
+    setBlockStartTime(null);
     setBlockData(prev => ({ ...prev, autoStart: false, startTime: '' }));
     
     // Limpiar estado guardado del localStorage
@@ -714,6 +737,11 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
               ></div>
             </div>
             <span className="progress-label">{currentOperation}/{blockData.totalOperations}</span>
+            {getFormattedStartTime() && (
+              <span className="start-time-label" title="Hora de inicio del bloque">
+                🕒 {getFormattedStartTime()}
+              </span>
+            )}
           </div>
 
           <div className="ultra-compact-body">
@@ -827,6 +855,11 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
               <span className="total-duration-info" title="Tiempo total estimado del bloque">
                 📅 Tiempo Total: {getTotalEstimatedDuration()}
               </span>
+              {getFormattedStartTime() && (
+                <span className="start-time-info" title="Hora de inicio del bloque">
+                  🕒 Iniciado: {getFormattedStartTime()}
+                </span>
+              )}
             </div>
             
             {blockData.autoStart && blockData.startTime && (
