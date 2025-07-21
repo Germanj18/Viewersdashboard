@@ -102,10 +102,10 @@
   border: 1px solid var(--border-color);
   width: 100%;
   max-width: 100%;
-  gap: 5px;
+  gap: 6px;
   box-sizing: border-box;
   overflow: visible;
-  min-height: 90px;
+  min-height: 120px; /* Aumentado para mejor espacio */
   max-height: none;
 }
 
@@ -115,22 +115,23 @@
   gap: 8px;
   width: 100%;
   flex-shrink: 0;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .ultra-compact-body {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
   min-width: 0;
   flex: 1;
+  margin-bottom: 6px;
 }
 
 .ultra-stats-column {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -138,7 +139,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -146,12 +147,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   flex-wrap: wrap;
   flex-shrink: 0;
   padding: 4px 0;
-  min-height: 30px;
+  min-height: 32px;
   width: 100%;
+  margin-top: auto; /* Empujar hacia abajo */
 }
 
 /* Progress bar para header */
@@ -343,8 +345,9 @@
 @media (max-width: 768px) {
   .blocks-container {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 1rem; /* Aumentado el gap para dar más espacio */
     align-items: start;
+    padding-bottom: 2rem; /* Padding extra al final */
   }
   
   .viewers-container {
@@ -1346,6 +1349,13 @@
 @media (max-width: 768px) {
   .viewers-container {
     padding: 1rem;
+    overflow-y: auto; /* Permitir scroll vertical */
+    min-height: 100vh; /* Asegurar altura mínima */
+  }
+  
+  .blocks-container {
+    margin-bottom: 2rem; /* Espacio extra al final */
+    min-height: auto;
   }
   
   .metrics-dashboard .metrics-grid {
@@ -1394,22 +1404,25 @@
   /* Ultra minimized responsive */
   .block-ultra-minimized {
     padding: 8px;
-    min-height: 75px;
-    max-height: 110px;
+    min-height: 140px; /* Aumentado para dar más espacio */
+    max-height: none; /* Removido max-height para permitir expansión */
+    gap: 6px;
+    margin-bottom: 0.5rem; /* Margen inferior adicional */
   }
   
   .ultra-compact-body {
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    margin-bottom: 4px;
   }
   
   .ultra-stats-column,
   .ultra-duration-column {
-    gap: 2px;
+    gap: 3px;
   }
   
   .stat-group, .duration-group {
-    gap: 2px;
+    gap: 3px;
   }
   
   .stat-label, .duration-label {
@@ -1425,16 +1438,22 @@
   }
   
   .micro-btn {
-    padding: 3px 6px;
+    padding: 4px 8px; /* Aumentado el padding */
     font-size: 11px;
     min-width: auto;
-    height: auto;
+    height: 24px; /* Altura fija para consistencia */
+    line-height: 1;
+    border-radius: 4px;
   }
   
   .ultra-compact-controls {
-    gap: 2px;
-    flex-direction: column;
-    align-items: stretch;
+    gap: 4px; /* Aumentado el gap */
+    flex-direction: row; /* Cambiado a row para layout horizontal */
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Permitir wrap si es necesario */
+    min-height: 32px; /* Altura mínima para los controles */
+    margin-top: auto; /* Empujar hacia abajo */
   }
 
   .progress-micro {
