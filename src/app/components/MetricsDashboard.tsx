@@ -799,7 +799,7 @@ const MetricsDashboard: React.FC = () => {
       successfulOperations: 0,
       failedOperations: 0,
       totalCost: 0,
-      totalViewers: totalViewers,
+      totalViewers: 0, // CORREGIDO: Calcular desde operaciones, no desde totalViewers context
       totalResetOperations: 0,
       totalResetViewers: 0,
       operationsPerBlock: {},
@@ -816,6 +816,9 @@ const MetricsDashboard: React.FC = () => {
     // Obtener todas las operaciones (históricas + actuales)
     const allOperations = getAllOperationsData();
     
+    // CORREGIDO: Calcular viewers totales desde las operaciones reales
+    let totalViewersFromOperations = 0;
+    
     // Procesar todas las operaciones
     allOperations.forEach((operation: any) => {
       const blockId = operation.blockId || `block-${operation.blockId}`;
@@ -829,6 +832,10 @@ const MetricsDashboard: React.FC = () => {
         newMetrics.successfulOperations++;
         const operationCost = operation.cost || 0;
         newMetrics.totalCost += operationCost;
+        
+        // CORREGIDO: Sumar viewers reales enviados
+        const viewersSent = operation.count || 0;
+        totalViewersFromOperations += viewersSent;
         
         if (operation.duration) {
           totalDuration += operation.duration;
@@ -855,6 +862,16 @@ const MetricsDashboard: React.FC = () => {
       } else {
         newMetrics.failedOperations++;
       }
+    });
+    
+    // CORREGIDO: Usar viewers calculados desde operaciones
+    newMetrics.totalViewers = totalViewersFromOperations;
+
+    console.log('📊 Métricas calculadas:', {
+      totalOperations: newMetrics.totalOperations,
+      successfulOperations: newMetrics.successfulOperations,
+      totalViewersFromOperations: totalViewersFromOperations,
+      note: 'totalViewers ahora refleja viewers realmente enviados'
     });
 
     // Calcular métricas de resets - NO crear datos de prueba automáticamente
@@ -890,7 +907,7 @@ const MetricsDashboard: React.FC = () => {
     newMetrics.youtubeStreams = getYouTubeStreamsData();
 
     setMetrics(newMetrics);
-  }, [totalViewers, getAllOperationsData, getYouTubeStreamsData, getResetHistory]);
+  }, [getAllOperationsData, getYouTubeStreamsData, getResetHistory]); // CORREGIDO: Removido totalViewers dependency
 
   // Función para generar alertas con mejor detección de cambios
   const generateAlerts = useCallback(() => {

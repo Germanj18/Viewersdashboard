@@ -96,34 +96,36 @@ export const GlobalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Función para calcular el total de viewers enviados incluyendo reiniciados
   const getTotalViewersSent = useCallback(() => {
     try {
-      // Viewers activos actuales (sin restar nada - estos son los de los bloques)
-      const activeViewers = currentActiveViewers;
+      // CORREGIDO: Calcular viewers enviados desde el historial global (fuente única de verdad)
+      const globalHistoryKey = 'globalOperationsHistory';
+      const globalHistory = localStorage.getItem(globalHistoryKey);
+      let totalViewersFromOperations = 0;
       
-      // Viewers expirados (que terminaron su duración)
-      const expiredViewers = getExpiredViewersCount();
-      
-      // Viewers de bloques reiniciados
-      const resetHistoryKey = 'blockResetHistory';
-      const resetHistory = localStorage.getItem(resetHistoryKey);
-      let resetViewers = 0;
-      
-      if (resetHistory) {
+      if (globalHistory) {
         try {
-          const resets = JSON.parse(resetHistory);
-          resetViewers = resets.reduce((sum: number, reset: any) => sum + (reset.viewersLost || 0), 0);
+          const operations = JSON.parse(globalHistory);
+          totalViewersFromOperations = operations
+            .filter((op: any) => op.status === 'success') // Solo operaciones exitosas
+            .reduce((sum: number, op: any) => sum + (op.count || 0), 0); // Sumar viewers enviados
         } catch (error) {
-          console.error('Error calculando viewers reiniciados:', error);
+          console.error('Error calculando viewers del historial:', error);
         }
       }
       
-      // Total enviados = activos + expirados + reiniciados
-      // IMPORTANTE: No se resta nada, esto es el TOTAL ENVIADO HISTÓRICO
-      return activeViewers + expiredViewers + resetViewers;
+      // Viewers de bloques reiniciados (ya incluidos en el historial global, no sumar dos veces)
+      // El historial global ya contiene todas las operaciones históricas, incluyendo las de bloques reiniciados
+      
+      console.log('📊 Cálculo de viewers enviados:', {
+        viewersFromOperations: totalViewersFromOperations,
+        note: 'Este es el total REAL de viewers enviados desde operaciones exitosas'
+      });
+      
+      return totalViewersFromOperations;
     } catch (error) {
       console.error('Error calculando total de viewers enviados:', error);
-      return currentActiveViewers;
+      return 0;
     }
-  }, [currentActiveViewers, getExpiredViewersCount]);
+  }, [getExpiredViewersCount]);
 
   // Total cargados = Total enviados - expirados
   const totalViewers = Math.max(0, getTotalViewersSent() - expiredViewers);
