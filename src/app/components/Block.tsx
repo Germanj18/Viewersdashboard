@@ -239,6 +239,32 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     return `${minutes}m`;
   }, [blockData.totalOperations, blockData.intervalMinutes]);
 
+  // Calcular tiempo restante basado en operaciones pendientes
+  const getRemainingTime = useCallback(() => {
+    const operationsRemaining = blockData.totalOperations - currentOperation;
+    
+    if (operationsRemaining <= 0) {
+      return "✅ Completado";
+    }
+    
+    if (state === 'idle') {
+      // Si no ha empezado, mostrar tiempo total
+      return getTotalEstimatedDuration();
+    }
+    
+    const operationInterval = blockData.intervalMinutes || 2;
+    // Para las operaciones restantes, el tiempo es: (operaciones_restantes - 1) * intervalo
+    // porque la última operación no necesita esperar el intervalo
+    const remainingMinutes = Math.max(0, (operationsRemaining - 1) * operationInterval);
+    const hours = Math.floor(remainingMinutes / 60);
+    const minutes = remainingMinutes % 60;
+    
+    if (hours > 0) {
+      return minutes > 0 ? `⏳ ${hours}h ${minutes}m restante` : `⏳ ${hours}h restante`;
+    }
+    return minutes > 0 ? `⏳ ${minutes}m restante` : `⏳ Última operación`;
+  }, [blockData.totalOperations, blockData.intervalMinutes, currentOperation, state, getTotalEstimatedDuration]);
+
   // Obtener duración de operación individual configurada
   const getOperationDuration = useCallback(() => {
     const duration = getServiceDuration(blockData.serviceId);
@@ -783,8 +809,10 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
                 <span className="duration-value">⏱️ {getOperationDuration()}</span>
               </div>
               <div className="duration-group">
-                <label className="duration-label">Tiempo Total:</label>
-                <span className="duration-value">📅 {getTotalEstimatedDuration()}</span>
+                <label className="duration-label">Tiempo Restante:</label>
+                <span className="duration-value" title="Tiempo estimado restante para completar el bloque">
+                  📅 {getRemainingTime()}
+                </span>
               </div>
             </div>
           </div>
@@ -859,8 +887,8 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
               <span className="operation-duration-info" title="Duración estimada por operación">
                 ⏱️ Duración Op: {getOperationDuration()}
               </span>
-              <span className="total-duration-info" title="Tiempo total estimado del bloque">
-                📅 Tiempo Total: {getTotalEstimatedDuration()}
+              <span className="total-duration-info" title="Tiempo estimado restante para completar el bloque">
+                📅 {getRemainingTime()}
               </span>
               {getFormattedStartTime() && (
                 <span className="start-time-info" title="Hora de inicio del bloque">
