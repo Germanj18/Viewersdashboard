@@ -50,7 +50,6 @@
   "devDependencies": {
     "@babel/preset-env": "^7.26.0",
     "@babel/preset-react": "^7.26.3",
-    "@prisma/extension-optimize": "^1.0.1",
     "@types/bcrypt": "^5.0.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/dotenv": "^8.2.0",
