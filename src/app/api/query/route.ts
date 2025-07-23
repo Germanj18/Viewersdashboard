@@ -1,5 +1,17 @@
-// src/app/api/query/route.ts
+// NOTA: Esta API está deshabilitada porque usa la tabla 'programas' que fue eliminada
+// durante la reestructuración de la base de datos para el sistema de autenticación
+
 import { NextRequest, NextResponse } from 'next/server';
+
+export async function GET(req: NextRequest) {
+  return NextResponse.json({ 
+    error: 'Esta API ha sido deshabilitada. La tabla programas fue eliminada durante la reestructuración.',
+    message: 'Por favor, usa la nueva API de métricas: /api/metrics'
+  }, { status: 410 }); // 410 Gone - Recurso ya no disponible
+}
+
+/*
+// CÓDIGO ORIGINAL COMENTADO - PARA REFERENCIA
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
@@ -32,3 +44,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Error al consultar los datos' }, { status: 500 });
   }
 }
+*/

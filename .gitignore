@@ -1,3 +1,7 @@
 node_modules
 .env
 .vercel
+test-db.js
+test-*.js
+test-*.ts
+DEPLOYMENT_INSTRUCTIONS.md
