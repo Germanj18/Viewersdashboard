@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { getUserByUsername } from "../../../lib/luser"; // Asegúrate de que la ruta sea correcta
 
 const handler = NextAuth({
@@ -13,16 +14,28 @@ const handler = NextAuth({
       authorize: async (credentials) => {
         if (!credentials) return null;
 
-        const user = await getUserByUsername(credentials.username);
-        if (user && user.password === credentials.password) {
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.username, // NextAuth espera un campo 'email'
-            rol: user.rol || "", // Asegúrate de que 'rol' sea una cadena
-          };
+        try {
+          const user = await getUserByUsername(credentials.username);
+          
+          if (user && credentials.password) {
+            // Verificar la contraseña hasheada con bcrypt
+            const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+            
+            if (isValidPassword) {
+              return {
+                id: user.id,
+                name: user.name,
+                email: user.username, // NextAuth espera un campo 'email'
+                rol: user.rol || "", // Asegúrate de que 'rol' sea una cadena
+              };
+            }
+          }
+          
+          return null; // Credenciales no válidas
+        } catch (error) {
+          console.error("Error during authentication:", error);
+          return null;
         }
-        return null; // Credenciales no válidas
       },
     }),
   ],
