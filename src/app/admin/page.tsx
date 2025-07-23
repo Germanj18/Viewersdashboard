@@ -113,6 +113,61 @@ export default function AdminDashboard() {
                   </p>
                 </div>
 
+                {/* Información del usuario logueado */}
+                <div className={`p-3 lg:p-4 rounded-2xl border transition-all duration-200 mb-4 ${
+                  theme === 'dark'
+                    ? 'bg-slate-700/40 border-slate-600/50 text-slate-200'
+                    : 'bg-gray-50 border-gray-200 text-gray-700'
+                }`}>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-xl flex items-center justify-center ${
+                      theme === 'dark' 
+                        ? 'bg-gradient-to-br from-green-500 to-green-600' 
+                        : 'bg-gradient-to-br from-blue-500 to-blue-600'
+                    }`}>
+                      <span className="text-white text-lg lg:text-xl">
+                        {session?.user?.name?.charAt(0)?.toUpperCase() || '👤'}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-sm lg:text-base truncate">
+                        {session?.user?.name || 'Usuario'}
+                      </div>
+                      <div className={`text-xs truncate ${
+                        theme === 'dark' ? 'text-slate-400' : 'text-gray-500'
+                      }`}>
+                        {session?.user?.email}
+                      </div>
+                      <div className="flex items-center mt-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                          (session?.user as any)?.rol === 'admin'
+                            ? theme === 'dark'
+                              ? 'bg-green-900/50 text-green-300 border border-green-800'
+                              : 'bg-green-100 text-green-700 border border-green-200'
+                            : theme === 'dark'
+                              ? 'bg-blue-900/50 text-blue-300 border border-blue-800'
+                              : 'bg-blue-100 text-blue-700 border border-blue-200'
+                        }`}>
+                          {(session?.user as any)?.rol === 'admin' ? '👑 Admin' : '👤 Usuario'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`mt-3 pt-3 border-t text-xs ${
+                    theme === 'dark' 
+                      ? 'border-slate-600 text-slate-400' 
+                      : 'border-gray-300 text-gray-500'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <span>Sesión iniciada</span>
+                      <span className="flex items-center">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                        Activa
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 <button
                   className={`w-full p-3 lg:p-4 rounded-2xl font-medium transition-all duration-200 ${
                     theme === 'dark'
