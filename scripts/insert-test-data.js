@@ -8,11 +8,11 @@ async function insertTestData() {
 
     // Obtener un usuario existente
     const user = await prisma.user.findFirst({
-      where: { username: 'germana@expansionholding.com' }
+      where: { username: process.env.ADMIN_EMAIL || 'admin@company.com' }
     });
 
     if (!user) {
-      console.log('❌ No se encontró el usuario germana@expansionholding.com');
+      console.log('❌ No se encontró el usuario administrador configurado');
       console.log('Ejecuta primero: node scripts/create-users.js');
       return;
     }

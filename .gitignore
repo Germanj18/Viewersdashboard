@@ -1,7 +1,33 @@
 node_modules
-.env
+.env*
+!.env.example
 .vercel
+
+# Test files with potentially sensitive data
 test-db.js
 test-*.js
 test-*.ts
+
+# Deployment and documentation files
 DEPLOYMENT_INSTRUCTIONS.md
+
+# IDE and OS files
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.lock
+
+# Security and credentials
+credentials.json
+secrets.json
+*.pem
+*.key

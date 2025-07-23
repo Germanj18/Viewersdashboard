@@ -61,7 +61,7 @@ async function quickCheck() {
       console.log('💡 Los datos se guardarán automáticamente cuando uses el dashboard');
       console.log('\n🎯 PARA PROBAR:');
       console.log('1. Ve a http://localhost:3000/admin');
-      console.log('2. Inicia sesión con: germana@expansionholding.com / admin');
+      console.log('2. Inicia sesión con las credenciales configuradas en tu .env.local');
       console.log('3. Crea un bloque y agrega viewers');
       console.log('4. Ejecuta este script nuevamente');
     } else {

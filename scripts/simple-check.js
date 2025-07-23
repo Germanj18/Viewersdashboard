@@ -118,7 +118,7 @@ async function simpleDataCheck() {
     if (stats.totalBloques === 0 && stats.totalOperaciones === 0) {
       console.log('\n💡 PRÓXIMOS PASOS:');
       console.log('1. Accede al dashboard en http://localhost:3000/admin');
-      console.log('2. Inicia sesión con: germana@expansionholding.com / admin');
+      console.log('2. Inicia sesión con las credenciales de tu .env.local');
       console.log('3. Crea algunos bloques y agrega viewers');
       console.log('4. Ejecuta este script nuevamente para ver los datos');
       console.log('\n🚀 O ejecuta "node scripts/insert-test-data.js" para agregar datos de prueba');

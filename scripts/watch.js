@@ -44,7 +44,7 @@ async function watchDatabase() {
 
     console.log('\n💡 Ve al dashboard y crea bloques/agrega viewers para ver cambios');
     console.log('🌐 http://localhost:3000/admin');
-    console.log('🔑 germana@expansionholding.com / admin');
+    console.log('🔑 Usa las credenciales configuradas en tu .env.local');
     console.log('\nCtrl+C para detener');
 
     lastCheck = current;
