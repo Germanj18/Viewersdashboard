@@ -404,7 +404,8 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       userId: session?.user?.id,
       operationStatus: operationData.status,
       operationCount: operationData.count,
-      blockTitle: blockData.title
+      blockTitle: blockData.title,
+      sessionData: session // 🆕 Log completo de la sesión
     });
 
     if (!session?.user?.id) {
@@ -413,7 +414,8 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         hasSession: !!session,
         hasUser: !!session?.user,
         hasUserId: !!session?.user?.id,
-        userData: session?.user
+        userData: session?.user,
+        fullSession: session // 🆕 Log completo de la sesión
       });
       return;
     }
@@ -436,6 +438,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     console.log('📤 Enviando datos a la BD:', requestData);
 
     try {
+      console.log('🌐 Enviando request a /api/operations-history...');
       const response = await fetch('/api/operations-history', {
         method: 'POST',
         headers: {
@@ -444,15 +447,31 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
         body: JSON.stringify(requestData),
       });
 
+      console.log('📡 Response status:', response.status, response.statusText);
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Failed to save operation to database:', response.status, response.statusText, errorText);
+        console.error('❌ Failed to save operation to database:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorBody: errorText,
+          url: response.url,
+          requestData: requestData
+        });
       } else {
         const result = await response.json();
-        console.log('✅ Operation saved to history:', result.operation?.id);
+        console.log('✅ Operation saved to history successfully:', {
+          operationId: result.operation?.id,
+          response: result
+        });
       }
     } catch (error) {
-      console.error('❌ Error saving operation to database:', error);
+      console.error('❌ Network error saving operation to database:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        requestData: requestData
+      });
     }
   }, [session?.user?.id, blockId, blockData.title, blockData.operationType]);
 
