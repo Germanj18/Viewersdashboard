@@ -1874,7 +1874,13 @@ const MetricsDashboard: React.FC = () => {
           {showOperationsTable && (
             <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
               <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-              <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
+              <thead style={{ 
+                position: 'sticky', 
+                top: 0, 
+                backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb',
+                zIndex: 10,
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
                 <tr>
                   <th>Bloque</th>
                   <th>Estado</th>
