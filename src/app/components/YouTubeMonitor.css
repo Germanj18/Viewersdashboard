@@ -394,6 +394,7 @@
   padding: 1rem;
   max-height: 220px;
   overflow-y: auto;
+  position: relative;
 }
 
 .youtube-monitor.dark .history-table-container {
@@ -515,13 +516,18 @@
 
 .history-table th {
   font-weight: 600;
-  background: rgba(0, 0, 0, 0.02);
+  background: #ffffff;
   font-size: 0.7rem;
   white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .youtube-monitor.dark .history-table th {
-  background: rgba(0, 0, 0, 0.2);
+  background: #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .history-table td {
