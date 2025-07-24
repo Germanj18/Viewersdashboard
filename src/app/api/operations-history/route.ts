@@ -64,6 +64,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    console.log('📥 Received operation data:', body);
+    
     const { 
       userId, 
       blockId, 
@@ -81,6 +83,7 @@ export async function POST(request: Request) {
 
     // Validar campos requeridos
     if (!userId || !blockTitle || !operationType || viewers === undefined) {
+      console.error('❌ Validation failed:', { userId, blockTitle, operationType, viewers });
       return NextResponse.json({ 
         error: 'userId, blockTitle, operationType y viewers son requeridos' 
       }, { status: 400 });
@@ -92,8 +95,11 @@ export async function POST(request: Request) {
     });
 
     if (!user) {
+      console.error('❌ User not found:', userId);
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
+
+    console.log('✅ User found:', user.name);
 
     // Crear la operación en el historial
     const operation = await prisma.operationHistory.create({
@@ -113,15 +119,18 @@ export async function POST(request: Request) {
       }
     });
 
+    console.log('✅ Operation created:', operation.id);
+
     return NextResponse.json({ 
       success: true, 
       operation 
     });
 
   } catch (error) {
-    console.error('Error guardando operación en historial:', error);
+    console.error('❌ Error guardando operación en historial:', error);
     return NextResponse.json({ 
-      error: 'Error interno del servidor' 
+      error: 'Error interno del servidor',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }

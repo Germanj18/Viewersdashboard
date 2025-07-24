@@ -404,36 +404,41 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       return;
     }
 
+    const requestData = {
+      userId: session.user.id,
+      blockId: blockId,
+      blockTitle: blockData.title,
+      operationType: blockData.operationType,
+      viewers: operationData.count || 0,
+      orderId: operationData.orderId,
+      orderStatus: operationData.orderStatus,
+      duration: operationData.duration,
+      cost: operationData.cost,
+      serviceId: operationData.serviceId,
+      message: operationData.message,
+      timestamp: operationData.startTime || new Date().toISOString(),
+    };
+
+    console.log('📤 Enviando datos a la BD:', requestData);
+
     try {
       const response = await fetch('/api/operations-history', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          userId: session.user.id,
-          blockId: blockId,
-          blockTitle: blockData.title,
-          operationType: blockData.operationType,
-          viewers: operationData.count || 0,
-          orderId: operationData.orderId,
-          orderStatus: operationData.orderStatus,
-          duration: operationData.duration,
-          cost: operationData.cost,
-          serviceId: operationData.serviceId,
-          message: operationData.message,
-          timestamp: operationData.startTime || new Date().toISOString(),
-        }),
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
-        console.error('Failed to save operation to database:', response.statusText);
+        const errorText = await response.text();
+        console.error('❌ Failed to save operation to database:', response.status, response.statusText, errorText);
       } else {
         const result = await response.json();
-        console.log('✅ Operation saved to history:', result.operation.id);
+        console.log('✅ Operation saved to history:', result.operation?.id);
       }
     } catch (error) {
-      console.error('Error saving operation to database:', error);
+      console.error('❌ Error saving operation to database:', error);
     }
   }, [session?.user?.id, blockId, blockData.title, blockData.operationType]);
 
