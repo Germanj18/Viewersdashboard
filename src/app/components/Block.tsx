@@ -875,8 +875,22 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
 
   const summaryStatus = getSummaryStatus();
 
+  // Función para obtener las clases CSS del estado del bloque
+  const getBlockStateClass = useCallback(() => {
+    switch (state) {
+      case 'completed':
+        return 'completed';
+      case 'running':
+        return 'running';
+      case 'paused':
+        return 'paused';
+      default:
+        return ''; // Estado 'idle' - sin clase especial
+    }
+  }, [state]);
+
   return (
-    <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'} ${isRecentlyEdited ? 'recently-edited' : ''}`}>
+    <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'} ${getBlockStateClass()} ${isRecentlyEdited ? 'recently-edited' : ''}`}>
       <div className="block-header">
         <h2 className="block-title">{blockData.title}</h2>
         <div className="auth-status-container">

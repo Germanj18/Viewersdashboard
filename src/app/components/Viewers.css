@@ -815,6 +815,82 @@
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
 }
 
+/* Estados de los bloques - Indicadores visuales */
+/* Bloque completado - Verde */
+.block.completed.dark {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.2);
+}
+
+.block.completed.dark:hover {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: rgba(34, 197, 94, 0.6);
+  box-shadow: 0 20px 40px -12px rgba(34, 197, 94, 0.3);
+}
+
+.block.completed.light {
+  background: rgba(34, 197, 94, 0.08);
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(34, 197, 94, 0.15);
+}
+
+.block.completed.light:hover {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 0 20px 40px -12px rgba(34, 197, 94, 0.2);
+}
+
+/* Bloque en ejecución - Naranja */
+.block.running.dark {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.2);
+}
+
+.block.running.dark:hover {
+  background: rgba(249, 115, 22, 0.25);
+  border-color: rgba(249, 115, 22, 0.6);
+  box-shadow: 0 20px 40px -12px rgba(249, 115, 22, 0.3);
+}
+
+.block.running.light {
+  background: rgba(249, 115, 22, 0.08);
+  border-color: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.15);
+}
+
+.block.running.light:hover {
+  background: rgba(249, 115, 22, 0.12);
+  border-color: rgba(249, 115, 22, 0.4);
+  box-shadow: 0 20px 40px -12px rgba(249, 115, 22, 0.2);
+}
+
+/* Bloque pausado - Amarillo */
+.block.paused.dark {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+  box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.2);
+}
+
+.block.paused.dark:hover {
+  background: rgba(234, 179, 8, 0.25);
+  border-color: rgba(234, 179, 8, 0.6);
+  box-shadow: 0 20px 40px -12px rgba(234, 179, 8, 0.3);
+}
+
+.block.paused.light {
+  background: rgba(234, 179, 8, 0.08);
+  border-color: rgba(234, 179, 8, 0.3);
+  box-shadow: 0 10px 25px -5px rgba(234, 179, 8, 0.15);
+}
+
+.block.paused.light:hover {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.4);
+  box-shadow: 0 20px 40px -12px rgba(234, 179, 8, 0.2);
+}
+
 .block-title {
   font-size: 1.5rem;
   font-weight: 700;
