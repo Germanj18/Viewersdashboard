@@ -2,21 +2,20 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-let lastOperationCount = 0;
-let lastBlockCount = 0;
+let lastOperationHistoryCount = 0;
+let lastUserCount = 0;
 
 async function monitorDatabase() {
   try {
     const currentTime = new Date().toLocaleTimeString();
     
     // Contar datos actuales
-    const operationCount = await prisma.operation.count();
-    const blockCount = await prisma.block.count();
-    const activeBlocks = await prisma.block.count({ where: { isActive: true } });
+    const operationHistoryCount = await prisma.operationHistory.count();
+    const userCount = await prisma.user.count();
     
     // Detectar cambios
-    const newOperations = operationCount - lastOperationCount;
-    const newBlocks = blockCount - lastBlockCount;
+    const newOperations = operationHistoryCount - lastOperationHistoryCount;
+    const newUsers = userCount - lastUserCount;
     
     console.clear();
     console.log('🔴 MONITOR EN TIEMPO REAL - Dashboard Viewers');
@@ -26,19 +25,18 @@ async function monitorDatabase() {
     
     // Estado actual
     console.log('📊 ESTADO ACTUAL:');
-    console.log(`   📦 Bloques: ${blockCount} total, ${activeBlocks} activos`);
-    console.log(`   ⚡ Operaciones: ${operationCount} total`);
+    console.log(`   � Usuarios: ${userCount} total`);
+    console.log(`   📋 Historial Operaciones: ${operationHistoryCount} total`);
     
     // Detectar actividad nueva
     if (newOperations > 0) {
       console.log(`\n🆕 NUEVA ACTIVIDAD DETECTADA:`);
-      console.log(`   ⚡ +${newOperations} nuevas operaciones`);
+      console.log(`   ⚡ +${newOperations} nuevas operaciones en historial`);
       
       // Mostrar las últimas operaciones
-      const recentOps = await prisma.operation.findMany({
+      const recentOps = await prisma.operationHistory.findMany({
         include: {
-          user: { select: { name: true } },
-          block: { select: { name: true } }
+          user: { select: { name: true } }
         },
         orderBy: { createdAt: 'desc' },
         take: 5
@@ -46,27 +44,31 @@ async function monitorDatabase() {
       
       console.log('\n📋 ÚLTIMAS OPERACIONES:');
       recentOps.forEach((op, index) => {
-        console.log(`   ${index + 1}. ${op.user.name} - ${op.type} ${op.viewers} viewers (${op.block?.name || 'Sin bloque'})`);
+        console.log(`   ${index + 1}. ${op.user.name} - ${op.operationType} ${op.viewers} viewers (Bloque ${op.blockId})`);
       });
     }
     
-    if (newBlocks > 0) {
-      console.log(`\n📦 +${newBlocks} nuevos bloques creados`);
+    if (newUsers > 0) {
+      console.log(`\n� +${newUsers} nuevos usuarios registrados`);
     }
     
-    if (newOperations === 0 && newBlocks === 0) {
+    if (newOperations === 0 && newUsers === 0) {
       console.log('\n💤 Sin actividad nueva...');
     }
     
     // Actualizar contadores
-    lastOperationCount = operationCount;
-    lastBlockCount = blockCount;
+    lastOperationHistoryCount = operationHistoryCount;
+    lastUserCount = userCount;
     
     console.log('\n⏰ Próxima verificación en 5 segundos...');
     console.log('Presiona Ctrl+C para detener el monitor');
     
   } catch (error) {
     console.error('❌ Error en el monitor:', error.message);
+    console.log('🔧 Posibles causas:');
+    console.log('   • Las tablas aún no han sido migradas');
+    console.log('   • La base de datos no está disponible');
+    console.log('   • Error de conexión');
   }
 }
 

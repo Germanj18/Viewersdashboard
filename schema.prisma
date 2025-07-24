@@ -1,79 +1,41 @@
-datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
-}
-
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  username  String   @unique
-  password  String
-  rol       String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relaciones
-  blocks     Block[]
-  operations Operation[]
-  metrics    UserMetrics[]
+  id               String             @id @default(uuid())
+  name             String
+  username         String             @unique
+  password         String
+  rol              String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  operationHistory OperationHistory[]
 }
 
-model Block {
-  id        String    @id @default(uuid())
-  userId    String
-  name      String
-  viewers   Int
-  minutes   Int
-  isActive  Boolean   @default(true)
-  startTime DateTime
-  endTime   DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  // Relaciones
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  operations Operation[]
-
-  @@index([userId, isActive])
-}
-
-model Operation {
-  id          String   @id @default(uuid())
-  userId      String
-  blockId     String?
-  type        String // 'add', 'subtract', 'reset'
-  viewers     Int
-  timestamp   DateTime @default(now())
-  description String?
-
-  // Relaciones
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  block Block? @relation(fields: [blockId], references: [id], onDelete: Cascade)
+model OperationHistory {
+  id            String   @id @default(uuid())
+  userId        String
+  blockId       String?
+  blockTitle    String
+  operationType String
+  viewers       Int
+  orderId       String?
+  orderStatus   String?
+  duration      Int?
+  cost          Float?
+  serviceId     Int?
+  message       String?
+  timestamp     DateTime @default(now())
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, timestamp])
-  @@index([blockId])
-}
-
-model UserMetrics {
-  id                    String    @id @default(uuid())
-  userId                String
-  date                  DateTime  @default(now())
-  totalViewersSent      Int
-  totalOperations       Int
-  activeBlocks          Int
-  expiredBlocks         Int
-  averageViewersPerHour Float
-  peakViewers           Int
-  peakViewersTime       DateTime?
-
-  // Relaciones
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, date])
-  @@index([userId, date])
+  @@index([blockTitle])
 }

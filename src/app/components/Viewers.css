@@ -13,6 +13,201 @@
   overflow-x: hidden;
 }
 
+/* Estilos para el modal de historial de operaciones */
+.operation-history-modal {
+  width: 95vw;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-section {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.date-filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.date-input {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+}
+
+.search-button, .export-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-button {
+  background: var(--accent-color);
+  color: white;
+}
+
+.search-button:hover {
+  background: var(--accent-hover);
+}
+
+.search-button:disabled {
+  background: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.export-button {
+  background: var(--success-color);
+  color: white;
+}
+
+.export-button:hover {
+  background: var(--success-hover);
+}
+
+.export-button.excel {
+  background: linear-gradient(135deg, #0f7b0f, #0d6635);
+  margin-left: 0.5rem;
+}
+
+.export-button.excel:hover {
+  background: linear-gradient(135deg, #198b19, #0e7a3e);
+  transform: translateY(-1px);
+}
+
+.summary-section {
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.summary-stats {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.operations-table-container {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.operations-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.operations-table th,
+.operations-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.operations-table th {
+  background: var(--bg-secondary);
+  font-weight: 600;
+  color: var(--text-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.operations-table td {
+  color: var(--text-primary);
+}
+
+.operations-table tr:hover {
+  background: var(--bg-hover);
+}
+
+.operation-type {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.operation-type.add {
+  background: var(--success-light);
+  color: var(--success-dark);
+}
+
+.operation-type.subtract {
+  background: var(--error-light);
+  color: var(--error-dark);
+}
+
+.order-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--info-light);
+  color: var(--info-dark);
+}
+
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+.history-button {
+  background: var(--info-color) !important;
+  color: white !important;
+}
+
+.history-button:hover {
+  background: var(--info-hover) !important;
+}
+
 /* Contenedor para input y total en desktop */
 .input-total-container {
   display: flex;

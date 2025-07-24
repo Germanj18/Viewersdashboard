@@ -47,13 +47,21 @@ const handler = NextAuth({
       if (session.user) {
         session.user = {
           ...session.user,
+          id: token.id as string,
           rol: token.rol as string ?? '',
-        } as { rol?: string; name?: string | null | undefined; email?: string | null | undefined; image?: string | null | undefined; };
+        } as { 
+          id?: string; 
+          rol?: string; 
+          name?: string | null | undefined; 
+          email?: string | null | undefined; 
+          image?: string | null | undefined; 
+        };
       }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id;
         token.rol = (user as { rol?: string }).rol;
       }
       return token;

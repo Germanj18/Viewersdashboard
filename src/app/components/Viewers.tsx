@@ -4,6 +4,7 @@ import { useTheme } from '../ThemeContext';
 import Block, { BlockData } from './Block';
 import MetricsDashboard from './MetricsDashboard';
 import YouTubeMonitor from './YouTubeMonitor';
+import OperationHistory from './OperationHistory';
 import ResetWarningModal from './ResetWarningModal';
 import './Viewers.css';
 
@@ -13,6 +14,7 @@ const Viewers = () => {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showMetrics, setShowMetrics] = useState(false);
   const [showYouTubeMonitor, setShowYouTubeMonitor] = useState(false);
+  const [showOperationHistory, setShowOperationHistory] = useState(false);
   const [showResetWarning, setShowResetWarning] = useState(false);
   
   // Estado para modales globales
@@ -314,12 +316,12 @@ const Viewers = () => {
   // Ejecutar el reset completo
   const executeCompleteReset = () => {
     try {
-      // 1. Resetear cada bloque (esto guarda las operaciones actuales al historial)
+      // 1. Resetear cada bloque SILENCIOSAMENTE (SIN guardar en BD)
       for (let i = 0; i < 10; i++) {
         const blockId = `block-${i}`;
-        const resetFunction = (window as any)[`resetBlock_${blockId}`];
-        if (resetFunction) {
-          resetFunction();
+        const resetSilentFunction = (window as any)[`resetBlockSilent_${blockId}`];
+        if (resetSilentFunction) {
+          resetSilentFunction(); // 🆕 Usar reset silencioso
         } else {
           // Si no hay función de reset, limpiar manualmente
           localStorage.removeItem(`blockState_${blockId}`);
@@ -414,6 +416,14 @@ const Viewers = () => {
           title="Monitor de YouTube en tiempo real"
         >
           📺 {showYouTubeMonitor ? 'Ocultar YouTube' : 'Monitor YouTube'}
+        </button>
+        
+        <button
+          onClick={() => setShowOperationHistory(!showOperationHistory)}
+          className="dashboard-button history-button"
+          title="Ver historial de operaciones en base de datos"
+        >
+          📋 {showOperationHistory ? 'Ocultar Historial' : 'Historial BD'}
         </button>
         
         <button
@@ -659,6 +669,11 @@ const Viewers = () => {
         onCancel={handleCancelReset}
         hasData={true} // Ya verificamos que hay datos antes de mostrar el modal
       />
+
+      {/* Modal de Historial de Operaciones */}
+      {showOperationHistory && (
+        <OperationHistory onClose={() => setShowOperationHistory(false)} />
+      )}
     </div>
   );
 };

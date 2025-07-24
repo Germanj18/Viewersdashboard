@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../ThemeContext';
+import { useSession } from 'next-auth/react';
 import * as XLSX from 'xlsx';
 
 export interface BlockStatus {
@@ -41,6 +42,7 @@ interface BlockProps {
 
 const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, blockId, onShowWarning, onShowEditModal, isRecentlyEdited = false }) => {
   const { theme } = useTheme();
+  const { data: session } = useSession();
   
   // Estado para minimizar/expandir - por defecto minimizado
   const [isMinimized, setIsMinimized] = useState(true);
@@ -395,6 +397,46 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     XLSX.writeFile(wb, `${currentBlockData.title}.xlsx`);
   }, []);
 
+  // Función para guardar operación en la base de datos (solo historial de operaciones)
+  const saveOperationToDatabase = useCallback(async (operationData: BlockStatus) => {
+    if (!session?.user?.id) {
+      console.warn('No user session available, operation not saved to database');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/operations-history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          blockId: blockId,
+          blockTitle: blockData.title,
+          operationType: blockData.operationType,
+          viewers: operationData.count || 0,
+          orderId: operationData.orderId,
+          orderStatus: operationData.orderStatus,
+          duration: operationData.duration,
+          cost: operationData.cost,
+          serviceId: operationData.serviceId,
+          message: operationData.message,
+          timestamp: operationData.startTime || new Date().toISOString(),
+        }),
+      });
+
+      if (!response.ok) {
+        console.error('Failed to save operation to database:', response.statusText);
+      } else {
+        const result = await response.json();
+        console.log('✅ Operation saved to history:', result.operation.id);
+      }
+    } catch (error) {
+      console.error('Error saving operation to database:', error);
+    }
+  }, [session?.user?.id, blockId, blockData.title, blockData.operationType]);
+
   const handleApiCall = useCallback(async () => {
     // Verificar condiciones usando refs para valores actuales
     if (stateRef.current !== 'running') {
@@ -454,6 +496,11 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       // Guardar en historial global inmediatamente
       saveToGlobalHistory(newStatus);
 
+      // 🆕 GUARDAR SOLO OPERACIONES EXITOSAS EN HISTORIAL DE BD
+      if (newStatus.status === 'success') {
+        await saveOperationToDatabase(newStatus);
+      }
+
       // Actualizar el total de espectadores
       if (newStatus.status === 'success') {
         setTotalViewers((prev: number) => prev + operationCount);
@@ -502,6 +549,8 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       
       // Guardar en historial global inmediatamente
       saveToGlobalHistory(newStatus);
+      
+      // Error en operación - solo se registra localmente
       
       const nextOperation = currentOperationRef.current + 1;
       setCurrentOperation(nextOperation);
@@ -609,13 +658,37 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     setBlockData(prev => ({ ...prev, autoStart: false }));
   }, [state, blockData.title, totalViewers, generateExcel]);
 
-  const resetBlock = useCallback(() => {
-    // CORRIGIDO: No guardamos las operaciones nuevamente porque ya fueron guardadas
-    // cuando se ejecutaron originalmente en handleApiCall (líneas 341 y 377)
-    
+  const resetBlock = useCallback(async () => {
     // Registrar el reset del bloque con las operaciones que se van a perder
     saveBlockReset();
     
+    // Ejecutar la lógica de reset
+    performReset();
+  }, [blockId, blockData.title]);
+
+  // 🆕 Reset silencioso (sin guardar en BD) - para Reset All
+  const resetBlockSilent = useCallback(() => {
+    // Solo limpiar estado local, NO guardar en base de datos ni historial
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      setIntervalId(null);
+    }
+    setStatus([]);
+    setIsPaused(false);
+    setCurrentOperation(0);
+    setState('idle');
+    stateRef.current = 'idle';
+    setTotalViewers(0);
+    setBlockStartTime(null);
+    setBlockData(prev => ({ ...prev, autoStart: false, startTime: '' }));
+    
+    // Limpiar estado guardado del localStorage
+    localStorage.removeItem(`blockState_${blockId}`);
+  }, [blockId]);
+
+  // Función común para ejecutar la lógica de reset
+  const performReset = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -648,12 +721,14 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     (window as any)[`updateBlockData_${blockId}`] = updateBlockData;
     (window as any)[`finalizeBlock_${blockId}`] = finalizeBlock;
     (window as any)[`resetBlock_${blockId}`] = resetBlock;
+    (window as any)[`resetBlockSilent_${blockId}`] = resetBlockSilent; // 🆕 Reset sin BD
     return () => {
       delete (window as any)[`updateBlockData_${blockId}`];
       delete (window as any)[`finalizeBlock_${blockId}`];
       delete (window as any)[`resetBlock_${blockId}`];
+      delete (window as any)[`resetBlockSilent_${blockId}`]; // 🆕 Limpiar
     };
-  }, [blockId, updateBlockData, finalizeBlock, resetBlock]);
+  }, [blockId, updateBlockData, finalizeBlock, resetBlock, resetBlockSilent]);
 
   // Función para guardar operación en historial permanente
   const saveToGlobalHistory = useCallback((operation: BlockStatus) => {
