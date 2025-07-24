@@ -840,11 +840,6 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
           <span className={`auth-indicator ${session?.user?.id ? 'authenticated' : 'not-authenticated'}`}>
             {session?.user?.id ? '🟢 BD Conectada' : '🔴 Solo localStorage'}
           </span>
-          {session?.user?.id && (
-            <span className="user-info" title={`Usuario: ${session.user.name} (${session.user.id})`}>
-              👤 {session.user.name}
-            </span>
-          )}
         </div>
         <div className="block-header-buttons">
           {(state === 'paused' || state === 'completed') && !isMinimized && (
@@ -884,7 +879,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
             <div className="ultra-stats-column">
               <div className="stat-group">
                 <label className="stat-label">Viewers:</label>
-                <span className="stat-value">👥 {totalViewers}</span>
+                <span className="stat-value viewers-highlight">👥 {totalViewers}</span>
               </div>
               <div className="stat-group">
                 <label className="stat-label">Éxito:</label>

@@ -68,6 +68,13 @@ const MetricsDashboard: React.FC = () => {
   const [showExpiredModal, setShowExpiredModal] = useState(false);
   const [showResetHistory, setShowResetHistory] = useState(false);
 
+  // Estados para controlar visibilidad de tablas (cerradas por defecto)
+  const [showOperationsTable, setShowOperationsTable] = useState(false);
+  const [showYouTubeHistoryTable, setShowYouTubeHistoryTable] = useState(false);
+  const [showServiceDurationTable, setShowServiceDurationTable] = useState(false);
+  const [showViewersPerHourTable, setShowViewersPerHourTable] = useState(false);
+  const [showOperationsPerBlockTable, setShowOperationsPerBlockTable] = useState(false);
+
   // Función para obtener todos los datos de operaciones (actuales + historial)
   const getAllOperationsData = useCallback(() => {
     const allOperations: any[] = [];
@@ -1598,82 +1605,154 @@ const MetricsDashboard: React.FC = () => {
 
       {/* Gráficos simples */}
       <div className="charts-section">
-        <div className="chart-card">
-          <h3>📊 Operaciones por Bloque</h3>
-          <div className="simple-chart">
-            {Object.entries(metrics.operationsPerBlock).map(([blockId, count]) => (
-              <div key={blockId} className="chart-bar">
-                <div className="bar-label">B{parseInt(blockId.replace('block-', '')) + 1}</div>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill" 
-                    style={{ 
-                      width: `${Math.max(10, (count / Math.max(...Object.values(metrics.operationsPerBlock), 1)) * 100)}%` 
-                    }}
-                  ></div>
-                </div>
-                <div className="bar-value">{count}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="chart-card">
-          <h3>⏰ Viewers por Hora</h3>
-          <div className="simple-chart">
-            {Object.entries(metrics.viewersPerHour)
-              .sort(([a], [b]) => a.localeCompare(b))
-              .slice(-8) // Mostrar últimas 8 horas
-              .map(([hour, viewers]) => (
-              <div key={hour} className="chart-bar">
-                <div className="bar-label">{hour}</div>
-                <div className="bar-container">
-                  <div 
-                    className="bar-fill viewers-bar" 
-                    style={{ 
-                      width: `${Math.max(10, (viewers / Math.max(...Object.values(metrics.viewersPerHour), 1)) * 100)}%` 
-                    }}
-                  ></div>
-                </div>
-                <div className="bar-value">{viewers}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="chart-card">
-          <h3>⏱️ Viewers por Duración de Servicio</h3>
-          <div className="service-duration-table">
-            <div className="service-duration-header">
-              <div className="duration-cell">Duración</div>
-              <div className="viewers-cell">Viewers</div>
-              <div className="cost-cell">Costo Total</div>
-              <div className="percentage-cell">Porcentaje</div>
-            </div>
-            {Object.entries(metrics.viewersByServiceDuration)
-              .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
-              .map(([duration, viewers]) => {
-                const cost = metrics.costByServiceDuration[duration] || 0;
-                const totalViewersSent = getTotalViewersSent();
-                const percentage = totalViewersSent > 0 ? ((viewers / totalViewersSent) * 100) : 0;
-                return (
-                  <div key={duration} className="service-duration-row">
-                    <div className="duration-cell">
-                      <span className="duration-badge">{duration}</span>
-                    </div>
-                    <div className="viewers-cell">
-                      <span className="viewers-count">{viewers.toLocaleString()}</span>
-                    </div>
-                    <div className="cost-cell">
-                      <span className="cost-amount">${cost.toFixed(2)}</span>
-                    </div>
-                    <div className="percentage-cell">
-                      <span className="percentage-value">{percentage.toFixed(1)}%</span>
-                    </div>
+        <div className="chart-card" style={{ 
+          transition: 'all 0.3s ease',
+          minHeight: showOperationsPerBlockTable ? 'auto' : '60px',
+          padding: showOperationsPerBlockTable ? '1.5rem' : '0.75rem 1.5rem'
+        }}>
+          <h3 
+            onClick={() => setShowOperationsPerBlockTable(!showOperationsPerBlockTable)}
+            style={{ 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              userSelect: 'none',
+              transition: 'opacity 0.2s ease',
+              margin: 0
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            📊 Operaciones por Bloque
+            <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+              {showOperationsPerBlockTable ? '▼' : '▶'}
+            </span>
+          </h3>
+          {showOperationsPerBlockTable && (
+            <div className="simple-chart">
+              {Object.entries(metrics.operationsPerBlock).map(([blockId, count]) => (
+                <div key={blockId} className="chart-bar">
+                  <div className="bar-label">B{parseInt(blockId.replace('block-', '')) + 1}</div>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill" 
+                      style={{ 
+                        width: `${Math.max(10, (count / Math.max(...Object.values(metrics.operationsPerBlock), 1)) * 100)}%` 
+                      }}
+                    ></div>
                   </div>
-                );
-              })}
-          </div>
+                  <div className="bar-value">{count}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="chart-card" style={{ 
+          transition: 'all 0.3s ease',
+          minHeight: showViewersPerHourTable ? 'auto' : '60px',
+          padding: showViewersPerHourTable ? '1.5rem' : '0.75rem 1.5rem'
+        }}>
+          <h3 
+            onClick={() => setShowViewersPerHourTable(!showViewersPerHourTable)}
+            style={{ 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              userSelect: 'none',
+              transition: 'opacity 0.2s ease',
+              margin: 0
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            ⏰ Viewers por Hora
+            <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+              {showViewersPerHourTable ? '▼' : '▶'}
+            </span>
+          </h3>
+          {showViewersPerHourTable && (
+            <div className="simple-chart">
+              {Object.entries(metrics.viewersPerHour)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .slice(-8) // Mostrar últimas 8 horas
+                .map(([hour, viewers]) => (
+                <div key={hour} className="chart-bar">
+                  <div className="bar-label">{hour}</div>
+                  <div className="bar-container">
+                    <div 
+                      className="bar-fill viewers-bar" 
+                      style={{ 
+                        width: `${Math.max(10, (viewers / Math.max(...Object.values(metrics.viewersPerHour), 1)) * 100)}%` 
+                      }}
+                    ></div>
+                  </div>
+                  <div className="bar-value">{viewers}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="chart-card" style={{ 
+          transition: 'all 0.3s ease',
+          minHeight: showServiceDurationTable ? 'auto' : '60px',
+          padding: showServiceDurationTable ? '1.5rem' : '0.75rem 1.5rem'
+        }}>
+          <h3 
+            onClick={() => setShowServiceDurationTable(!showServiceDurationTable)}
+            style={{ 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              userSelect: 'none',
+              transition: 'opacity 0.2s ease',
+              margin: 0
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            ⏱️ Viewers por Duración de Servicio
+            <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+              {showServiceDurationTable ? '▼' : '▶'}
+            </span>
+          </h3>
+          {showServiceDurationTable && (
+            <div className="service-duration-table">
+              <div className="service-duration-header">
+                <div className="duration-cell">Duración</div>
+                <div className="viewers-cell">Viewers</div>
+                <div className="cost-cell">Costo Total</div>
+                <div className="percentage-cell">Porcentaje</div>
+              </div>
+              {Object.entries(metrics.viewersByServiceDuration)
+                .sort(([a], [b]) => parseFloat(a) - parseFloat(b))
+                .map(([duration, viewers]) => {
+                  const cost = metrics.costByServiceDuration[duration] || 0;
+                  const totalViewersSent = getTotalViewersSent();
+                  const percentage = totalViewersSent > 0 ? ((viewers / totalViewersSent) * 100) : 0;
+                  return (
+                    <div key={duration} className="service-duration-row">
+                      <div className="duration-cell">
+                        <span className="duration-badge">{duration}</span>
+                      </div>
+                      <div className="viewers-cell">
+                        <span className="viewers-count">{viewers.toLocaleString()}</span>
+                      </div>
+                      <div className="cost-cell">
+                        <span className="cost-amount">${cost.toFixed(2)}</span>
+                      </div>
+                      <div className="percentage-cell">
+                        <span className="percentage-value">{percentage.toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1738,32 +1817,63 @@ const MetricsDashboard: React.FC = () => {
 
       {/* Nueva sección: Operaciones Recientes con Horarios */}
       <div className="recent-operations-section">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>📋 Todas las Operaciones (con Horarios)</h3>
-            <button 
-              onClick={downloadOperationsTableCSV}
-              className="export-button"
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.875rem',
-                borderRadius: '0.375rem',
-                background: 'linear-gradient(135deg, #059669, #047857)',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: '500',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
+        <div className="chart-card" style={{ 
+          gridColumn: '1 / -1',
+          transition: 'all 0.3s ease',
+          minHeight: showOperationsTable ? 'auto' : '80px',
+          padding: showOperationsTable ? '1.5rem' : '1rem 1.5rem'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: showOperationsTable ? '1rem' : '0'
+          }}>
+            <h3 
+              onClick={() => setShowOperationsTable(!showOperationsTable)}
+              style={{ 
+                cursor: 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                userSelect: 'none',
+                transition: 'opacity 0.2s ease',
+                margin: 0
               }}
-              title="Descargar tabla de operaciones como CSV"
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
             >
-              📥 Descargar CSV
-            </button>
+              📋 Todas las Operaciones (con Horarios)
+              <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+                {showOperationsTable ? '▼' : '▶'}
+              </span>
+            </h3>
+            {showOperationsTable && (
+              <button 
+                onClick={downloadOperationsTableCSV}
+                className="export-button"
+                style={{
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.875rem',
+                  borderRadius: '0.375rem',
+                  background: 'linear-gradient(135deg, #059669, #047857)',
+                  color: 'white',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}
+                title="Descargar tabla de operaciones como CSV"
+              >
+                📥 Descargar CSV
+              </button>
+            )}
           </div>
-          <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
-            <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
+          {showOperationsTable && (
+            <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
+              <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
               <thead style={{ position: 'sticky', top: 0, backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb' }}>
                 <tr>
                   <th>Bloque</th>
@@ -1838,15 +1948,45 @@ const MetricsDashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+          )}
         </div>
       </div>
 
       {/* Nueva sección: Historial de Monitoreo de YouTube */}
       <div className="recent-operations-section">
-        <div className="chart-card" style={{ gridColumn: '1 / -1' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3>📺 Historial de Monitoreo de YouTube</h3>
-            <button 
+        <div className="chart-card" style={{ 
+          gridColumn: '1 / -1',
+          transition: 'all 0.3s ease',
+          minHeight: showYouTubeHistoryTable ? 'auto' : '80px',
+          padding: showYouTubeHistoryTable ? '1.5rem' : '1rem 1.5rem'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            marginBottom: showYouTubeHistoryTable ? '1rem' : '0'
+          }}>
+            <h3 
+              onClick={() => setShowYouTubeHistoryTable(!showYouTubeHistoryTable)}
+              style={{ 
+                cursor: 'pointer', 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.5rem',
+                userSelect: 'none',
+                transition: 'opacity 0.2s ease',
+                margin: 0
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              📺 Historial de Monitoreo de YouTube
+              <span style={{ fontSize: '0.8em', color: 'var(--text-muted)' }}>
+                {showYouTubeHistoryTable ? '▼' : '▶'}
+              </span>
+            </h3>
+            {showYouTubeHistoryTable && (
+              <button 
               onClick={downloadYouTubeHistoryXLSX}
               className="export-button"
               style={{
@@ -1866,8 +2006,10 @@ const MetricsDashboard: React.FC = () => {
             >
               � Descargar Excel
             </button>
+            )}
           </div>
-          <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
+          {showYouTubeHistoryTable && (
+            <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
             {(() => {
               const youtubeHistory = getYouTubeMonitoringHistory();
               return youtubeHistory.length > 0 ? (
@@ -1935,6 +2077,7 @@ const MetricsDashboard: React.FC = () => {
               );
             })()}
           </div>
+          )}
         </div>
       </div>
 
