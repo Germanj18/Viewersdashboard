@@ -397,10 +397,24 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     XLSX.writeFile(wb, `${currentBlockData.title}.xlsx`);
   }, []);
 
-  // Función para guardar operación en la base de datos (solo historial de operaciones)
+  // Función para guardar operación en la base de datos (historial de operaciones)
   const saveOperationToDatabase = useCallback(async (operationData: BlockStatus) => {
+    console.log('🔍 saveOperationToDatabase called with:', {
+      hasSession: !!session,
+      userId: session?.user?.id,
+      operationStatus: operationData.status,
+      operationCount: operationData.count,
+      blockTitle: blockData.title
+    });
+
     if (!session?.user?.id) {
-      console.warn('No user session available, operation not saved to database');
+      console.warn('⚠️ No user session available, operation not saved to database');
+      console.log('📋 Session status:', {
+        hasSession: !!session,
+        hasUser: !!session?.user,
+        hasUserId: !!session?.user?.id,
+        userData: session?.user
+      });
       return;
     }
 
@@ -501,10 +515,9 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       // Guardar en historial global inmediatamente
       saveToGlobalHistory(newStatus);
 
-      // 🆕 GUARDAR SOLO OPERACIONES EXITOSAS EN HISTORIAL DE BD
-      if (newStatus.status === 'success') {
-        await saveOperationToDatabase(newStatus);
-      }
+      // 🆕 GUARDAR TODAS LAS OPERACIONES EN HISTORIAL DE BD (exitosas y fallidas)
+      console.log(`🔄 Intentando guardar operación en BD - Status: ${newStatus.status}`);
+      await saveOperationToDatabase(newStatus);
 
       // Actualizar el total de espectadores
       if (newStatus.status === 'success') {
@@ -823,6 +836,16 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
     <div className={`block ${theme} ${isMinimized ? 'minimized' : 'expanded'} ${isRecentlyEdited ? 'recently-edited' : ''}`}>
       <div className="block-header">
         <h2 className="block-title">{blockData.title}</h2>
+        <div className="auth-status-container">
+          <span className={`auth-indicator ${session?.user?.id ? 'authenticated' : 'not-authenticated'}`}>
+            {session?.user?.id ? '🟢 BD Conectada' : '🔴 Solo localStorage'}
+          </span>
+          {session?.user?.id && (
+            <span className="user-info" title={`Usuario: ${session.user.name} (${session.user.id})`}>
+              👤 {session.user.name}
+            </span>
+          )}
+        </div>
         <div className="block-header-buttons">
           {(state === 'paused' || state === 'completed') && !isMinimized && (
             <button onClick={generateExcel} className="download-icon">

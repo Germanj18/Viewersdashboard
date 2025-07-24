@@ -477,3 +477,63 @@ body {
   appearance: none !important;
 }
 
+/* Estilos para indicador de autenticación en bloques */
+.auth-status-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: auto;
+  font-size: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.auth-indicator {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.auth-indicator.authenticated {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.auth-indicator.not-authenticated {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  animation: pulse-warning 2s infinite;
+}
+
+.user-info {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(var(--text-secondary), 0.1);
+  border-radius: 0.25rem;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .auth-status-container {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+  
+  .auth-indicator,
+  .user-info {
+    font-size: 0.65rem;
+  }
+}
+
