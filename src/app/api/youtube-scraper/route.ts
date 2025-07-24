@@ -282,6 +282,8 @@ async function findChannelLiveStream(channelUrl: string): Promise<YouTubeData> {
       normalizedUrl = `https://www.youtube.com/${normalizedUrl.replace(/^[@\/]/, '@')}`;
     }
     
+    console.log('🔗 URL normalizada:', normalizedUrl);
+    
     // Intentar diferentes estrategias para encontrar streams en vivo
     const strategies = [
       // Estrategia 1: Buscar en la página principal del canal
@@ -295,16 +297,26 @@ async function findChannelLiveStream(channelUrl: string): Promise<YouTubeData> {
     ];
 
     for (let i = 0; i < strategies.length; i++) {
-      console.log(`🔎 Ejecutando estrategia ${i + 1}...`);
+      console.log(`🔎 Ejecutando estrategia ${i + 1}/4...`);
       try {
         const liveVideoUrl = await strategies[i]();
         if (liveVideoUrl) {
-          console.log('✅ Stream en vivo encontrado:', liveVideoUrl);
+          console.log('✅ Stream en vivo encontrado con estrategia', i + 1, ':', liveVideoUrl);
           // Monitorear el video en vivo encontrado
           const result = await scrapeVideoData(liveVideoUrl);
           result.redirectedUrl = liveVideoUrl;
           result.channelName = await extractChannelName(normalizedUrl);
+          
+          console.log('📊 Datos del stream:', {
+            title: result.title,
+            viewers: result.viewers,
+            isLive: result.isLive,
+            channelName: result.channelName
+          });
+          
           return result;
+        } else {
+          console.log(`❌ Estrategia ${i + 1} no encontró streams en vivo`);
         }
       } catch (strategyError) {
         console.warn(`⚠️ Estrategia ${i + 1} falló:`, strategyError);
@@ -313,12 +325,14 @@ async function findChannelLiveStream(channelUrl: string): Promise<YouTubeData> {
 
     // Si no encuentra stream en vivo, retornar resultado indicando que no hay stream
     const channelName = await extractChannelName(normalizedUrl);
+    console.log('❌ No se encontraron streams en vivo en el canal:', channelName);
+    
     return {
       viewers: 0,
       isLive: false,
       title: `${channelName} - Sin streams en vivo`,
       status: 'success',
-      message: 'No se encontró ningún stream en vivo en este canal',
+      message: 'No se encontró ningún stream en vivo en este canal actualmente',
       timestamp: new Date().toISOString(),
       url: channelUrl,
       channelName
@@ -359,15 +373,38 @@ async function searchInChannelLive(channelUrl: string): Promise<string | null> {
   try {
     console.log('🔴 Buscando en página /live del canal...');
     const liveUrl = `${channelUrl}/live`;
+    console.log('🔗 URL de live:', liveUrl);
+    
     const response = await fetchWithRetry(liveUrl);
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.log(`⚠️ Response not ok: ${response.status} ${response.statusText}`);
+      return null;
+    }
 
-    const html = await response.text();
+    console.log('✅ Response OK, analizando respuesta...');
+    console.log('🔗 Final URL:', response.url);
     
     // Si nos redirige a un video específico, extraer el ID del video
     if (response.url.includes('/watch?v=')) {
-      return response.url;
+      console.log('✅ Redirección directa a video detectada');
+      const videoIdMatch = response.url.match(/watch\?v=([a-zA-Z0-9_-]{11})/);
+      if (videoIdMatch && videoIdMatch[1]) {
+        const videoUrl = `https://www.youtube.com/watch?v=${videoIdMatch[1]}`;
+        console.log('✅ Video en vivo encontrado por redirección:', videoUrl);
+        return videoUrl;
+      }
+    }
+
+    const html = await response.text();
+    console.log('📄 HTML recibido, tamaño:', html.length);
+    
+    // Verificar si la página contiene indicadores de "no live"
+    if (html.includes('This channel is not live') || 
+        html.includes('No live streams') ||
+        html.includes('isn\'t live right now')) {
+      console.log('❌ Canal no está en vivo según la página /live');
+      return null;
     }
     
     return extractLiveVideoFromChannelPage(html, channelUrl);
@@ -521,26 +558,35 @@ function extractLiveVideoFromChannelPage(html: string, channelUrl: string): stri
   try {
     console.log('🔍 Analizando HTML para encontrar streams en vivo...');
     
-    // 1. Buscar patrones directos de videos en vivo
+    // 1. Buscar patrones directos de videos en vivo (mejorados)
     const directLivePatterns = [
-      // Enlaces con "watch?v=" que incluyan texto de LIVE
-      /href="\/watch\?v=([a-zA-Z0-9_-]{11})[^"]*"[^>]*>[^<]*(?:LIVE|EN VIVO|🔴|DIRECTO)/i,
+      // Patrones de enlaces con badges LIVE
+      /href="\/watch\?v=([a-zA-Z0-9_-]{11})[^"]*"[^>]*>[^<]*(?:LIVE|EN VIVO|🔴|DIRECTO|Live)/i,
+      // Patrones con atributos de live
       /href="\/watch\?v=([a-zA-Z0-9_-]{11})[^"]*"[^>]*data-live="true"/i,
-      // Videos con badge de LIVE
-      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"isLive":true/g,
-      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"isLiveContent":true/g,
+      // Patrones en JSON directo
+      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"isLive":true/,
+      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"isLiveContent":true/,
+      // Patrones de viewers watching
+      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"watching"/i,
+      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"viewers"/i,
+      // Patrón para live badge renderer
+      /"videoId":"([a-zA-Z0-9_-]{11})"[^}]*"liveBadgeRenderer"/i
     ];
 
     for (const pattern of directLivePatterns) {
-      const match = html.match(pattern);
-      if (match && match[1]) {
-        const videoId = match[1];
-        console.log('✅ Video ID encontrado con patrón directo:', videoId);
-        return `https://www.youtube.com/watch?v=${videoId}`;
+      let match;
+      const globalPattern = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : pattern.flags + 'g');
+      while ((match = globalPattern.exec(html)) !== null) {
+        if (match && match[1]) {
+          const videoId = match[1];
+          console.log('✅ Video ID encontrado con patrón directo:', videoId);
+          return `https://www.youtube.com/watch?v=${videoId}`;
+        }
       }
     }
 
-    // 2. Buscar en ytInitialData
+    // 2. Buscar en ytInitialData con mejor parseo
     const ytDataMatch = html.match(/var ytInitialData = ({[\s\S]*?});/);
     if (ytDataMatch) {
       try {
@@ -556,6 +602,26 @@ function extractLiveVideoFromChannelPage(html: string, channelUrl: string): stri
       }
     }
 
+    // 3. Buscar patrones más específicos en el HTML
+    const htmlLivePatterns = [
+      // Buscar elementos con clase live
+      /class="[^"]*live[^"]*"[^>]*href="\/watch\?v=([a-zA-Z0-9_-]{11})"/i,
+      // Buscar elementos con texto "watching" o "viewers"
+      /href="\/watch\?v=([a-zA-Z0-9_-]{11})"[^>]*>[^<]*(\d+[KM]?\s*(?:watching|viewers))/i,
+      // Buscar cualquier video con indicadores de live
+      /watch\?v=([a-zA-Z0-9_-]{11})[^"]*"[^>]*>[^<]*(?:🔴|live|LIVE|EN VIVO)/i
+    ];
+
+    for (const pattern of htmlLivePatterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        const videoId = match[1];
+        console.log('✅ Video ID encontrado con patrón HTML:', videoId);
+        return `https://www.youtube.com/watch?v=${videoId}`;
+      }
+    }
+
+    console.log('❌ No se encontraron streams en vivo en la página del canal');
     return null;
   } catch (error) {
     console.error('Error en extractLiveVideoFromChannelPage:', error);
@@ -568,31 +634,114 @@ function findLiveVideoInYtData(obj: any): string | null {
   if (!obj || typeof obj !== 'object') return null;
 
   // Buscar propiedades específicas de videos en vivo
-  if (obj.videoId && (obj.isLive || obj.isLiveContent)) {
-    return obj.videoId;
-  }
+  if (obj.videoId) {
+    // Verificar indicadores directos de live
+    if (obj.isLive || obj.isLiveContent || obj.isLiveNow) {
+      console.log('✅ Video en vivo encontrado por isLive:', obj.videoId);
+      return obj.videoId;
+    }
 
-  // Buscar en badges de "LIVE"
-  if (obj.videoId && obj.badges) {
-    for (const badge of obj.badges) {
-      if (badge.liveBadgeRenderer || 
-          (badge.metadataBadgeRenderer && 
-           badge.metadataBadgeRenderer.label && 
-           /live|en vivo/i.test(badge.metadataBadgeRenderer.label))) {
+    // Verificar viewers concurrentes (indica stream en vivo)
+    if (obj.viewCountText && typeof obj.viewCountText === 'object') {
+      const viewText = obj.viewCountText.simpleText || obj.viewCountText.runs?.[0]?.text || '';
+      if (/watching|viewers/i.test(viewText)) {
+        console.log('✅ Video en vivo encontrado por viewCountText:', obj.videoId);
         return obj.videoId;
       }
     }
+
+    // Verificar badges de LIVE
+    if (obj.badges) {
+      for (const badge of obj.badges) {
+        if (badge.liveBadgeRenderer) {
+          console.log('✅ Video en vivo encontrado por liveBadgeRenderer:', obj.videoId);
+          return obj.videoId;
+        }
+        if (badge.metadataBadgeRenderer && 
+            badge.metadataBadgeRenderer.label && 
+            /live|en vivo|directo/i.test(badge.metadataBadgeRenderer.label)) {
+          console.log('✅ Video en vivo encontrado por badge label:', obj.videoId);
+          return obj.videoId;
+        }
+      }
+    }
+
+    // Verificar en thumbnailOverlays
+    if (obj.thumbnailOverlays) {
+      for (const overlay of obj.thumbnailOverlays) {
+        if (overlay.thumbnailOverlayTimeStatusRenderer && 
+            overlay.thumbnailOverlayTimeStatusRenderer.style === 'LIVE') {
+          console.log('✅ Video en vivo encontrado por thumbnailOverlay:', obj.videoId);
+          return obj.videoId;
+        }
+      }
+    }
+  }
+
+  // Buscar en contenido de tabs específicamente
+  if (obj.tabRenderer && obj.tabRenderer.content) {
+    const result = findLiveVideoInYtData(obj.tabRenderer.content);
+    if (result) return result;
+  }
+
+  // Buscar en richGrid específicamente (página principal de canal)
+  if (obj.richGridRenderer) {
+    const result = findLiveVideoInYtData(obj.richGridRenderer);
+    if (result) return result;
+  }
+
+  // Búsqueda recursiva limitada para evitar loops infinitos
+  const searchableKeys = ['contents', 'items', 'videos', 'tabs', 'richItemRenderer', 'videoRenderer'];
+  
+  for (const key of searchableKeys) {
+    if (obj[key]) {
+      const value = obj[key];
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const result = findLiveVideoInYtData(item);
+          if (result) return result;
+        }
+      } else if (typeof value === 'object' && value !== null) {
+        const result = findLiveVideoInYtData(value);
+        if (result) return result;
+      }
+    }
+  }
+
+  return null;
+}
+
+// Función para buscar título en datos de YouTube
+function findTitleInYtData(obj: any): string | null {
+  if (!obj || typeof obj !== 'object') return null;
+
+  // Buscar título en propiedades específicas
+  if (obj.title) {
+    if (typeof obj.title === 'string') {
+      return obj.title;
+    }
+    if (obj.title.simpleText) {
+      return obj.title.simpleText;
+    }
+    if (obj.title.runs && obj.title.runs[0] && obj.title.runs[0].text) {
+      return obj.title.runs[0].text;
+    }
+  }
+
+  // Buscar en propiedades comunes de video
+  if (obj.videoDetails && obj.videoDetails.title) {
+    return obj.videoDetails.title;
   }
 
   // Búsqueda recursiva en objetos y arrays
   for (const value of Object.values(obj)) {
     if (Array.isArray(value)) {
       for (const item of value) {
-        const result = findLiveVideoInYtData(item);
+        const result = findTitleInYtData(item);
         if (result) return result;
       }
     } else if (typeof value === 'object' && value !== null) {
-      const result = findLiveVideoInYtData(value);
+      const result = findTitleInYtData(value);
       if (result) return result;
     }
   }
@@ -602,11 +751,56 @@ function findLiveVideoInYtData(obj: any): string | null {
 
 function extractYouTubeData(html: string, url: string): YouTubeData {
   try {
-    // Extraer título del video
+    // Extraer título del video con múltiples patrones
     let title = '';
-    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-    if (titleMatch) {
-      title = titleMatch[1].replace(' - YouTube', '').trim();
+    
+    // Patrones mejorados para extraer título
+    const titlePatterns = [
+      // Meta property og:title (más confiable)
+      /<meta property="og:title" content="([^"]+)"/i,
+      // Title en ytInitialData
+      /"title":"([^"]+)"[^}]*"isLive":true/i,
+      /"title":"([^"]+)"[^}]*"isLiveContent":true/i,
+      // Title tag como fallback
+      /<title[^>]*>([^<]+)<\/title>/i
+    ];
+    
+    for (const pattern of titlePatterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        title = match[1]
+          .replace(' - YouTube', '')
+          .replace(/\\u([0-9a-fA-F]{4})/g, (match, p1) => String.fromCharCode(parseInt(p1, 16)))
+          .replace(/\\"/g, '"')
+          .trim();
+        
+        if (title && title !== 'YouTube') {
+          console.log(`📝 Título extraído: "${title}"`);
+          break;
+        }
+      }
+    }
+    
+    // Si no se encontró título, intentar buscar en ytInitialData
+    if (!title || title === 'YouTube') {
+      const ytDataMatch = html.match(/var ytInitialData = ({[\s\S]*?});/);
+      if (ytDataMatch) {
+        try {
+          const ytData = JSON.parse(ytDataMatch[1]);
+          const extractedTitle = findTitleInYtData(ytData);
+          if (extractedTitle) {
+            title = extractedTitle;
+            console.log(`📝 Título extraído de ytInitialData: "${title}"`);
+          }
+        } catch (parseError) {
+          console.warn('Error parseando ytInitialData para título:', parseError);
+        }
+      }
+    }
+    
+    // Fallback si no se encontró título
+    if (!title || title === 'YouTube') {
+      title = 'Stream de YouTube';
     }
 
     // Buscar indicadores de stream en vivo
