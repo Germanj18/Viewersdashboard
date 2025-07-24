@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '../../lib/prisma';
 
+// Definir el tipo para el cliente Prisma extendido
+type ExtendedPrismaClient = typeof prisma & {
+  operationHistory: any;
+};
+
 // GET - Obtener historial de operaciones por fechas
 export async function GET(request: Request) {
   try {
@@ -40,7 +45,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const operations = await prisma.operationHistory.findMany({
+    const operations = await (prisma as any).operationHistory.findMany({
       where: whereClause,
       orderBy: {
         timestamp: 'desc'
@@ -63,8 +68,13 @@ export async function GET(request: Request) {
 // POST - Guardar nueva operación en historial
 export async function POST(request: Request) {
   try {
+    console.log('🔍 POST /api/operations-history - Starting request');
+    console.log('🔍 Environment:', process.env.NODE_ENV);
+    console.log('🔍 Database URL exists:', !!process.env.POSTGRES_PRISMA_URL);
+    console.log('🔍 NEXTAUTH_URL:', process.env.NEXTAUTH_URL);
+    
     const body = await request.json();
-    console.log('📥 Received operation data:', body);
+    console.log('📥 Received operation data:', JSON.stringify(body, null, 2));
     
     const { 
       userId, 
@@ -102,7 +112,7 @@ export async function POST(request: Request) {
     console.log('✅ User found:', user.name);
 
     // Crear la operación en el historial
-    const operation = await prisma.operationHistory.create({
+    const operation = await (prisma as any).operationHistory.create({
       data: {
         userId: userId,
         blockId: blockId || null,
@@ -155,7 +165,7 @@ export async function DELETE(request: Request) {
     }
 
     // Eliminar todas las operaciones del usuario
-    const result = await prisma.operationHistory.deleteMany({
+    const result = await (prisma as any).operationHistory.deleteMany({
       where: {
         userId: userId
       }

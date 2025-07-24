@@ -408,6 +408,30 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       sessionData: session // 🆕 Log completo de la sesión
     });
 
+    // 🚀 DIAGNOSTIC para producción
+    const isProduction = typeof window !== 'undefined' && window.location.href.includes('vercel.app');
+    if (isProduction) {
+      console.log('🚀 PRODUCTION DETECTED - Extra diagnostics:');
+      console.log('🌐 Current URL:', window.location.href);
+      console.log('🔐 Session details:', JSON.stringify(session, null, 2));
+      
+      // Llamar al endpoint de diagnóstico
+      try {
+        const diagnosticResponse = await fetch('/api/production-debug', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            blockTitle: blockData.title,
+            operationData,
+            userId: session?.user?.id
+          })
+        });
+        console.log('📊 Production diagnostic response:', await diagnosticResponse.json());
+      } catch (e) {
+        console.error('❌ Production diagnostic failed:', e);
+      }
+    }
+
     if (!session?.user?.id) {
       console.warn('⚠️ No user session available, operation not saved to database');
       console.log('📋 Session status:', {
