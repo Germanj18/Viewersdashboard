@@ -214,28 +214,17 @@ const MetricsDashboard: React.FC = () => {
   const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
 
   // Función para obtener operaciones expiradas con detalles y filtros de fecha
-  const getExpiredOperationsDetails = useCallback((filterByDate = true) => {
+  const getExpiredOperationsDetails = useCallback(() => {
     const allOperations = getAllOperationsData();
     const expiredOperations: any[] = [];
     const currentTime = new Date();
-
-    // Crear fechas de filtro
-    const fromDate = new Date(dateFrom);
-    fromDate.setHours(0, 0, 0, 0);
-    const toDate = new Date(dateTo);
-    toDate.setHours(23, 59, 59, 999);
 
     allOperations.forEach((operation: any) => {
       if (operation.status === 'success' && operation.savedAt && operation.duration) {
         try {
           const startTime = new Date(operation.savedAt);
           const endTime = new Date(startTime.getTime() + (operation.duration * 60 * 1000));
-          
-          // Aplicar filtro de fecha si está habilitado
-          if (filterByDate && (startTime < fromDate || startTime > toDate)) {
-            return;
-          }
-          
+
           if (currentTime >= endTime) {
             // Esta operación ha expirado
             const startTimeFormatted = startTime.toLocaleTimeString('es-ES', {
@@ -243,7 +232,7 @@ const MetricsDashboard: React.FC = () => {
               minute: '2-digit',
               second: '2-digit'
             });
-            
+
             const endTimeFormatted = endTime.toLocaleTimeString('es-ES', {
               hour: '2-digit',
               minute: '2-digit',
@@ -1236,10 +1225,10 @@ const MetricsDashboard: React.FC = () => {
 
   // Función para descargar operaciones expiradas como CSV
   const downloadExpiredOperationsCSV = useCallback(() => {
-    const expiredOps = getExpiredOperationsDetails(true); // Usar filtros de fecha
+    const expiredOps = getExpiredOperationsDetails();
     
     if (expiredOps.length === 0) {
-      showToast('⚠️ No hay operaciones expiradas para el rango de fechas seleccionado', 'warning');
+      showToast('⚠️ No hay operaciones expiradas para descargar', 'warning');
       return;
     }
 
@@ -2144,75 +2133,11 @@ const MetricsDashboard: React.FC = () => {
               </div>
             </div>
             
-            {/* Filtros de Fecha */}
-            <div className="modal-filters" style={{ 
-              padding: '1rem 2rem', 
-              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-              background: theme === 'dark' ? 'rgba(15, 23, 42, 0.5)' : 'rgba(248, 250, 252, 0.8)'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                gap: '1rem', 
-                alignItems: 'center', 
-                flexWrap: 'wrap' 
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{ fontSize: '0.875rem', fontWeight: '600' }}>Desde:</label>
-                  <input
-                    type="date"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                    style={{
-                      padding: '0.5rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid rgba(0, 0, 0, 0.2)',
-                      background: theme === 'dark' ? '#1f2937' : '#ffffff',
-                      color: theme === 'dark' ? '#f1f5f9' : '#1f2937',
-                      fontSize: '0.875rem'
-                    }}
-                  />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <label style={{ fontSize: '0.875rem', fontWeight: '600' }}>Hasta:</label>
-                  <input
-                    type="date"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                    style={{
-                      padding: '0.5rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid rgba(0, 0, 0, 0.2)',
-                      background: theme === 'dark' ? '#1f2937' : '#ffffff',
-                      color: theme === 'dark' ? '#f1f5f9' : '#1f2937',
-                      fontSize: '0.875rem'
-                    }}
-                  />
-                </div>
-                <button
-                  onClick={() => {
-                    const today = new Date().toISOString().split('T')[0];
-                    setDateFrom(today);
-                    setDateTo(today);
-                  }}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '0.375rem',
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                    color: 'white',
-                    fontSize: '0.875rem',
-                    cursor: 'pointer',
-                    fontWeight: '500'
-                  }}
-                >
-                  📅 Hoy
-                </button>
-              </div>
-            </div>
+            {/* Eliminados los filtros de fecha, solo se muestra la tabla de operaciones expiradas */}
             
             <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               {(() => {
-                const expiredOps = getExpiredOperationsDetails(true);
+                const expiredOps = getExpiredOperationsDetails();
                 return expiredOps.length > 0 ? (
                   <>
                     <div className="expired-summary" style={{ 
