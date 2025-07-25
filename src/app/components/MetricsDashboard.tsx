@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../ThemeContext';
 import { useGlobal } from './GlobalContext';
-import { NotificationService, showToast } from './NotificationService';
+import { useToast } from '../hooks/useToast';
 import * as XLSX from 'xlsx';
 import './MetricsDashboard.css';
 
@@ -46,6 +46,7 @@ interface Alert {
 const MetricsDashboard: React.FC = () => {
   const { theme } = useTheme();
   const { totalViewers, getExpiredViewersCount, getTotalViewersSent } = useGlobal();
+  const { showToast, ToastContainer } = useToast();
   
   const [metrics, setMetrics] = useState<OperationMetrics>({
     totalOperations: 0,
@@ -208,17 +209,32 @@ const MetricsDashboard: React.FC = () => {
     }
   };
 
-  // Función para obtener operaciones expiradas con detalles
-  const getExpiredOperationsDetails = useCallback(() => {
+  // Estados para filtros de fecha
+  const [dateFrom, setDateFrom] = useState(new Date().toISOString().split('T')[0]);
+  const [dateTo, setDateTo] = useState(new Date().toISOString().split('T')[0]);
+
+  // Función para obtener operaciones expiradas con detalles y filtros de fecha
+  const getExpiredOperationsDetails = useCallback((filterByDate = true) => {
     const allOperations = getAllOperationsData();
     const expiredOperations: any[] = [];
     const currentTime = new Date();
+
+    // Crear fechas de filtro
+    const fromDate = new Date(dateFrom);
+    fromDate.setHours(0, 0, 0, 0);
+    const toDate = new Date(dateTo);
+    toDate.setHours(23, 59, 59, 999);
 
     allOperations.forEach((operation: any) => {
       if (operation.status === 'success' && operation.savedAt && operation.duration) {
         try {
           const startTime = new Date(operation.savedAt);
           const endTime = new Date(startTime.getTime() + (operation.duration * 60 * 1000));
+          
+          // Aplicar filtro de fecha si está habilitado
+          if (filterByDate && (startTime < fromDate || startTime > toDate)) {
+            return;
+          }
           
           if (currentTime >= endTime) {
             // Esta operación ha expirado
@@ -1029,13 +1045,25 @@ const MetricsDashboard: React.FC = () => {
         
         // Mostrar notificaciones para alertas nuevas
         uniqueNewAlerts.forEach(alert => {
-          NotificationService.showNotification(alert.title, {
-            body: alert.message,
-            tag: alert.id,
-            silent: alert.type === 'info'
-          });
+          // Mostrar notificación del navegador
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification(alert.title, {
+              body: alert.message,
+              tag: alert.id,
+              icon: '/servicedg-favicon.svg',
+              silent: alert.type === 'info'
+            });
+          }
           
-          NotificationService.playSound(alert.type);
+          // Reproducir sonido de alerta
+          const audio = new Audio();
+          if (alert.type === 'error') {
+            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmccETmGy+zEbywFKWpS';
+          } else {
+            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmccETmGy+zEbywFK2pS';
+          }
+          audio.play().catch(() => {}); // Ignorar errores de audio
+          
           showToast(alert.message, alert.type);
         });
         
@@ -1208,10 +1236,10 @@ const MetricsDashboard: React.FC = () => {
 
   // Función para descargar operaciones expiradas como CSV
   const downloadExpiredOperationsCSV = useCallback(() => {
-    const expiredOps = getExpiredOperationsDetails();
+    const expiredOps = getExpiredOperationsDetails(true); // Usar filtros de fecha
     
     if (expiredOps.length === 0) {
-      showToast('⚠️ No hay operaciones expiradas para descargar', 'warning');
+      showToast('⚠️ No hay operaciones expiradas para el rango de fechas seleccionado', 'warning');
       return;
     }
 
@@ -1388,35 +1416,40 @@ const MetricsDashboard: React.FC = () => {
 
   return (
     <div className={`metrics-dashboard ${theme}`}>
-      {/* Header */}
+      {/* Header Mejorado */}
       <div className="metrics-header">
-        <h2>📊 Dashboard de Métricas</h2>
-        <div className="metrics-actions">
-          <button 
-            onClick={() => setShowAlerts(!showAlerts)}
-            className={`alerts-button ${alerts.length > 0 ? 'has-alerts' : ''}`}
-          >
-            🔔 Alertas ({alerts.length})
-          </button>
-          
-          {/* Botones de exportación */}
-          <div className="export-buttons" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-            <button onClick={exportToJSON} className="export-button" title="Descargar datos completos en JSON">
-              📄 JSON
+        <div className="metrics-header-content">
+          <h2>📊 Dashboard de Métricas</h2>
+          <div className="metrics-actions">
+            <button 
+              onClick={() => setShowAlerts(!showAlerts)}
+              className={`alerts-button ${alerts.length > 0 ? 'has-alerts' : ''}`}
+            >
+              🔔 Alertas ({alerts.length})
             </button>
-            <button onClick={exportToCSV} className="export-button" title="Descargar operaciones en CSV">
-              📊 CSV
-            </button>
-            <button onClick={exportExecutiveReport} className="export-button" title="Descargar reporte ejecutivo">
-              📋 Reporte
-            </button>
+            
+            {/* Botones de exportación */}
+            <div className="export-buttons">
+              <button onClick={exportToJSON} className="export-button" title="Descargar datos completos en JSON">
+                📄 JSON
+              </button>
+              <button onClick={exportToCSV} className="export-button" title="Descargar operaciones en CSV">
+                📊 CSV
+              </button>
+              <button onClick={exportExecutiveReport} className="export-button" title="Descargar reporte ejecutivo">
+                📋 Reporte
+              </button>
+            </div>
+            
+            <span className="last-updated">
+              Actualizado: {new Date(metrics.lastUpdated).toLocaleTimeString()}
+            </span>
           </div>
-          
-          <span className="last-updated">
-            Actualizado: {new Date(metrics.lastUpdated).toLocaleTimeString()}
-          </span>
         </div>
       </div>
+
+      {/* Contenido Principal */}
+      <div className="metrics-dashboard-content">
 
       {/* Alertas desplegables */}
       {showAlerts && (
@@ -2111,11 +2144,124 @@ const MetricsDashboard: React.FC = () => {
               </div>
             </div>
             
-            <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+            {/* Filtros de Fecha */}
+            <div className="modal-filters" style={{ 
+              padding: '1rem 2rem', 
+              borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              background: theme === 'dark' ? 'rgba(15, 23, 42, 0.5)' : 'rgba(248, 250, 252, 0.8)'
+            }}>
+              <div style={{ 
+                display: 'flex', 
+                gap: '1rem', 
+                alignItems: 'center', 
+                flexWrap: 'wrap' 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.875rem', fontWeight: '600' }}>Desde:</label>
+                  <input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '0.375rem',
+                      border: '1px solid rgba(0, 0, 0, 0.2)',
+                      background: theme === 'dark' ? '#1f2937' : '#ffffff',
+                      color: theme === 'dark' ? '#f1f5f9' : '#1f2937',
+                      fontSize: '0.875rem'
+                    }}
+                  />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <label style={{ fontSize: '0.875rem', fontWeight: '600' }}>Hasta:</label>
+                  <input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                    style={{
+                      padding: '0.5rem',
+                      borderRadius: '0.375rem',
+                      border: '1px solid rgba(0, 0, 0, 0.2)',
+                      background: theme === 'dark' ? '#1f2937' : '#ffffff',
+                      color: theme === 'dark' ? '#f1f5f9' : '#1f2937',
+                      fontSize: '0.875rem'
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={() => {
+                    const today = new Date().toISOString().split('T')[0];
+                    setDateFrom(today);
+                    setDateTo(today);
+                  }}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                    color: 'white',
+                    fontSize: '0.875rem',
+                    cursor: 'pointer',
+                    fontWeight: '500'
+                  }}
+                >
+                  📅 Hoy
+                </button>
+              </div>
+            </div>
+            
+            <div className="modal-body" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
               {(() => {
-                const expiredOps = getExpiredOperationsDetails();
+                const expiredOps = getExpiredOperationsDetails(true);
                 return expiredOps.length > 0 ? (
                   <>
+                    <div className="expired-summary" style={{ 
+                      marginBottom: '1.5rem', 
+                      padding: '1.25rem', 
+                      background: theme === 'dark' ? 'rgba(30, 41, 59, 0.6)' : 'rgba(248, 250, 252, 0.8)',
+                      borderRadius: '0.75rem',
+                      border: '1px solid rgba(59, 130, 246, 0.2)'
+                    }}>
+                      <h4 style={{ margin: '0 0 1rem 0', color: '#3b82f6' }}>📊 Resumen del Período</h4>
+                      <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', 
+                        gap: '1rem' 
+                      }}>
+                        <div style={{ 
+                          padding: '0.75rem',
+                          background: 'rgba(59, 130, 246, 0.1)',
+                          borderRadius: '0.5rem',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#3b82f6' }}>
+                            {expiredOps.length}
+                          </div>
+                          <div style={{ fontSize: '0.875rem', opacity: '0.8' }}>Total Operaciones</div>
+                        </div>
+                        <div style={{ 
+                          padding: '0.75rem',
+                          background: 'rgba(34, 197, 94, 0.1)',
+                          borderRadius: '0.5rem',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#22c55e' }}>
+                            {expiredOps.reduce((sum, op) => sum + (op.count || 0), 0).toLocaleString()}</div>
+                          <div style={{ fontSize: '0.875rem', opacity: '0.8' }}>Total Viewers</div>
+                        </div>
+                        <div style={{ 
+                          padding: '0.75rem',
+                          background: 'rgba(245, 158, 11, 0.1)',
+                          borderRadius: '0.5rem',
+                          textAlign: 'center'
+                        }}>
+                          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b' }}>
+                            ${expiredOps.reduce((sum, op) => sum + (op.cost || 0), 0).toFixed(2)}
+                          </div>
+                          <div style={{ fontSize: '0.875rem', opacity: '0.8' }}>Costo Total</div>
+                        </div>
+                      </div>
+                    </div>
                     <div className="expired-summary" style={{ 
                       marginBottom: '1rem', 
                       padding: '1rem', 
@@ -2214,6 +2360,9 @@ const MetricsDashboard: React.FC = () => {
           </div>
         </div>
       )}
+      
+      </div> {/* Cierre de metrics-dashboard-content */}
+      <ToastContainer />
     </div>
   );
 };
