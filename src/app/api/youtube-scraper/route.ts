@@ -284,6 +284,12 @@ async function findChannelLiveStream(channelUrl: string): Promise<YouTubeData> {
     
     console.log('🔗 URL normalizada:', normalizedUrl);
     
+    // Caso especial para @somoslacasa - agregar logs detallados
+    const isTestChannel = normalizedUrl.includes('somoslacasa');
+    if (isTestChannel) {
+      console.log('🏠 Detectado canal de prueba @somoslacasa - logs detallados activados');
+    }
+    
     // Intentar diferentes estrategias para encontrar streams en vivo
     const strategies = [
       // Estrategia 1: Buscar en la página principal del canal
