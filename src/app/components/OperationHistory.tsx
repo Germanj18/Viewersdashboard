@@ -32,13 +32,12 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
   const [totalCost, setTotalCost] = useState(0);
   const [totalViewers, setTotalViewers] = useState(0);
 
-  // Establecer fechas por defecto (últimos 30 días)
+  // Establecer fechas por defecto (hoy)
   useEffect(() => {
     const today = new Date();
-    const thirtyDaysAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
-    
-    setEndDate(today.toISOString().split('T')[0]);
-    setStartDate(thirtyDaysAgo.toISOString().split('T')[0]);
+    const todayStr = today.toISOString().split('T')[0];
+    setEndDate(todayStr);
+    setStartDate(todayStr);
   }, []);
 
   // Cargar operaciones cuando cambien las fechas
@@ -195,7 +194,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
 
   return (
     <div className="modal-overlay">
-      <div className={`modal-content operation-history-modal ${theme}`}>
+      <div className={`modal-content operation-history-modal ${theme}`} style={{ maxWidth: 900, width: '98%' }}>
         <div className="modal-header">
           <h2>📊 Historial de Operaciones</h2>
           <button onClick={onClose} className="close-button">❌</button>

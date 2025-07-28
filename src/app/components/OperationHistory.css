@@ -342,6 +342,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 .operations-table {
@@ -362,19 +364,18 @@
 }
 
 .operations-table thead {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: var(--thead-bg);
-  backdrop-filter: blur(10px);
+  background: var(--thead-bg-solid, #f8fafc);
+  backdrop-filter: none;
 }
 
 .operation-history-modal.light .operations-table thead {
-  --thead-bg: rgba(248, 250, 252, 0.9);
+  --thead-bg: #f8fafc;
+  --thead-bg-solid: #f8fafc;
 }
 
 .operation-history-modal.dark .operations-table thead {
-  --thead-bg: rgba(15, 23, 42, 0.9);
+  --thead-bg: #1e293b;
+  --thead-bg-solid: #1e293b;
 }
 
 .operations-table th {
