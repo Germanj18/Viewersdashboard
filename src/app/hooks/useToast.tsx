@@ -48,8 +48,14 @@ export const useToast = () => {
   return { showToast, ToastContainer };
 };
 
-// Export standalone function for compatibility
+// Export standalone function for compatibility (NO duplica ni hace bucle)
+// Si tienes acceso al hook, usa useToast().showToast en componentes React.
+// Esta función solo hace log si no hay instancia React activa.
 export const showToastMessage = (message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info') => {
-  // This would need to be connected to a global toast provider
-  console.log(`[${type.toUpperCase()}] ${message}`);
+  // Aquí podrías conectar con un sistema global si lo implementas, pero por defecto solo loguea
+  if (typeof window !== 'undefined' && (window as any).__REACT_TOAST__) {
+    (window as any).__REACT_TOAST__(message, type);
+  } else {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+  }
 };

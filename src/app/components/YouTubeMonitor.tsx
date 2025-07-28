@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '../ThemeContext';
-import { showToast } from './NotificationService';
+import { useToast } from '../hooks/useToast';
 import './YouTubeMonitor.css';
 
 interface YouTubeData {
@@ -27,6 +27,7 @@ interface MonitorHistory {
 
 const YouTubeMonitor: React.FC = () => {
   const { theme } = useTheme();
+  const { showToast, ToastContainer } = useToast();
   
   const [url, setUrl] = useState('');
   const [isMonitoring, setIsMonitoring] = useState(false);
@@ -286,6 +287,7 @@ const YouTubeMonitor: React.FC = () => {
 
   return (
     <div className={`youtube-monitor ${theme}`}>
+      <ToastContainer />
       <div className="monitor-header">
         <h3>📺 Monitor de YouTube en Tiempo Real</h3>
       </div>
