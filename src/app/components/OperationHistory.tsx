@@ -253,7 +253,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="operations-table-container">
+        <div className="operations-table-container" style={{ paddingTop: 0, marginTop: 0 }}>
           {loading ? (
             <div className="loading-state">🔄 Cargando operaciones...</div>
           ) : operations.length === 0 ? (
@@ -261,18 +261,18 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
               📭 No se encontraron operaciones en el período seleccionado
             </div>
           ) : (
-            <table className={`operations-table ${theme}`}>
-              <thead>
-                <tr>
-                  <th>Fecha/Hora</th>
-                  <th>Bloque</th>
-                  <th>Tipo</th>
-                  <th>Viewers</th>
-                  <th>Order ID</th>
-                  <th>Estado</th>
-                  <th>Duración</th>
-                  <th>Costo</th>
-                  <th>Service ID</th>
+            <table className={`operations-table ${theme}`} style={{ marginTop: 0, paddingTop: 0, borderSpacing: 0 }}>
+              <thead style={{ marginTop: 0, paddingTop: 0, backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>
+                <tr style={{ marginTop: 0, paddingTop: 0 }}>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Fecha/Hora</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Bloque</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Tipo</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Viewers</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Order ID</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Estado</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Duración</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Costo</th>
+                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Service ID</th>
                 </tr>
               </thead>
               <tbody>

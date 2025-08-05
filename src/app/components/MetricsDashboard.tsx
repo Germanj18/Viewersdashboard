@@ -1899,18 +1899,62 @@ const MetricsDashboard: React.FC = () => {
               <thead style={{ 
                 position: 'sticky', 
                 top: 0, 
-                backgroundColor: theme === 'dark' ? '#1f2937' : '#f9fafb',
+                backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                 zIndex: 10,
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                margin: 0,
+                padding: 0
               }}>
-                <tr>
-                  <th>Bloque</th>
-                  <th>Estado</th>
-                  <th>Inicio</th>
-                  <th>Finalización Est.</th>
-                  <th>Duración</th>
-                  <th>Viewers</th>
-                  <th>Costo</th>
+                <tr style={{ margin: 0, padding: 0 }}>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Bloque</th>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Estado</th>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Inicio</th>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Finalización Est.</th>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Duración</th>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Viewers</th>
+                  <th style={{ 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    margin: 0,
+                    padding: '0.75rem',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Costo</th>
                 </tr>
               </thead>
               <tbody>

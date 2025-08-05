@@ -346,11 +346,19 @@
   margin-top: 0 !important;
 }
 
+.operation-history-modal > .operations-table-container:first-child,
+.operation-history-modal .operations-table {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
 .operations-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
   background: var(--table-bg);
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 .operation-history-modal.light .operations-table {
@@ -366,6 +374,8 @@
 .operations-table thead {
   background: var(--thead-bg-solid, #f8fafc);
   backdrop-filter: none;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 .operation-history-modal.light .operations-table thead {
@@ -379,7 +389,7 @@
 }
 
 .operations-table th {
-  padding: 1rem 0.75rem;
+ 
   text-align: left;
   font-weight: 600;
   color: var(--text-primary);
