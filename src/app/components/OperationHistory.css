@@ -5,14 +5,15 @@
   width: 96vw;
   max-width: 1400px;
   min-width: 320px;
-  margin: 2.5vh auto;
+  margin: 1vh auto;
   border-radius: 1.25rem;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   padding: 0;
   background: var(--modal-bg, #fff);
   display: flex;
   flex-direction: column;
-  min-height: 70vh;
+  min-height: 85vh;
+  max-height: 95vh;
   transition: all 0.3s;
   overflow: hidden;
 /* Fin de variables para tema claro */
@@ -344,6 +345,61 @@
   flex-direction: column;
   padding-top: 0 !important;
   margin-top: 0 !important;
+  min-height: 60vh !important;
+  max-height: 75vh !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  /* Mejorar el scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+}
+
+.operations-table-container::-webkit-scrollbar {
+  height: 16px !important;
+  width: 16px !important;
+}
+
+.operations-table-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 8px;
+  border: 2px solid #f3f4f6;
+  cursor: pointer;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.operations-table-container::-webkit-scrollbar-corner {
+  background: #f3f4f6;
+}
+
+/* Tema oscuro para scrollbar */
+.operation-history-modal.dark .operations-table-container {
+  scrollbar-color: #64748b #1e293b;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-color: #1e293b;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-corner {
+  background: #1e293b;
 }
 
 .operation-history-modal > .operations-table-container:first-child,
@@ -684,21 +740,27 @@
 
 /* Scroll personalizado para la tabla */
 .operations-table-container::-webkit-scrollbar {
-  height: 8px;
+  height: 12px;
+  width: 12px;
 }
 
 .operations-table-container::-webkit-scrollbar-track {
   background: var(--scroll-track);
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .operations-table-container::-webkit-scrollbar-thumb {
   background: var(--scroll-thumb);
-  border-radius: 4px;
+  border-radius: 6px;
+  border: 2px solid var(--scroll-track);
 }
 
 .operations-table-container::-webkit-scrollbar-thumb:hover {
   background: var(--scroll-thumb-hover);
+}
+
+.operations-table-container::-webkit-scrollbar-corner {
+  background: var(--scroll-track);
 }
 
 .operation-history-modal.light {

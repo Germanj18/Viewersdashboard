@@ -2612,6 +2612,938 @@
   }
 }
 
+/*!*************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./src/app/components/OperationHistory.css ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************/
+/* OperationHistory.css - Estilos para el modal de historial de operaciones */
+
+/* Modal específico para historial de operaciones */
+.operation-history-modal {
+  width: 96vw;
+  max-width: 1400px;
+  min-width: 320px;
+  margin: 1vh auto;
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 0;
+  background: var(--modal-bg, #fff);
+  display: flex;
+  flex-direction: column;
+  min-height: 85vh;
+  max-height: 95vh;
+  transition: all 0.3s;
+  overflow: hidden;
+/* Fin de variables para tema claro */
+
+.operation-history-modal .modal-header {
+  flex-shrink: 0;
+  padding: 1.5rem;
+  border-bottom: 2px solid;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--header-bg);
+/* Fin de variables para tema oscuro */
+
+.operation-history-modal.light   .quick-filter-buttons {
+    justify-content: center;
+  }
+
+  .quick-filter-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    flex: 1;
+    min-width: 60px;
+  }al-header {
+  --header-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-bottom-color: #e2e8f0;
+}
+
+.operation-history-modal.dark .modal-header {
+  --header-bg: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  border-bottom-color: #475569;
+}
+
+.operation-history-modal h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Sección de filtros mejorada */
+.filters-section {
+  flex-shrink: 0;
+  padding: 1.5rem;
+  background: var(--filters-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.operation-history-modal.light .filters-section {
+  --filters-bg: #f8fafc;
+  --border-color: #e2e8f0;
+}
+
+.operation-history-modal.dark .filters-section {
+  --filters-bg: #0f172a;
+  --border-color: #334155;
+}
+
+/* Filtros rápidos */
+.quick-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.quick-filters-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.quick-filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.quick-filter-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--quick-border);
+  border-radius: 20px;
+  background: var(--quick-bg);
+  color: var(--quick-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.quick-filter-btn:hover {
+  background: var(--quick-hover-bg);
+  border-color: var(--quick-hover-border);
+  transform: translateY(-1px);
+}
+
+.quick-filter-btn.active {
+  background: var(--quick-active-bg);
+  border-color: var(--quick-active-border);
+  color: var(--quick-active-text);
+  box-shadow: 0 2px 8px var(--quick-active-shadow);
+}
+
+.operation-history-modal.light {
+  --modal-bg: rgba(255,255,255,0.98);
+  --quick-border: #d1d5db;
+  --quick-bg: #ffffff;
+  --quick-text: #374151;
+  --quick-hover-bg: #f9fafb;
+  --quick-hover-border: #9ca3af;
+  --quick-active-bg: #3b82f6;
+  --quick-active-border: #3b82f6;
+  --quick-active-text: #ffffff;
+  --quick-active-shadow: rgba(59, 130, 246, 0.3);
+}
+
+}
+.operation-history-modal.dark {
+  background: #0f172a !important;
+  color: #f9fafb !important;
+  --modal-bg: #0f172a;
+  --quick-border: #475569;
+  --quick-bg: #1e293b;
+  --quick-text: #e2e8f0;
+  --quick-hover-bg: #334155;
+  --quick-hover-border: #64748b;
+  --quick-active-bg: #60a5fa;
+  --quick-active-border: #60a5fa;
+  --quick-active-text: #0f172a;
+  --quick-active-shadow: rgba(96, 165, 250, 0.3);
+}
+
+.date-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.date-input {
+  padding: 0.75rem;
+  border: 2px solid var(--input-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px var(--primary-shadow);
+}
+
+.operation-history-modal.light .date-input {
+  --input-border: #d1d5db;
+  --input-bg: #ffffff;
+  --primary-color: #3b82f6;
+  --primary-shadow: rgba(59, 130, 246, 0.1);
+}
+
+.operation-history-modal.dark .date-input {
+  --input-border: #475569;
+  --input-bg: #1e293b;
+  --primary-color: #60a5fa;
+  --primary-shadow: rgba(96, 165, 250, 0.1);
+}
+
+.search-button, .export-button {
+  border: 2px solid var(--search-border, transparent);
+  --search-border: #3b82f6;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.search-button {
+  background: var(--search-bg);
+  color: var(--search-text);
+}
+
+.search-button:hover:not(:disabled) {
+  background: var(--search-hover);
+  transform: translateY(-1px);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.export-button {
+  background: var(--export-bg);
+  color: var(--export-text);
+}
+
+.export-button:hover {
+  background: var(--export-hover);
+  transform: translateY(-1px);
+}
+
+.export-button.excel {
+  background: var(--excel-bg);
+  color: var(--excel-text);
+}
+
+.export-button.excel:hover {
+  background: var(--excel-hover);
+}
+
+.operation-history-modal.light {
+  --search-bg: #3b82f6;
+  --search-text: #ffffff;
+  --search-hover: #2563eb;
+  --export-bg: #10b981;
+  --export-text: #ffffff;
+  --export-hover: #059669;
+  --excel-bg: #f59e0b;
+  --excel-text: #ffffff;
+  --excel-hover: #d97706;
+}
+
+.operation-history-modal.dark {
+  --search-bg: #60a5fa;
+  --search-text: #0f172a;
+  --search-hover: #3b82f6;
+  --export-bg: #34d399;
+  --export-text: #0f172a;
+  --export-hover: #10b981;
+  --excel-bg: #fbbf24;
+  --excel-text: #0f172a;
+  --excel-hover: #f59e0b;
+}
+
+/* Sección de resumen mejorada */
+.summary-section {
+  flex-shrink: 0;
+  padding: 1.5rem;
+  background: var(--summary-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.operation-history-modal.light .summary-section {
+  --summary-bg: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.operation-history-modal.dark .summary-section {
+  --summary-bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--stat-bg);
+  border-radius: 12px;
+  border: 1px solid var(--stat-border);
+  box-shadow: var(--stat-shadow);
+  transition: transform 0.2s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+}
+
+.operation-history-modal.light .stat-item {
+  --stat-bg: #ffffff;
+  --stat-border: #e2e8f0;
+  --stat-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.operation-history-modal.dark .stat-item {
+  --stat-bg: #1e293b;
+  --stat-border: #475569;
+  --stat-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Contenedor de tabla responsivo */
+.operations-table-container {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  min-height: 60vh !important;
+  max-height: 75vh !important;
+  overflow-x: auto !important;
+  overflow-y: auto !important;
+  /* Mejorar el scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+}
+
+.operations-table-container::-webkit-scrollbar {
+  height: 16px !important;
+  width: 16px !important;
+}
+
+.operations-table-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 8px;
+  border: 2px solid #f3f4f6;
+  cursor: pointer;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.operations-table-container::-webkit-scrollbar-corner {
+  background: #f3f4f6;
+}
+
+/* Tema oscuro para scrollbar */
+.operation-history-modal.dark .operations-table-container {
+  scrollbar-color: #64748b #1e293b;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-color: #1e293b;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.operation-history-modal.dark .operations-table-container::-webkit-scrollbar-corner {
+  background: #1e293b;
+}
+
+.operation-history-modal > .operations-table-container:first-child,
+.operation-history-modal .operations-table {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.operations-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  background: var(--table-bg);
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.operation-history-modal.light .operations-table {
+  --table-bg: #ffffff;
+}
+
+.operation-history-modal.dark .operations-table {
+  background: #0f172a !important;
+  color: #f9fafb !important;
+  --table-bg: #0f172a;
+}
+
+.operations-table thead {
+  background: var(--thead-bg-solid, #f8fafc);
+  backdrop-filter: none;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.operation-history-modal.light .operations-table thead {
+  --thead-bg: #f8fafc;
+  --thead-bg-solid: #f8fafc;
+}
+
+.operation-history-modal.dark .operations-table thead {
+  --thead-bg: #1e293b;
+  --thead-bg-solid: #1e293b;
+}
+
+.operations-table th {
+ 
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  background: var(--th-bg);
+  white-space: nowrap;
+}
+
+.operation-history-modal.light .operations-table th {
+  --th-bg: #f8fafc;
+}
+
+.operation-history-modal.dark .operations-table th {
+  background: #1e293b !important;
+  background: #0f172a !important;
+  color: #f9fafb !important;
+  --th-bg: #1e293b;
+}
+
+.operations-table td {
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.operations-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.operations-table tbody tr:hover {
+  background: var(--row-hover);
+}
+
+.operation-history-modal.light .operations-table tbody tr:hover {
+  --row-hover: #f8fafc;
+}
+
+.operation-history-modal.dark .operations-table tbody tr:hover {
+  --row-hover: #1e293b;
+}
+
+/* Tipos de operación */
+.operation-type {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.operation-type.add {
+  background: var(--add-bg);
+  color: var(--add-text);
+}
+
+.operation-type.subtract {
+  background: var(--subtract-bg);
+  color: var(--subtract-text);
+}
+
+.operation-history-modal.light {
+  --add-bg: #dcfce7;
+  --add-text: #166534;
+  --subtract-bg: #fee2e2;
+  --subtract-text: #991b1b;
+}
+
+.operation-history-modal.dark {
+  --add-bg: #052e16;
+  --add-text: #bbf7d0;
+  --subtract-bg: #450a0a;
+  --subtract-text: #fca5a5;
+}
+
+/* Estados de orden */
+.order-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.order-status.completed {
+  background: var(--completed-bg);
+  color: var(--completed-text);
+}
+
+.order-status.pending {
+  background: var(--pending-bg);
+  color: var(--pending-text);
+}
+
+.order-status.failed {
+  background: var(--failed-bg);
+  color: var(--failed-text);
+}
+
+.operation-history-modal.light {
+  --completed-bg: #dcfce7;
+  --completed-text: #166534;
+  --pending-bg: #fef3c7;
+  --pending-text: #92400e;
+  --failed-bg: #fee2e2;
+  --failed-text: #991b1b;
+}
+
+.operation-history-modal.dark {
+  --completed-bg: #052e16;
+  --completed-text: #bbf7d0;
+  --pending-bg: #451a03;
+  --pending-text: #fcd34d;
+  --failed-bg: #450a0a;
+  --failed-text: #fca5a5;
+}
+
+/* Estados de carga y vacío */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  text-align: center;
+  background: var(--state-bg);
+  border-radius: 12px;
+  margin: 1rem;
+}
+
+.operation-history-modal.light {
+  --state-bg: #f8fafc;
+}
+
+.operation-history-modal.dark {
+  --state-bg: #1e293b;
+}
+
+/* Responsive Design */
+
+/* Tabletas */
+@media (max-width: 1024px) {
+  .operation-history-modal {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .date-filters {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .summary-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .operations-table {
+    font-size: 0.8rem;
+  }
+
+  .operations-table th,
+  .operations-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* Móviles */
+@media (max-width: 768px) {
+  .operation-history-modal {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .operation-history-modal .modal-header {
+    padding: 1rem;
+  }
+
+  .operation-history-modal h2 {
+    font-size: 1.25rem;
+  }
+
+  .filters-section {
+    padding: 1rem;
+  }
+
+  .quick-filters {
+    gap: 0.5rem;
+  }
+
+  .quick-filter-buttons {
+    gap: 0.375rem;
+  }
+
+  .quick-filter-btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+
+  .date-filters {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .summary-section {
+    padding: 1rem;
+  }
+
+  .summary-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .stat-item {
+    padding: 0.75rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  /* Tabla responsive en móviles */
+  .operations-table-container {
+    overflow-x: auto;
+    margin: 0 -1rem;
+    padding: 0 1rem;
+  }
+
+  .operations-table {
+    min-width: 800px;
+    font-size: 0.75rem;
+  }
+
+  .operations-table th,
+  .operations-table td {
+    padding: 0.5rem 0.375rem;
+  }
+
+  .operation-type,
+  .order-status {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.5rem;
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 480px) {
+  .operation-history-modal {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .filter-group label {
+    font-size: 0.8rem;
+  }
+
+  .date-input {
+    padding: 0.625rem;
+    font-size: 0.8rem;
+  }
+
+  .search-button,
+  .export-button {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .operations-table {
+    font-size: 0.7rem;
+  }
+
+  .operations-table th,
+  .operations-table td {
+    padding: 0.375rem 0.25rem;
+  }
+}
+
+/* Scroll personalizado para la tabla */
+.operations-table-container::-webkit-scrollbar {
+  height: 12px;
+  width: 12px;
+}
+
+.operations-table-container::-webkit-scrollbar-track {
+  background: var(--scroll-track);
+  border-radius: 6px;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb {
+  background: var(--scroll-thumb);
+  border-radius: 6px;
+  border: 2px solid var(--scroll-track);
+}
+
+.operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--scroll-thumb-hover);
+}
+
+.operations-table-container::-webkit-scrollbar-corner {
+  background: var(--scroll-track);
+}
+
+.operation-history-modal.light {
+  --scroll-track: #f1f5f9;
+  --scroll-thumb: #cbd5e1;
+  --scroll-thumb-hover: #94a3b8;
+}
+
+.operation-history-modal.dark {
+  --scroll-track: #1e293b;
+  --scroll-thumb: #475569;
+  --scroll-thumb-hover: #64748b;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.operation-history-modal {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+/* Variables CSS para los colores del texto */
+.operation-history-modal.light {
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+}
+
+.operation-history-modal.dark {
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+}
+  --search-border: #60a5fa;
+  background: #0f172a !important;
+  color: #f9fafb !important;
+}
+.operation-history-modal.dark label,
+.operation-history-modal.dark .stat-label,
+.operation-history-modal.dark .quick-filters-label,
+.operation-history-modal.dark .filter-group label {
+  color: #cbd5e1 !important;
+}
+.operation-history-modal.dark .operations-table th,
+.operation-history-modal.dark .operations-table td {
+  color: #f9fafb !important;
+}
+.operation-history-modal.light label,
+.operation-history-modal.light .stat-label,
+.operation-history-modal.light .quick-filters-label,
+.operation-history-modal.light .filter-group label {
+  color: #374151 !important;
+}
+
+/* Estilos para los botones de filtro rápido */
+.quick-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  flex-wrap: wrap;
+}
+
+.quick-filters-label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.quick-filter-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.quick-filter-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.quick-filter-btn:active {
+  transform: translateY(0);
+}
+
+.quick-filter-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border-color: #1d4ed8;
+}
+
+.quick-filter-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Estilos para tema oscuro */
+.operation-history-modal.dark .quick-filters {
+  background: rgba(30, 41, 59, 0.4);
+  border-color: rgba(71, 85, 105, 0.3);
+}
+
+.operation-history-modal.dark .quick-filters-label {
+  color: #e2e8f0;
+}
+
+.operation-history-modal.dark .quick-filter-btn {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+.operation-history-modal.dark .quick-filter-btn:hover:not(:disabled) {
+  border-color: #3b82f6;
+  background: #1e3a8a;
+  color: #93c5fd;
+}
+
+.operation-history-modal.dark .quick-filter-btn.active {
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quick-filters {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .quick-filters-label {
+    margin-bottom: 0.5rem;
+  }
+  
+  .quick-filter-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
 /*!**************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[14].oneOf[12].use[3]!./src/app/components/ResetWarningModal.css ***!
   \**************************************************************************************************************************************************************************************************************************************************************************************/

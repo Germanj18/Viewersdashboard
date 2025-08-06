@@ -456,6 +456,7 @@ const Block: React.FC<BlockProps> = ({ initialData, link, onTotalViewersChange, 
       cost: operationData.cost,
       serviceId: operationData.serviceId,
       message: operationData.message,
+      youtubeUrl: link || null,
       timestamp: operationData.startTime || new Date().toISOString(),
     };
 
