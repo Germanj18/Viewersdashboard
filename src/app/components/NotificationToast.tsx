@@ -22,7 +22,7 @@ const toastIcons: Record<string, string> = {
   info: 'ℹ️'
 };
 
-const NotificationToast: React.FC<NotificationToastProps> = ({ message, type, duration = 10000, onClose }) => {
+const NotificationToast: React.FC<NotificationToastProps> = ({ message, type, duration = 5000, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, duration);
     return () => clearTimeout(timer);
@@ -34,20 +34,20 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ message, type, du
         background: toastColors[type],
         color: 'white',
         borderRadius: 8,
-        padding: '14px 20px',
-            minWidth: 240,
-            maxWidth: 380,
-            margin: '2px 0',
+        padding: '12px 16px',
+        minWidth: 240,
+        maxWidth: 380,
+        margin: '0px 0',
         boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
+        gap: 10,
         fontWeight: 500,
-        fontSize: 15,
+        fontSize: 14,
         zIndex: 10001
       }}
     >
-      <span style={{ fontSize: 22 }}>{toastIcons[type]}</span>
+      <span style={{ fontSize: 18 }}>{toastIcons[type]}</span>
       <span style={{ flex: 1 }}>{message}</span>
       <button
         onClick={onClose}
@@ -55,9 +55,9 @@ const NotificationToast: React.FC<NotificationToastProps> = ({ message, type, du
           background: 'transparent',
           border: 'none',
           color: 'white',
-          fontSize: 18,
+          fontSize: 16,
           cursor: 'pointer',
-          marginLeft: 8
+          marginLeft: 6
         }}
         aria-label="Cerrar notificación"
       >

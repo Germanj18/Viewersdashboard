@@ -13,25 +13,31 @@ interface Toast {
 export const useToast = () => {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
   const showToast = useCallback((message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info', duration = 5000) => {
     const id = Math.random().toString(36).substr(2, 9);
     const newToast = { id, message, type, duration };
     
     setToasts(prev => [...prev, newToast]);
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  }, []);
+    
+    // Auto-remover el toast después del tiempo especificado
+    setTimeout(() => {
+      removeToast(id);
+    }, duration);
+  }, [removeToast]);
 
   const ToastContainer = () => (
-    <div style={{ position: 'fixed', top: 0, right: 0, zIndex: 10000 }}>
+    <div style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 10000 }}>
       {toasts.map((toast, index) => (
         <div
           key={toast.id}
           style={{
-            transform: `translateY(${index * 80}px)`,
-            transition: 'transform 0.3s ease'
+            transform: `translateY(${index * 65}px)`,
+            transition: 'transform 0.3s ease',
+            marginBottom: '5px'
           }}
         >
           <NotificationToast

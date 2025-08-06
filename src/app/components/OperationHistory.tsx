@@ -317,7 +317,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
           marginTop: 0, 
           overflowX: 'auto',
           overflowY: 'auto',
-          maxHeight: '500px',
+          maxHeight: '70vh',
           width: '100%'
         }}>
           {loading ? (
