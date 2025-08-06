@@ -340,119 +340,19 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
                 backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                 position: 'sticky',
                 top: 0,
-                zIndex: 10
+                zIndex: 100
               }}>
                 <tr style={{ marginTop: 0, paddingTop: 0 }}>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '140px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Fecha/Hora</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '100px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Bloque</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '80px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Tipo</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '80px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Viewers</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '100px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Order ID</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '80px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Estado</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '80px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Duración</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '80px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Costo</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '90px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>Service ID</th>
-                  <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '8px', 
-                    paddingBottom: '8px', 
-                    paddingLeft: '12px',
-                    paddingRight: '12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    minWidth: '120px',
-                    textAlign: 'left',
-                    border: '1px solid #d1d5db'
-                  }}>YouTube URL</th>
+                  <th className="sticky-header">Fecha/Hora</th>
+                  <th className="sticky-header">Bloque</th>
+                  <th className="sticky-header">Tipo</th>
+                  <th className="sticky-header">Viewers</th>
+                  <th className="sticky-header">Order ID</th>
+                  <th className="sticky-header">Estado</th>
+                  <th className="sticky-header">Duración</th>
+                  <th className="sticky-header">Costo</th>
+                  <th className="sticky-header">Service ID</th>
+                  <th className="sticky-header">YouTube URL</th>
                 </tr>
               </thead>
               <tbody>

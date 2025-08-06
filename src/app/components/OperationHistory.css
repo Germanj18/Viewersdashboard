@@ -428,8 +428,11 @@
 }
 
 .operations-table thead {
-  background: var(--thead-bg-solid, #f8fafc);
-  backdrop-filter: none;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background: var(--thead-bg-solid, #f8fafc) !important;
+  backdrop-filter: blur(10px) !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
@@ -437,33 +440,48 @@
 .operation-history-modal.light .operations-table thead {
   --thead-bg: #f8fafc;
   --thead-bg-solid: #f8fafc;
+  background: #f8fafc !important;
 }
 
 .operation-history-modal.dark .operations-table thead {
   --thead-bg: #1e293b;
   --thead-bg-solid: #1e293b;
+  background: #1e293b !important;
 }
 
 .operations-table th {
- 
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  padding: 12px !important;
   text-align: left;
   font-weight: 600;
   color: var(--text-primary);
   border-bottom: 2px solid var(--border-color);
-  background: var(--th-bg);
   white-space: nowrap;
+  border: 1px solid #d1d5db;
+  min-width: 80px;
 }
 
-.operation-history-modal.light .operations-table th {
-  --th-bg: #f8fafc;
+.operations-table th.sticky-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  margin: 0 !important;
+  padding: 12px !important;
+  text-align: left !important;
 }
 
-.operation-history-modal.dark .operations-table th {
+.operation-history-modal.light .operations-table th,
+.operation-history-modal.light .operations-table th.sticky-header {
+  background: #f8fafc !important;
+  color: #1f2937 !important;
+}
+
+.operation-history-modal.dark .operations-table th,
+.operation-history-modal.dark .operations-table th.sticky-header {
   background: #1e293b !important;
   color: #f9fafb !important;
-  background: #0f172a !important;
-  color: #f9fafb !important;
-  --th-bg: #1e293b;
 }
 
 .operations-table td {

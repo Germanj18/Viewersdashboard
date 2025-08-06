@@ -739,15 +739,66 @@
   }
 }
 
+/* Mejorar scrollbar para tabla de operaciones */
+.operations-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: #9ca3af #f3f4f6;
+}
+
+.operations-table-container::-webkit-scrollbar {
+  height: 16px !important;
+  width: 16px !important;
+}
+
+.operations-table-container::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 8px;
+  margin: 2px;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 8px;
+  border: 2px solid #f3f4f6;
+  cursor: pointer;
+}
+
+.operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.operations-table-container::-webkit-scrollbar-corner {
+  background: #f3f4f6;
+}
+
+/* Tema oscuro para scrollbar */
+.metrics-dashboard.dark .operations-table-container {
+  scrollbar-color: #64748b #1e293b;
+}
+
+.metrics-dashboard.dark .operations-table-container::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.metrics-dashboard.dark .operations-table-container::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-color: #1e293b;
+}
+
+.metrics-dashboard.dark .operations-table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.metrics-dashboard.dark .operations-table-container::-webkit-scrollbar-corner {
+  background: #1e293b;
+}
+
 @media (max-width: 768px) {
   .operations-table-container {
     overflow-x: auto !important;
     width: 100%;
     box-sizing: border-box;
     padding-bottom: 0.5rem;
-    /* Scrollbar visible */
-    scrollbar-width: thin;
-    scrollbar-color: #3b82f6 #e5e7eb;
   }
   .operations-table-container::-webkit-scrollbar {
     height: 8px;
