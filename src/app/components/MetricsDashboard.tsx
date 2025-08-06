@@ -1896,83 +1896,15 @@ const MetricsDashboard: React.FC = () => {
           {showOperationsTable && (
             <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '500px' }}>
               <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem', minWidth: '900px' }}>
-              <thead style={{ 
-                position: 'sticky', 
-                top: 0, 
-                backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                zIndex: 100
-              }}>
+              <thead>
                 <tr>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '100px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Bloque</th>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '100px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Estado</th>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '120px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Inicio</th>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '140px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Finalización Est.</th>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '100px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Duración</th>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '100px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Viewers</th>
-                  <th style={{ 
-                    padding: '8px 12px',
-                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                    border: '1px solid #d1d5db',
-                    textAlign: 'left',
-                    minWidth: '100px',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 100
-                  }}>Costo</th>
+                  <th>Bloque</th>
+                  <th>Estado</th>
+                  <th>Inicio</th>
+                  <th>Finalización Est.</th>
+                  <th>Duración</th>
+                  <th>Viewers</th>
+                  <th>Costo</th>
                 </tr>
               </thead>
               <tbody>

@@ -431,7 +431,6 @@
   position: sticky !important;
   top: 0 !important;
   z-index: 100 !important;
-  background: var(--thead-bg-solid, #f8fafc) !important;
   backdrop-filter: blur(10px) !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
