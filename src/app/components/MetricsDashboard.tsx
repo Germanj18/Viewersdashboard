@@ -1896,15 +1896,71 @@ const MetricsDashboard: React.FC = () => {
           {showOperationsTable && (
             <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
               <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
-              <thead style={{ marginTop: 0, paddingTop: 0, backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>
-                <tr>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Bloque</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Estado</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Inicio</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Finalización Est.</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Duración</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Viewers</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Costo</th>
+              <thead style={{ 
+                position: 'sticky', 
+                top: 0, 
+                backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                zIndex: 10,
+                marginTop: 0,
+                paddingTop: 0
+              }}>
+                <tr style={{ margin: 0, padding: 0 }}>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Bloque</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Estado</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Inicio</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Finalización Est.</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Duración</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Viewers</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '2px', 
+                    paddingBottom: '2px', 
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    border: '1px solid #d1d5db',
+                    textAlign: 'left'
+                  }}>Costo</th>
                 </tr>
               </thead>
               <tbody>

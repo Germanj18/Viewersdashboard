@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useTheme } from '../ThemeContext';
 import * as XLSX from 'xlsx';
+import './OperationHistory.css';
 
 interface OperationHistoryItem {
   id: string;
@@ -39,6 +40,32 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
     setEndDate(todayStr);
     setStartDate(todayStr);
   }, []);
+
+  // Funciones para filtros rápidos
+  const setFilterToday = () => {
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    setStartDate(todayStr);
+    setEndDate(todayStr);
+  };
+
+  const setFilterLast7Days = () => {
+    const today = new Date();
+    const sevenDaysAgo = new Date(today);
+    sevenDaysAgo.setDate(today.getDate() - 7);
+    
+    setStartDate(sevenDaysAgo.toISOString().split('T')[0]);
+    setEndDate(today.toISOString().split('T')[0]);
+  };
+
+  const setFilterLastMonth = () => {
+    const today = new Date();
+    const oneMonthAgo = new Date(today);
+    oneMonthAgo.setMonth(today.getMonth() - 1);
+    
+    setStartDate(oneMonthAgo.toISOString().split('T')[0]);
+    setEndDate(today.toISOString().split('T')[0]);
+  };
 
   // Cargar operaciones cuando cambien las fechas
   useEffect(() => {
@@ -201,6 +228,32 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
         </div>
 
         <div className="filters-section">
+          {/* Botones de filtro rápido */}
+          <div className="quick-filters">
+            <span className="quick-filters-label">Filtros rápidos:</span>
+            <button 
+              onClick={setFilterToday} 
+              className={`quick-filter-btn ${startDate === new Date().toISOString().split('T')[0] && endDate === new Date().toISOString().split('T')[0] ? 'active' : ''}`}
+              disabled={loading}
+            >
+              📅 Hoy
+            </button>
+            <button 
+              onClick={setFilterLast7Days} 
+              className="quick-filter-btn"
+              disabled={loading}
+            >
+              📊 Últimos 7 días
+            </button>
+            <button 
+              onClick={setFilterLastMonth} 
+              className="quick-filter-btn"
+              disabled={loading}
+            >
+              📈 Último mes
+            </button>
+          </div>
+
           <div className="date-filters">
             <div className="filter-group">
               <label>Fecha inicio:</label>
