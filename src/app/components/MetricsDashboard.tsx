@@ -1895,71 +1895,62 @@ const MetricsDashboard: React.FC = () => {
           </div>
           {showOperationsTable && (
             <div className="operations-table-container" style={{ overflowX: 'auto', overflowY: 'auto', maxHeight: '400px' }}>
-              <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem' }}>
+              <table className="operations-table" style={{ width: '100%', fontSize: '0.85rem', minWidth: '900px' }}>
               <thead style={{ 
                 position: 'sticky', 
                 top: 0, 
                 backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
-                zIndex: 10,
-                marginTop: 0,
-                paddingTop: 0
+                zIndex: 10
               }}>
-                <tr style={{ margin: 0, padding: 0 }}>
+                <tr>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '100px'
                   }}>Bloque</th>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '100px'
                   }}>Estado</th>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '120px'
                   }}>Inicio</th>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '140px'
                   }}>Finalización Est.</th>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '100px'
                   }}>Duración</th>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '100px'
                   }}>Viewers</th>
                   <th style={{ 
-                    marginTop: 0, 
-                    paddingTop: '2px', 
-                    paddingBottom: '2px', 
+                    padding: '8px 12px',
                     backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
                     border: '1px solid #d1d5db',
-                    textAlign: 'left'
+                    textAlign: 'left',
+                    minWidth: '100px'
                   }}>Costo</th>
                 </tr>
               </thead>
@@ -2006,8 +1997,8 @@ const MetricsDashboard: React.FC = () => {
                           ? (theme === 'dark' ? '#451a03' : '#fef3c7')
                           : 'transparent'
                       }}>
-                    <td>Bloque {parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
-                    <td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>Bloque {parseInt((op.blockId || 'block-0').replace('block-', '')) + 1}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>
                       <span style={{ 
                         color: op.status === 'success' ? '#10b981' : '#ef4444',
                         fontWeight: 'bold'
@@ -2015,11 +2006,11 @@ const MetricsDashboard: React.FC = () => {
                         {op.status === 'success' ? '✅' : '❌'} {op.status}
                       </span>
                     </td>
-                    <td>{startTimeDisplay || 'N/A'}</td>
-                    <td>{estimatedEndTime}</td>
-                    <td>{op.duration || 0} min</td>
-                    <td>{(op.count || 0).toLocaleString()}</td>
-                    <td>${(op.cost || 0).toFixed(2)}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{startTimeDisplay || 'N/A'}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{estimatedEndTime}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{op.duration || 0} min</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{(op.count || 0).toLocaleString()}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>${(op.cost || 0).toFixed(2)}</td>
                   </tr>
                     );
                   })}

@@ -15,6 +15,7 @@ interface OperationHistoryItem {
   cost?: number;
   serviceId?: number;
   message?: string;
+  youtubeUrl?: string;
   timestamp: string;
 }
 
@@ -130,6 +131,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
       'Duración (min)',
       'Costo',
       'Service ID',
+      'YouTube URL',
       'Mensaje'
     ];
 
@@ -143,6 +145,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
       op.duration || '',
       op.cost || '',
       op.serviceId || '',
+      op.youtubeUrl || '',
       op.message || ''
     ]);
 
@@ -173,6 +176,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
       'Duración (min)': op.duration || '',
       'Costo': op.cost || '',
       'Service ID': op.serviceId || '',
+      'YouTube URL': op.youtubeUrl || '',
       'Mensaje': op.message || ''
     }));
 
@@ -187,6 +191,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
       'Duración (min)': '',
       'Costo': totalCost,
       'Service ID': '',
+      'YouTube URL': '',
       'Mensaje': `Total: ${operations.length} operaciones`
     };
 
@@ -210,6 +215,7 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
       { wch: 15 }, // Duración
       { wch: 10 }, // Costo
       { wch: 12 }, // Service ID
+      { wch: 40 }, // YouTube URL
       { wch: 30 }  // Mensaje
     ];
     worksheet['!cols'] = columnWidths;
@@ -306,7 +312,14 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
           </div>
         </div>
 
-        <div className="operations-table-container" style={{ paddingTop: 0, marginTop: 0 }}>
+        <div className="operations-table-container" style={{ 
+          paddingTop: 0, 
+          marginTop: 0, 
+          overflowX: 'auto',
+          overflowY: 'auto',
+          maxHeight: '500px',
+          width: '100%'
+        }}>
           {loading ? (
             <div className="loading-state">🔄 Cargando operaciones...</div>
           ) : operations.length === 0 ? (
@@ -314,42 +327,175 @@ const OperationHistory: React.FC<OperationHistoryProps> = ({ onClose }) => {
               📭 No se encontraron operaciones en el período seleccionado
             </div>
           ) : (
-            <table className={`operations-table ${theme}`} style={{ marginTop: 0, paddingTop: 0, borderSpacing: 0 }}>
-              <thead style={{ marginTop: 0, paddingTop: 0, backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>
+            <table className={`operations-table ${theme}`} style={{ 
+              marginTop: 0, 
+              paddingTop: 0, 
+              borderSpacing: 0,
+              minWidth: '1100px',
+              width: '100%'
+            }}>
+              <thead style={{ 
+                marginTop: 0, 
+                paddingTop: 0, 
+                backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                position: 'sticky',
+                top: 0,
+                zIndex: 10
+              }}>
                 <tr style={{ marginTop: 0, paddingTop: 0 }}>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Fecha/Hora</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Bloque</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Tipo</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Viewers</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Order ID</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Estado</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Duración</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Costo</th>
-                  <th style={{ marginTop: 0, paddingTop: '2px', paddingBottom: '2px', backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc' }}>Service ID</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '140px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Fecha/Hora</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '100px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Bloque</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '80px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Tipo</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '80px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Viewers</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '100px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Order ID</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '80px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Estado</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '80px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Duración</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '80px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Costo</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '90px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>Service ID</th>
+                  <th style={{ 
+                    marginTop: 0, 
+                    paddingTop: '8px', 
+                    paddingBottom: '8px', 
+                    paddingLeft: '12px',
+                    paddingRight: '12px',
+                    backgroundColor: theme === 'dark' ? '#1e293b' : '#f8fafc',
+                    minWidth: '120px',
+                    textAlign: 'left',
+                    border: '1px solid #d1d5db'
+                  }}>YouTube URL</th>
                 </tr>
               </thead>
               <tbody>
                 {operations.map((operation) => (
                   <tr key={operation.id}>
-                    <td>{formatDate(operation.timestamp)}</td>
-                    <td>{operation.blockTitle}</td>
-                    <td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{formatDate(operation.timestamp)}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{operation.blockTitle}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>
                       <span className={`operation-type ${operation.operationType}`}>
                         {operation.operationType === 'add' ? '➕ Agregar' : '➖ Restar'}
                       </span>
                     </td>
-                    <td>{operation.viewers.toLocaleString()}</td>
-                    <td>{operation.orderId || '-'}</td>
-                    <td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{operation.viewers.toLocaleString()}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{operation.orderId || '-'}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>
                       {operation.orderStatus ? (
                         <span className={`order-status ${operation.orderStatus}`}>
                           {operation.orderStatus}
                         </span>
                       ) : '-'}
                     </td>
-                    <td>{operation.duration ? `${operation.duration} min` : '-'}</td>
-                    <td>{operation.cost ? `$${operation.cost.toFixed(2)}` : '-'}</td>
-                    <td>{operation.serviceId || '-'}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{operation.duration ? `${operation.duration} min` : '-'}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{operation.cost ? `$${operation.cost.toFixed(2)}` : '-'}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>{operation.serviceId || '-'}</td>
+                    <td style={{ padding: '8px 12px', border: '1px solid #d1d5db' }}>
+                      {operation.youtubeUrl ? (
+                        <a 
+                          href={operation.youtubeUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          style={{ 
+                            color: theme === 'dark' ? '#60a5fa' : '#2563eb',
+                            textDecoration: 'none',
+                            fontSize: '0.85rem'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={(e) => e.currentTarget.style.textDecoration = 'none'}
+                          title={operation.youtubeUrl}
+                        >
+                          🔗 Ver video
+                        </a>
+                      ) : '-'}
+                    </td>
                   </tr>
                 ))}
               </tbody>

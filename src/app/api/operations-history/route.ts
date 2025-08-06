@@ -87,7 +87,8 @@ export async function POST(request: Request) {
       duration, 
       cost, 
       serviceId, 
-      message, 
+      message,
+      youtubeUrl,
       timestamp 
     } = body;
 
@@ -125,6 +126,7 @@ export async function POST(request: Request) {
         cost: cost || null,
         serviceId: serviceId || null,
         message: message || null,
+        youtubeUrl: youtubeUrl || null,
         timestamp: timestamp ? new Date(timestamp) : new Date()
       }
     });
